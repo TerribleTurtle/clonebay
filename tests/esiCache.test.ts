@@ -45,4 +45,49 @@ describe('esiCache', () => {
     expect(result?.eTag).toBe('my-etag-123');
     expect(result?.data).toEqual({ some: 'data2' });
   });
+
+  it('expires data when Date.now() equals expires exact time', async () => {
+    const url = 'https://api.eve.com/data-exact';
+    vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
+    const exactDateStr = new Date('2026-01-01T10:00:00Z').toUTCString();
+    
+    await setCachedEsiData(url, { some: 'data-exact' }, 'exact-etag', exactDateStr);
+    
+    const result = await getCachedEsiData(url);
+    expect(result).toBeNull();
+  });
+
+  it('defaults to 5 minutes if expires header is un-parsable', async () => {
+    const url = 'https://api.eve.com/data-unparsable';
+    vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
+    
+    await setCachedEsiData(url, { some: 'data-unparsable' }, 'unparsable-etag', 'invalid-date-string');
+    
+    // Should be valid at 10:04
+    vi.setSystemTime(new Date('2026-01-01T10:04:00Z'));
+    const resultBefore = await getCachedEsiData(url);
+    expect(resultBefore).not.toBeNull();
+
+    // Should be expired at 10:05
+    vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
+    const resultAfter = await getCachedEsiData(url);
+    expect(resultAfter).toBeNull();
+  });
+
+  it('defaults to 5 minutes if expires header is null', async () => {
+    const url = 'https://api.eve.com/data-null';
+    vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
+    
+    await setCachedEsiData(url, { some: 'data-null' }, 'null-etag', null);
+    
+    // Should be valid at 10:04
+    vi.setSystemTime(new Date('2026-01-01T10:04:00Z'));
+    const resultBefore = await getCachedEsiData(url);
+    expect(resultBefore).not.toBeNull();
+
+    // Should be expired at 10:05
+    vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
+    const resultAfter = await getCachedEsiData(url);
+    expect(resultAfter).toBeNull();
+  });
 });

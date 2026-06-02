@@ -53,8 +53,8 @@ describe('esiWorker', () => {
 
     const selfObj = global.self;
     if (selfObj && typeof selfObj.onmessage === 'function') {
-      // @ts-expect-error Mocking MessageEvent without full DOM implementation
-      await selfObj.onmessage({ data: { type: 'START_POLLING' } });
+      const event = new MessageEvent('message', { data: { type: 'START_POLLING' } });
+      await selfObj.onmessage(event);
     }
 
     expect(mockPostMessage).toHaveBeenCalledWith({

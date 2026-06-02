@@ -34,14 +34,23 @@ describe('authStorage', () => {
 
     const dict = await getAuthDictionary();
     
-    expect(dict).toBeDefined();
-    expect(dict!['char1']).toBeDefined();
-    expect(dict!['char1']!.characterName).toBe('Alice');
+    if (dict === undefined) {
+      throw new Error('Dictionary should be defined');
+    }
     
-    expect(dict!['char2']).toBeDefined();
-    expect(dict!['char2']!.characterName).toBe('Bob');
+    const char1Data = dict['char1'];
+    if (char1Data === undefined) {
+      throw new Error('char1 should be defined');
+    }
+    expect(char1Data.characterName).toBe('Alice');
+    
+    const char2Data = dict['char2'];
+    if (char2Data === undefined) {
+      throw new Error('char2 should be defined');
+    }
+    expect(char2Data.characterName).toBe('Bob');
     
     const EXPECTED_DICT_LENGTH = 2;
-    expect(Object.keys(dict!).length).toBe(EXPECTED_DICT_LENGTH);
+    expect(Object.keys(dict).length).toBe(EXPECTED_DICT_LENGTH);
   });
 });

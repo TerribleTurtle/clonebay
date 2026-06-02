@@ -14,7 +14,7 @@ export async function getCachedEsiData<T>(url: string): Promise<CacheEntry<T> | 
   try {
     const entry = await get<CacheEntry<T>>(url);
     if (entry !== undefined) {
-      if (entry.expires < Date.now()) {
+      if (entry.expires <= Date.now()) {
         return null;
       }
       return entry;
