@@ -11,5 +11,13 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    coverage: {
+      provider: 'v8',
+      include: ['src/lib/thresholds/**', 'src/lib/esi/**'],
+      thresholds: {
+        statements: 100,
+        branches: 100,
+      }
+    },
   },
 })

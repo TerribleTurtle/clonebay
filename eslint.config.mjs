@@ -89,6 +89,14 @@ const eslintConfig = defineConfig([
         {
           "selector": "CatchClause > BlockStatement:not(:has(ThrowStatement)):not(:has(CallExpression[callee.object.name='console']))",
           "message": "FAIL LOUDLY: Catch blocks MUST NOT swallow errors silently. You must explicitly log (console.error) or re-throw."
+        },
+        {
+          "selector": "ExpressionStatement > Literal[value='use server'], Directive > Literal[value='use server']",
+          "message": "FAIL LOUDLY: 'use server' is strictly banned. Server Actions and Next.js backend features are not allowed."
+        },
+        {
+          "selector": "MemberExpression[object.object.name='process'][object.property.name='env'][property.type='Identifier'][property.name!=/^NEXT_PUBLIC_/], MemberExpression[object.object.name='process'][object.property.name='env'][property.type='Literal'][property.value!=/^NEXT_PUBLIC_/]",
+          "message": "FAIL LOUDLY: Accessing non-NEXT_PUBLIC_ environment variables is banned. EVE SSO tokens must be stored client-side."
         }
       ],
       "no-magic-numbers": ["error", { "ignore": [0, 1, -1] }],

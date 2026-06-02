@@ -18,8 +18,6 @@ A "Single Pane of Glass" read-only dashboard that monitors the passive and async
 
 ## Technology Stack
 - **Frontend:** Next.js (App Router), React, Tailwind CSS, shadcn/ui
-- **Backend:** Next.js API Routes
-- **Database:** Prisma ORM with SQLite (for token persistence)
 - **APIs:** EVE Swagger Interface (ESI)
 
 ## Getting Started
@@ -29,9 +27,8 @@ A "Single Pane of Glass" read-only dashboard that monitors the passive and async
    npm install
    ```
 2. Set up your EVE Developer application at [developers.eveonline.com](https://developers.eveonline.com/).
-3. Create a `.env` file in the root directory with your `CLIENT_ID` and `SECRET_KEY`.
-4. Initialize the Prisma database (commands to follow in development).
-5. Run the development server:
+3. Create a `.env` file in the root directory with your `NEXT_PUBLIC_EVE_CLIENT_ID`.
+4. Run the development server:
    ```bash
    npm run dev
    ```

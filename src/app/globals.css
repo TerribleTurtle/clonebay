@@ -1,26 +1,38 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+    --background: 0 0% 1%;
+    --foreground: 0 0% 100%;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    /* EVE NeoCom Theme */
+    --eve-bg: 0 0% 1%;
+    --eve-panel: 240 10% 4%;
+    --eve-border: 240 4% 16%;
+    
+    /* Traffic Light Status */
+    --status-green: 115 100% 45%;
+    --status-yellow: 42 96% 63%;
+    --status-red: 5 100% 44%;
+    --status-cyan: 185 100% 50%;
+    
+    /* Factions */
+    --faction-amarr: 42 96% 63%;
+    --faction-amarr-brass: 36 23% 41%;
+    --faction-caldari: 218 22% 47%;
+    --faction-caldari-blue: 216 84% 57%;
+    --faction-gallente: 180 30% 30%;
+    --faction-gallente-green: 115 100% 45%;
+    --faction-minmatar: 5 32% 30%;
+    --faction-minmatar-red: 13 100% 50%;
+    --faction-triglavian: 5 100% 44%;
+    --faction-triglavian-bronze: 22 45% 35%;
+  }
+
+  body {
+    background-color: hsl(var(--eve-bg));
+    color: hsl(var(--foreground));
+    /* The typography and alignment rules are enforced by layout.tsx and eslint */
+  }
 }
