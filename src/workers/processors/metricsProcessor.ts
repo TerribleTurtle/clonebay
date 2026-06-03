@@ -107,5 +107,15 @@ export async function processMetrics(
   // eslint-disable-next-line no-restricted-syntax
   } catch (err) {
     logger.error(`ESI Worker: Error processing metrics for ${charId}`, err);
+    postMessage({
+      type: 'ESI_METRICS_UPDATE',
+      payload: {
+        characterId: charId,
+        walletStatus: 'Red',
+        locationStatus: 'Red',
+        mailStatus: 'Red',
+        cloneStatus: 'Red'
+      }
+    });
   }
 }
