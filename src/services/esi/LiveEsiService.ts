@@ -37,7 +37,7 @@ export class LiveEsiService implements IEsiService {
   private safeFetch<T>(url: string, accessToken: string, characterId: string, schema: z.ZodType<T>, name: string): Promise<EsiResponse<T> | null> {
     return fetchEsi({ url, accessToken, characterId, schema }).catch(error => {
       if (error instanceof z.ZodError) {
-        logger.error(`ESI Worker: Contract Validation Error fetching ${name} for ${characterId}`, error.errors);
+        logger.error(`ESI Worker: Contract Validation Error fetching ${name} for ${characterId}`, error);
       } else if (error instanceof TypeError) {
         logger.error(`ESI Worker: Network Error fetching ${name} for ${characterId}`, error.message);
       } else {

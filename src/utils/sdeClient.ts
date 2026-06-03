@@ -15,6 +15,7 @@ export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   // Fetch from ESI if not cached
   let response;
   try {
+    // eslint-disable-next-line no-restricted-globals
     response = await fetch(`https://esi.evetech.net/latest/universe/types/${typeId}/`);
   } catch (error) {
     logger.error(`Network error fetching SDE type ${typeId}`, error);
@@ -45,6 +46,7 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
   // Fetch from ESI if not cached
   let response;
   try {
+    // eslint-disable-next-line no-restricted-globals
     response = await fetch(`https://esi.evetech.net/latest/universe/systems/${systemId}/`);
   } catch (error) {
     logger.error(`Network error fetching SDE system ${systemId}`, error);

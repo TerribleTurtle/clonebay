@@ -58,6 +58,7 @@ export class HttpClient {
         fetchOptions.body = JSON.stringify(currentReq.body);
       }
 
+      // eslint-disable-next-line no-restricted-globals
       const fetchResponse = await fetch(currentReq.url, fetchOptions);
 
       let data: T | null = null;

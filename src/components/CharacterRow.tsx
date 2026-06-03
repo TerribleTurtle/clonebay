@@ -1,5 +1,6 @@
 import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import { logger } from '../utils/logger';
 import { useCharacterStore, StatusLight } from '../store/useCharacterStore';
 
 interface CharacterRowProps {
@@ -29,7 +30,7 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
     try {
       await removeAndReload(characterId);
     } catch (e) {
-      console.error('[CharacterRow] Failed to remove character ' + characterId + ' from IDB:', e);
+      logger.error('[CharacterRow] Failed to remove character ' + characterId + ' from IDB:', e);
       throw e;
     }
   };

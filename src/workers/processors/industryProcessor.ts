@@ -37,7 +37,7 @@ export function processIndustry(
         payload: { characterId: charId, dataType: 'industry', status: 'Red', data: null }
       });
     }
-  // eslint-disable-next-line no-restricted-syntax
+   
   } catch (error) {
     logger.error(`ESI Worker: Error calculating industry status for ${charId}`, error);
     postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'industry', status: 'Red', data: null } });

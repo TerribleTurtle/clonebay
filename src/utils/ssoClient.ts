@@ -22,6 +22,7 @@ export async function exchangeCodeForToken(
 ): Promise<TokenExchangeResult> {
   let response;
   try {
+    // eslint-disable-next-line no-restricted-globals
     response = await fetch("https://login.eveonline.com/v2/oauth/token", {
       method: "POST",
       headers: {

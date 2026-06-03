@@ -83,16 +83,14 @@ export class WorkerManager {
           try {
             handler(event);
           } catch (error) {
-            console.error('WorkerManager: Error in message handler', error);
             logger.error('WorkerManager: Error in message handler', error);
-              }
+          }
         });
       };
 
       this.worker.onerror = (error) => {
         logger.error('WorkerManager: Worker crashed', error);
         this.scheduleRestart();
-      throw error;
       };
 
       // Start the worker logic
@@ -101,10 +99,8 @@ export class WorkerManager {
       // Start ping/pong
       this.startPingPong();
     } catch (error) {
-      console.error('WorkerManager: Failed to initialize worker', error);
       logger.error('WorkerManager: Failed to initialize worker', error);
       this.scheduleRestart();
-      throw error;
     }
   }
 
@@ -141,7 +137,6 @@ export class WorkerManager {
     this.pongTimeout = setTimeout(() => {
       logger.error('WorkerManager: Missed PONG, terminating worker');
       this.scheduleRestart();
-      throw new Error('WorkerManager: Missed PONG, terminating worker');
     }, this.PONG_TIMEOUT_MS);
   }
 

@@ -91,8 +91,16 @@ const eslintConfig = defineConfig([
           "message": "FAIL LOUDLY: 'as' type casting is BANNED (except 'as const'). Rely on type inference or Zod validation."
         },
         {
-          "selector": "CatchClause > BlockStatement:not(:has(ThrowStatement)):not(:has(CallExpression[callee.object.name='console']))",
-          "message": "FAIL LOUDLY: Catch blocks MUST NOT swallow errors silently. You must explicitly log (console.error) or re-throw."
+          "selector": "CallExpression[callee.property.name='parse']",
+          "message": "FAIL LOUDLY: Synchronous .parse() is banned. Use .safeParse() or .parseAsync() to prevent unhandled exceptions."
+        },
+        {
+          "selector": "CallExpression[callee.object.name='console'][callee.property.name='error']",
+          "message": "FAIL LOUDLY: console.error is banned. Use the centralized structured logger (e.g., logger.error) instead."
+        },
+        {
+          "selector": "CatchClause > BlockStatement:not(:has(ThrowStatement)):not(:has(CallExpression[callee.object.name='logger']))",
+          "message": "FAIL LOUDLY: Catch blocks MUST NOT swallow errors silently. You must explicitly log (logger.error) or re-throw."
         },
         {
           "selector": "ExpressionStatement > Literal[value='use server'], Directive > Literal[value='use server']",
@@ -108,6 +116,13 @@ const eslintConfig = defineConfig([
       "no-empty": ["error", { "allowEmptyCatch": false }],
       "promise/catch-or-return": "error",
       "promise/no-return-wrap": "error",
+      "no-restricted-globals": [
+        "error",
+        {
+          "name": "fetch",
+          "message": "FAIL LOUDLY: Raw fetch() is banned. Use the centralized resilient HTTP client wrapper."
+        }
+      ],
       "no-restricted-imports": [
         "error",
         {
@@ -195,7 +210,8 @@ const eslintConfig = defineConfig([
     files: ["tests/**/*.ts", "tests/**/*.tsx", "src/**/*.test.ts", "src/**/*.test.tsx", "scripts/**/*.ts"],
     rules: {
       "no-magic-numbers": "off",
-      "no-restricted-syntax": "off"
+      "no-restricted-syntax": "off",
+      "no-restricted-globals": "off"
     }
   },
   {

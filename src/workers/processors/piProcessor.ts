@@ -93,7 +93,7 @@ export async function processPi(
         type: 'ESI_DATA_UPDATE',
         payload: { characterId: charId, dataType: 'pi', status, data: planetsResult.data }
       });
-    // eslint-disable-next-line no-restricted-syntax
+     
     } catch (error) {
       logger.error(`ESI Worker: Error processing PI layouts for ${charId}`, error);
       postMessage({

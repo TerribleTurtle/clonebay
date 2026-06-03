@@ -104,7 +104,7 @@ export async function processMetrics(
         cloneStatus
       } 
     });
-  // eslint-disable-next-line no-restricted-syntax
+   
   } catch (err) {
     logger.error(`ESI Worker: Error processing metrics for ${charId}`, err);
     postMessage({

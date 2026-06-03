@@ -27,6 +27,7 @@ export async function refreshAccessToken(characterId: string): Promise<string> {
         }
         let refreshResponse;
         try {
+          // eslint-disable-next-line no-restricted-globals
           refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

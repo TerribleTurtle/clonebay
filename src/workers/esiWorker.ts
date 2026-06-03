@@ -50,7 +50,7 @@ async function pollLoop() {
   if (!isPolling) return;
   try {
     await pollData();
-  // eslint-disable-next-line no-restricted-syntax
+   
   } catch (error) {
     logger.error("ESI Worker: Unhandled error in pollData cycle:", error);
   }
@@ -64,7 +64,7 @@ async function pollData(): Promise<void> {
   let authTokens;
   try {
     authTokens = await get('eve_auth_tokens');
-  // eslint-disable-next-line no-restricted-syntax
+   
   } catch (err) {
     logger.error("ESI Worker: Failed to get auth tokens", err);
     return;
@@ -129,7 +129,7 @@ async function pollData(): Promise<void> {
       });
 
       await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing]);
-    // eslint-disable-next-line no-restricted-syntax
+     
     } catch (err) {
       logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);
     }
