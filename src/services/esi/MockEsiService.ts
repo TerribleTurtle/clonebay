@@ -40,7 +40,7 @@ export class MockEsiService implements IEsiService {
 
   private mockResponse<T>(data: unknown, schema: z.ZodType<T>): Promise<EsiResponse<T> | null> {
     if (!data) return Promise.resolve(null);
-    return Promise.resolve({ data: schema.parse(data), status: 'Green', cached: false });
+    return Promise.resolve().then(() => ({ data: schema.parse(data), status: 'Green' as const, cached: false }));
   }
 
   getSkillQueue(charId: string): Promise<EsiResponse<EsiSkillQueue[]> | null> {
