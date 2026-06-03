@@ -23,7 +23,7 @@ import { EsiSkillQueue, EsiIndustryJob } from '../schemas/esi';
  */
 export function calculateSkillQueueStatus(
   queue: EsiSkillQueue[],
-  nowMs: number = Date.now()
+  nowMs: number
 ): DashboardStatus {
   if (!queue || queue.length === 0) {
     return 'Red';
@@ -32,7 +32,7 @@ export function calculateSkillQueueStatus(
   let latestFinishDate = 0;
   for (const item of queue) {
     if (item.finish_date) {
-      const finishTime = new Date(item.finish_date).getTime();
+      const finishTime = Date.parse(item.finish_date);
       if (finishTime > latestFinishDate) {
         latestFinishDate = finishTime;
       }
@@ -71,7 +71,7 @@ export interface PiPinState {
  */
 export function calculatePiStatus(
   pins: PiPinState[],
-  nowMs: number = Date.now()
+  nowMs: number
 ): DashboardStatus {
   if (!pins || pins.length === 0) {
     // If no PI is setup, default to Green to avoid false alarms
@@ -104,7 +104,7 @@ export function calculatePiStatus(
         return 'Red'; // Extractor is stopped
       }
       
-      const expiry = new Date(pin.extractorExpiryTime).getTime();
+      const expiry = Date.parse(pin.extractorExpiryTime);
       if (expiry <= nowMs) {
         return 'Red'; // Extractor cycle finished
       }
@@ -130,7 +130,7 @@ export function calculatePiStatus(
 export function calculateIndustryStatus(
   jobs: EsiIndustryJob[],
   maxJobs: number,
-  nowMs: number = Date.now()
+  nowMs: number
 ): DashboardStatus {
   if (!jobs) {
     return maxJobs > 0 ? 'Red' : 'Green';
@@ -153,7 +153,7 @@ export function calculateIndustryStatus(
     }
     
     if (job.end_date) {
-      const endTime = new Date(job.end_date).getTime();
+      const endTime = Date.parse(job.end_date);
       if (endTime <= nowMs) {
         return 'Red';
       }
@@ -203,12 +203,12 @@ export function calculateMailStatus(unreadCount?: number | null): DashboardStatu
  * - GREEN: Jump clone ready.
  */
 export function calculateCloneStatus(
-  lastJumpDate?: string | null,
-  nowMs: number = Date.now()
+  lastJumpDate: string | null | undefined,
+  nowMs: number
 ): DashboardStatus {
   if (!lastJumpDate) return 'Green';
   
-  const lastJumpTime = new Date(lastJumpDate).getTime();
+  const lastJumpTime = Date.parse(lastJumpDate);
   const cooldownMs = DEFAULT_CLONE_COOLDOWN_HOURS * MS_IN_HOUR; // Default 24h, can be reduced by skills
   
   if (nowMs < lastJumpTime + cooldownMs) {

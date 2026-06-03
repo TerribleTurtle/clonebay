@@ -151,8 +151,8 @@ describe('ESI Client', () => {
     });
 
     const adjustedNow = getAdjustedNow();
-    expect(adjustedNow.getTime()).toBeGreaterThan(localTime.getTime());
-    expect(adjustedNow.getTime()).toBeCloseTo(serverTime.getTime(), -2); // close to server time
+    expect(adjustedNow).toBeGreaterThan(localTime.getTime());
+    expect(adjustedNow).toBeCloseTo(serverTime.getTime(), -2); // close to server time
   });
 
   it('should enforce MAX_CONCURRENT_REQUESTS = 5', async () => {

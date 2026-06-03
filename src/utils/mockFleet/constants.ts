@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-syntax */
+ 
 export const nowMs = Date.now();
 export const MINUTES_IN_HOUR = 60;
 export const SECONDS_IN_MINUTE = 60;

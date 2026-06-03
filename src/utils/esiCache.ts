@@ -10,11 +10,11 @@ export interface CacheEntry<T> {
   expires: number;
 }
 
-export async function getCachedEsiData<T>(url: string): Promise<CacheEntry<T> | null> {
+export async function getCachedEsiData<T>(url: string, nowMs: number): Promise<CacheEntry<T> | null> {
   try {
     const entry = await get<CacheEntry<T>>(url);
     if (entry !== undefined) {
-      if (entry.expires <= Date.now()) {
+      if (entry.expires <= nowMs) {
         return null;
       }
       return entry;
@@ -30,10 +30,11 @@ export async function setCachedEsiData<T>(
   url: string,
   data: T,
   eTag: string | null,
-  expiresHeader: string | null
+  expiresHeader: string | null,
+  nowMs: number
 ): Promise<void> {
   try {
-    let expires = Date.now() + DEFAULT_CACHE_MINUTES * SECONDS_PER_MINUTE * MS_PER_SECOND; // default 5 mins
+    let expires = nowMs + DEFAULT_CACHE_MINUTES * SECONDS_PER_MINUTE * MS_PER_SECOND; // default 5 mins
     if (expiresHeader !== null) {
       const parsed = Date.parse(expiresHeader);
       if (!Number.isNaN(parsed)) {

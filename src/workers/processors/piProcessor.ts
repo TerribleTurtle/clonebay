@@ -88,7 +88,7 @@ export async function processPi(
         }
       }
 
-      const status = calculatePiStatus(allPins);
+      const status = calculatePiStatus(allPins, Date.now());
       postMessage({
         type: 'ESI_DATA_UPDATE',
         payload: { characterId: charId, dataType: 'pi', status, data: planetsResult.data }

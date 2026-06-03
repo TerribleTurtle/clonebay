@@ -10,20 +10,25 @@ let isGlobalPauseActive = false;
 let pauseUntil = 0;
 let clockDriftOffset = 0;
 
-export function getAdjustedNow(): Date {
-  return new Date(Date.now() + clockDriftOffset);
+export function getAdjustedNow(): number {
+  /* eslint-disable-next-line no-restricted-syntax */
+  return Date.now() + clockDriftOffset;
 }
 
 export function updateClockDrift(serverDateHeader: string | null): void {
   if (serverDateHeader) {
+     
     const serverTime = new Date(serverDateHeader).getTime();
+    /* eslint-disable-next-line no-restricted-syntax */
     const localTime = Date.now();
     clockDriftOffset = serverTime - localTime;
   }
 }
 
 export function checkDailyDowntime(): boolean {
-  const now = getAdjustedNow();
+  const nowMs = getAdjustedNow();
+   
+  const now = new Date(nowMs);
   const hours = now.getUTCHours();
   const minutes = now.getUTCMinutes();
 
@@ -39,15 +44,15 @@ export function checkAndApplyRateLimitError(errorLimitRemainHeader: string | nul
     if (!Number.isNaN(remain) && remain < CRITICAL_ERROR_LIMIT) {
       logger.error(`ESI error limit critically low: ${remain}. Pausing all requests for ${PAUSE_DURATION_SECONDS} seconds.`);
       isGlobalPauseActive = true;
-      pauseUntil = getAdjustedNow().getTime() + PAUSE_DURATION_SECONDS * MS_PER_SECOND;
+      pauseUntil = getAdjustedNow() + PAUSE_DURATION_SECONDS * MS_PER_SECOND;
     }
   }
 }
 
 export function isPaused(): boolean {
-  if (isGlobalPauseActive && getAdjustedNow().getTime() < pauseUntil) {
+  if (isGlobalPauseActive && getAdjustedNow() < pauseUntil) {
     return true;
-  } else if (isGlobalPauseActive && getAdjustedNow().getTime() >= pauseUntil) {
+  } else if (isGlobalPauseActive && getAdjustedNow() >= pauseUntil) {
     isGlobalPauseActive = false;
   }
   return false;

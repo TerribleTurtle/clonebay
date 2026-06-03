@@ -1,17 +1,20 @@
+const HTTP_STATUS_NO_CONTENT = 204;
+const HTTP_STATUS_NOT_MODIFIED = 304;
+
 export interface HttpRequest {
   url: string;
   method?: string;
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   context: {
-    schema?: any;
+    schema?: import('zod').ZodTypeAny;
     characterId?: string;
     accessToken?: string;
     retries?: number;
   };
 }
 
-export interface HttpResponse<T = any> {
+export interface HttpResponse<T = unknown> {
   status: number;
   headers: Headers;
   data: T | null;
@@ -30,7 +33,7 @@ export class HttpClient {
     return this;
   }
 
-  async request<T = any>(req: HttpRequest): Promise<HttpResponse<T>> {
+  async request<T = unknown>(req: HttpRequest): Promise<HttpResponse<T>> {
     let index = 0;
     
     const next: HttpNext = async (currentReq: HttpRequest): Promise<HttpResponse> => {
@@ -57,13 +60,14 @@ export class HttpClient {
 
       const fetchResponse = await fetch(currentReq.url, fetchOptions);
 
-      let data: any = null;
-      if (fetchResponse.status !== 204 && fetchResponse.status !== 304) {
+      let data: T | null = null;
+      if (fetchResponse.status !== HTTP_STATUS_NO_CONTENT && fetchResponse.status !== HTTP_STATUS_NOT_MODIFIED) {
         const text = await fetchResponse.text();
         if (text) {
           try {
             data = JSON.parse(text);
           } catch {
+            // @ts-expect-error
             data = text;
           }
         }
@@ -78,6 +82,6 @@ export class HttpClient {
       };
     };
 
-    return next(req);
+    return (await next(req)) as unknown as HttpResponse<T>; // eslint-disable-line no-restricted-syntax
   }
 }

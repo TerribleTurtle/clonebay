@@ -19,9 +19,9 @@ describe('esiCache', () => {
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
     const pastDateStr = new Date('2026-01-01T09:00:00Z').toUTCString();
     
-    await setCachedEsiData(url, { some: 'data' }, 'fake-etag', pastDateStr);
+    await setCachedEsiData(url, { some: 'data' }, 'fake-etag', pastDateStr, Date.now());
     
-    const result = await getCachedEsiData(url);
+    const result = await getCachedEsiData(url, Date.now());
     expect(result).toBeNull();
   });
 
@@ -30,9 +30,9 @@ describe('esiCache', () => {
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
     const futureDateStr = new Date('2026-01-01T11:00:00Z').toUTCString();
 
-    await setCachedEsiData(url, { some: 'data2' }, 'my-etag-123', futureDateStr);
+    await setCachedEsiData(url, { some: 'data2' }, 'my-etag-123', futureDateStr, Date.now());
 
-    const result = await getCachedEsiData(url);
+    const result = await getCachedEsiData(url, Date.now());
     expect(result).not.toBeNull();
     expect(result?.eTag).toBe('my-etag-123');
     expect(result?.data).toEqual({ some: 'data2' });
@@ -43,9 +43,9 @@ describe('esiCache', () => {
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
     const exactDateStr = new Date('2026-01-01T10:00:00Z').toUTCString();
     
-    await setCachedEsiData(url, { some: 'data-exact' }, 'exact-etag', exactDateStr);
+    await setCachedEsiData(url, { some: 'data-exact' }, 'exact-etag', exactDateStr, Date.now());
     
-    const result = await getCachedEsiData(url);
+    const result = await getCachedEsiData(url, Date.now());
     expect(result).toBeNull();
   });
 
@@ -53,16 +53,16 @@ describe('esiCache', () => {
     const url = 'https://api.eve.com/data-unparsable';
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
     
-    await setCachedEsiData(url, { some: 'data-unparsable' }, 'unparsable-etag', 'invalid-date-string');
+    await setCachedEsiData(url, { some: 'data-unparsable' }, 'unparsable-etag', 'invalid-date-string', Date.now());
     
     // Should be valid at 10:04
     vi.setSystemTime(new Date('2026-01-01T10:04:00Z'));
-    const resultBefore = await getCachedEsiData(url);
+    const resultBefore = await getCachedEsiData(url, Date.now());
     expect(resultBefore).not.toBeNull();
 
     // Should be expired at 10:05
     vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
-    const resultAfter = await getCachedEsiData(url);
+    const resultAfter = await getCachedEsiData(url, Date.now());
     expect(resultAfter).toBeNull();
   });
 
@@ -70,16 +70,16 @@ describe('esiCache', () => {
     const url = 'https://api.eve.com/data-null';
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
     
-    await setCachedEsiData(url, { some: 'data-null' }, 'null-etag', null);
+    await setCachedEsiData(url, { some: 'data-null' }, 'null-etag', null, Date.now());
     
     // Should be valid at 10:04
     vi.setSystemTime(new Date('2026-01-01T10:04:00Z'));
-    const resultBefore = await getCachedEsiData(url);
+    const resultBefore = await getCachedEsiData(url, Date.now());
     expect(resultBefore).not.toBeNull();
 
     // Should be expired at 10:05
     vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
-    const resultAfter = await getCachedEsiData(url);
+    const resultAfter = await getCachedEsiData(url, Date.now());
     expect(resultAfter).toBeNull();
   });
 });
