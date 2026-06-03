@@ -1,5 +1,6 @@
 import { getCachedEsiData, setCachedEsiData } from './esiCache';
 import { getAuthDictionary, addOrUpdateCharacter } from './authStorage';
+import { logger } from './logger';
 import { z } from 'zod';
 
 const DOWNTIME_HOUR_UTC = 11;
@@ -81,9 +82,11 @@ export function resetGlobalPauseForTests(): void {
   requestQueue.length = 0;
 }
 
+const refreshPromises: Record<string, Promise<string>> = {};
+
 export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number = DEFAULT_RETRIES): Promise<EsiResponse<T>> {
   if (checkDailyDowntime()) {
-    console.warn("ESI is offline for daily downtime (11:00-11:15 UTC).");
+    logger.warn("ESI is offline for daily downtime (11:00-11:15 UTC).");
     return { data: null, status: 'Offline', cached: false };
   }
 
@@ -106,7 +109,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
     }
 
     if (isGlobalPauseActive && getAdjustedNow().getTime() < pauseUntil) {
-      console.warn("Global pause is active due to rate limits.");
+      logger.warn("Global pause is active due to rate limits.");
       return { data: null, status: 'Offline', cached: false };
     } else if (isGlobalPauseActive && getAdjustedNow().getTime() >= pauseUntil) {
       isGlobalPauseActive = false;
@@ -129,7 +132,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
       if (errorLimitRemain !== null) {
         const remain = parseInt(errorLimitRemain, 10);
         if (!Number.isNaN(remain) && remain < CRITICAL_ERROR_LIMIT) {
-          console.error(`ESI error limit critically low: ${remain}. Pausing all requests for ${PAUSE_DURATION_SECONDS} seconds.`);
+          logger.error(`ESI error limit critically low: ${remain}. Pausing all requests for ${PAUSE_DURATION_SECONDS} seconds.`);
           isGlobalPauseActive = true;
           pauseUntil = getAdjustedNow().getTime() + PAUSE_DURATION_SECONDS * MS_PER_SECOND;
         }
@@ -146,31 +149,46 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
         const authDict = await getAuthDictionary();
         const auth = authDict[characterId];
         if (auth) {
-          try {
-            const refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: new URLSearchParams({
-                grant_type: 'refresh_token',
-                refresh_token: auth.refreshToken,
-                client_id: process.env['NEXT_PUBLIC_EVE_CLIENT_ID'] || '',
-              }),
-            });
-            if (refreshResponse.ok) {
-              const refreshData = await refreshResponse.json();
-              auth.accessToken = refreshData.access_token;
-              if (refreshData.refresh_token) {
-                auth.refreshToken = refreshData.refresh_token;
+          if (!refreshPromises[characterId]) {
+            refreshPromises[characterId] = (async () => {
+              try {
+                const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'] || '';
+                if (!clientId) {
+                  throw new Error("NEXT_PUBLIC_EVE_CLIENT_ID is missing in worker context!");
+                }
+                const refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                  body: new URLSearchParams({
+                    grant_type: 'refresh_token',
+                    refresh_token: auth.refreshToken,
+                    client_id: clientId,
+                  }),
+                });
+                if (refreshResponse.ok) {
+                  const refreshData = await refreshResponse.json();
+                  auth.accessToken = refreshData.access_token;
+                  if (refreshData.refresh_token) {
+                    auth.refreshToken = refreshData.refresh_token;
+                  }
+                  await addOrUpdateCharacter(characterId, auth);
+                  return auth.accessToken;
+                } else {
+                  throw new Error(`ESI OAuth Refresh failed with status ${refreshResponse.status}`);
+                }
+              } finally {
+                delete refreshPromises[characterId];
               }
-              await addOrUpdateCharacter(characterId, auth);
-              options.accessToken = auth.accessToken;
-            } else {
-              throw new Error(`ESI OAuth Refresh failed with status ${refreshResponse.status}`);
-            }
+            })();
+          }
+
+          try {
+            options.accessToken = await refreshPromises[characterId];
           } catch (refreshError) {
-            console.error('Failed to refresh token:', refreshError);
+            logger.error('Failed to refresh token:', refreshError);
             throw refreshError;
           }
+          
           dequeueRequest();
           return fetchEsi<T>(options, retries);
         }
@@ -180,7 +198,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
         if (retries > 0) {
           const attempt = DEFAULT_RETRIES - retries + 1;
           const backoff = Math.pow(BACKOFF_BASE, attempt - 1) * MS_PER_SECOND;
-          console.warn(`ESI returned ${response.status}. Retrying in ${backoff}ms...`);
+          logger.warn(`ESI returned ${response.status}. Retrying in ${backoff}ms...`);
           await sleep(backoff);
           dequeueRequest();
           return fetchEsi<T>(options, retries - 1);
@@ -207,7 +225,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
     }
 
   } catch (error) {
-    console.error(`Error fetching ESI data for ${url}:`, error);
+    logger.error(`Error fetching ESI data for ${url}:`, error);
     throw error;
   }
 }

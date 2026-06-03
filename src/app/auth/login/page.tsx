@@ -45,8 +45,11 @@ export default function LoginPage() {
 
       const scopes = [
         "esi-skills.read_skillqueue.v1",
+        "esi-skills.read_skills.v1",
         "esi-industry.read_character_jobs.v1",
-        "esi-planets.manage_planets.v1"
+        "esi-planets.manage_planets.v1",
+        "esi-wallet.read_character_wallet.v1",
+        "esi-location.read_location.v1"
       ].join(" ");
 
       const params = new URLSearchParams({

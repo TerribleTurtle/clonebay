@@ -105,7 +105,20 @@ export const EsiCharacterSkillsResponseSchema = z.object({
       skill_id: z.number().int().positive(),
       active_skill_level: z.number().int().min(0).max(MAX_SKILL_LEVEL),
       trained_skill_level: z.number().int().min(0).max(MAX_SKILL_LEVEL),
+      skillpoints_in_skill: z.number().int().min(0).optional(),
     }).strict()
-  )
+  ),
+  total_sp: z.number().int().min(0).optional(),
+  unallocated_sp: z.number().int().min(0).optional()
 }).strict();
 export type EsiCharacterSkillsResponse = z.infer<typeof EsiCharacterSkillsResponseSchema>;
+
+export const EsiWalletSchema = z.number();
+export type EsiWallet = z.infer<typeof EsiWalletSchema>;
+
+export const EsiLocationSchema = z.object({
+  solar_system_id: z.number().int().positive(),
+  station_id: z.number().int().positive().optional(),
+  structure_id: z.number().int().positive().optional()
+}).strict();
+export type EsiLocation = z.infer<typeof EsiLocationSchema>;

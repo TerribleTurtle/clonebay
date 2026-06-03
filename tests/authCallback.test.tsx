@@ -73,7 +73,7 @@ describe('Auth Callback', () => {
     });
 
     const { addOrUpdateCharacter } = await import('../src/utils/authStorage');
-    expect(addOrUpdateCharacter).toHaveBeenCalledWith('CHARACTER:EVE:123456789', {
+    expect(addOrUpdateCharacter).toHaveBeenCalledWith('123456789', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
       characterName: 'Test Character'
@@ -113,7 +113,7 @@ describe('Auth Callback', () => {
     });
 
     const { addOrUpdateCharacter } = await import('../src/utils/authStorage');
-    expect(addOrUpdateCharacter).toHaveBeenCalledWith('CHARACTER:EVE:9999', {
+    expect(addOrUpdateCharacter).toHaveBeenCalledWith('9999', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
       characterName: 'Jön Dœ 🚀'

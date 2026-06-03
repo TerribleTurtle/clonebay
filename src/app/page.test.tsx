@@ -1,9 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
-import ComingSoonPage from './page'
+import Home from './page'
 
-test('renders the coming soon heading', () => {
-  render(<ComingSoonPage />)
-  expect(screen.getByText(/coming soon/i)).toBeDefined()
-  expect(screen.getByRole('status')).toBeDefined()
+test('renders the Dashboard', () => {
+  render(<Home />)
+  expect(screen.getByText(/EVE Fleet Command/i)).toBeDefined()
 })

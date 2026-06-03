@@ -24,11 +24,13 @@ describe('ESI Client', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     resetGlobalPauseForTests();
+    vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', 'test-client-id');
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   it('should return Offline status during Daily Downtime (11:00-11:15 UTC)', async () => {

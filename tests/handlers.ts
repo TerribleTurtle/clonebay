@@ -18,6 +18,22 @@ export const handlers = [
     return HttpResponse.json(mockPlanets);
   }),
 
+  http.get('https://esi.evetech.net/latest/characters/:characterId/skills/', () => {
+    return HttpResponse.json({ skills: [], total_sp: 50000000 });
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/wallet/', () => {
+    return HttpResponse.json(1500000000);
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/location/', () => {
+    return HttpResponse.json({ solar_system_id: 30000142 });
+  }),
+
+  http.get('https://esi.evetech.net/latest/universe/systems/:systemId/', () => {
+    return HttpResponse.json({ name: 'Jita' });
+  }),
+
   http.get('https://esi.evetech.net/latest/universe/types/:typeId/', ({ params }) => {
     const typeId = Number(params['typeId']);
     const sdeArray = Array.isArray(mockSde) ? mockSde : [mockSde];

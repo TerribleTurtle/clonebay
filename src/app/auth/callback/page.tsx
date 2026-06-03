@@ -72,7 +72,7 @@ function CallbackLogic() {
       );
       const payload = JSON.parse(payloadJson);
 
-      const characterId = payload.sub;
+      const characterId = payload.sub?.split(":").pop();
       const characterName = payload.name;
 
       if (!characterId || !characterName) {
