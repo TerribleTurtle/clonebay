@@ -58,6 +58,33 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
             </span>
           )}
         </div>
+        <div className="flex gap-4 text-xs font-mono mt-1">
+          <span className="text-zinc-400">
+            Clones: <span className="text-zinc-200 font-bold">{status.clones ? status.clones.jump_clones.length : '???'}</span>
+          </span>
+          <span className="text-zinc-400">
+            Fatigue Expires: <span className="text-zinc-200 font-bold">{status.fatigue?.jump_fatigue_expire_date ? new Date(status.fatigue.jump_fatigue_expire_date).toLocaleString() : (status.fatigue ? 'None' : '???')}</span>
+          </span>
+        </div>
+        <div className="flex gap-4 text-xs font-mono mt-1">
+          <span className="text-zinc-400">
+            Transactions: <span className="text-zinc-200 font-bold">{status.transactions ? status.transactions.length : '???'}</span>
+          </span>
+          <span className="text-zinc-400">
+            Unread Mail: <span className="text-zinc-200 font-bold">{status.mail?.total_unread_count !== undefined ? status.mail.total_unread_count : '???'}</span>
+          </span>
+          <span className="text-zinc-400">
+            Contracts: <span className="text-zinc-200 font-bold">{status.contracts ? status.contracts.length : '???'}</span>
+          </span>
+        </div>
+        <div className="flex gap-4 text-xs font-mono mt-1">
+          <span className="text-zinc-400">
+            Ship: <span className="text-zinc-200 font-bold">{status.ship?.ship_name ?? '???'}</span>
+          </span>
+          <span className="text-zinc-400">
+            Location: <span className="text-zinc-200 font-bold">{status.locationName ?? status.location?.solar_system_id ?? '???'}</span>
+          </span>
+        </div>
       </div>
       <div className="flex gap-2 w-full sm:w-auto tabular-nums">
         <StatusPill label="SKILL" status={status.skills} />

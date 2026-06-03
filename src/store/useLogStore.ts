@@ -35,6 +35,16 @@ export const useLogStore = create<LogStore>()(
     }),
     {
       name: 'eve-log-store',
+      partialize: (state) => ({
+        ...state,
+        logs: state?.logs?.map((log) => ({
+          id: log.id,
+          timestamp: log.timestamp,
+          level: log.level,
+          message: log.message,
+          source: log.source,
+        })) || [],
+      }),
     }
   )
 );

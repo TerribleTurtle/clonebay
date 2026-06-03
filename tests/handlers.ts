@@ -26,8 +26,52 @@ export const handlers = [
     return HttpResponse.json(1500000000);
   }),
 
+  http.get('https://esi.evetech.net/v1/characters/:characterId/wallet/transactions/', () => {
+    return HttpResponse.json([
+      {
+        transaction_id: 1234567890,
+        date: "2026-06-03T17:51:00Z",
+        client_id: 987654321,
+        location_id: 60003760,
+        type_id: 34,
+        unit_price: 500000.0,
+        quantity: 1,
+        is_buy: true,
+        is_personal: true,
+        journal_ref_id: 999888777
+      }
+    ]);
+  }),
+
   http.get('https://esi.evetech.net/latest/characters/:characterId/location/', () => {
     return HttpResponse.json({ solar_system_id: 30000142 });
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/ship/', () => {
+    return HttpResponse.json({
+      ship_item_id: 1000000016991,
+      ship_name: "SPACESHIPS!!!",
+      ship_type_id: 1233
+    });
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/clones/', () => {
+    return HttpResponse.json({
+      home_location: { location_id: 1021348135816, location_type: 'station' },
+      jump_clones: []
+    });
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/fatigue/', () => {
+    return HttpResponse.json({});
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/mail/labels/', () => {
+    return HttpResponse.json({ total_unread_count: 0, labels: [] });
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/contracts/', () => {
+    return HttpResponse.json([]);
   }),
 
   http.get('https://esi.evetech.net/latest/universe/systems/:systemId/', ({ params }) => {

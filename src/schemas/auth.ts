@@ -23,6 +23,7 @@ export const EveSsoJwtPayloadSchema = z.object({
   sub: z.string(),
   tenant: z.string().optional(),
   tier: z.string().optional(),
+  scp: z.union([z.string(), z.array(z.string())]).optional(),
 }).strict();
 
 export type EveSsoJwtPayload = z.infer<typeof EveSsoJwtPayloadSchema>;

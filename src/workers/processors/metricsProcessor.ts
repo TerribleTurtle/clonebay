@@ -1,7 +1,7 @@
 import { fetchSdeSystem } from '../../utils/sdeClient';
 import { logger } from '../../utils/logger';
 import { mockFleet } from '../../utils/mockFleet';
-import type { EsiSkillQueue, EsiCharacterSkillsResponse, EsiWallet, EsiLocation } from '../../schemas/esi';
+import type { EsiSkillQueue, EsiCharacterSkillsResponse, EsiWallet, EsiLocation, EsiShip, EsiClones, EsiFatigue, EsiTransaction, EsiMailLabels, EsiContract } from '../../schemas/esi';
 import type { EsiResponse } from '../../utils/esiClient';
 
 export async function processMetrics(
@@ -10,7 +10,13 @@ export async function processMetrics(
   charSkillsResult: EsiResponse<EsiCharacterSkillsResponse> | null | undefined,
   walletResult: EsiResponse<EsiWallet> | null | undefined,
   locationResult: EsiResponse<EsiLocation> | null | undefined,
+  shipResult: EsiResponse<EsiShip> | null | undefined,
   skillsResult: EsiResponse<EsiSkillQueue[]> | null | undefined,
+  clonesResult: EsiResponse<EsiClones> | null | undefined,
+  fatigueResult: EsiResponse<EsiFatigue> | null | undefined,
+  transactionsResult: EsiResponse<EsiTransaction[]> | null | undefined,
+  mailLabelsResult: EsiResponse<EsiMailLabels> | null | undefined,
+  contractsResult: EsiResponse<EsiContract[]> | null | undefined,
   isMockMode: boolean,
   postMessage: (msg: unknown) => void
 ) {
@@ -46,6 +52,8 @@ export async function processMetrics(
     const locationId = locationResult?.data?.solar_system_id;
     const stationId = locationResult?.data?.station_id;
     const structureId = locationResult?.data?.structure_id;
+    const location = locationResult?.data;
+    const ship = shipResult?.data;
     
     let locationName = undefined;
     if (locationId) {
@@ -54,6 +62,12 @@ export async function processMetrics(
         return undefined;
       });
     }
+
+    const clones = clonesResult?.data;
+    const fatigue = fatigueResult?.data;
+    const transactions = transactionsResult?.data;
+    const mail = mailLabelsResult?.data;
+    const contracts = contractsResult?.data;
 
     postMessage({ 
       type: 'ESI_METRICS_UPDATE', 
@@ -66,7 +80,14 @@ export async function processMetrics(
         locationId, 
         locationName,
         stationId,
-        structureId
+        structureId,
+        location,
+        ship,
+        clones,
+        fatigue,
+        transactions,
+        mail,
+        contracts
       } 
     });
   // eslint-disable-next-line no-restricted-syntax

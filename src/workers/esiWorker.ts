@@ -13,7 +13,19 @@ import {
   EsiPlanet,
   EsiCharacterSkillsResponse,
   EsiWallet,
-  EsiLocation
+  EsiLocation,
+  EsiShip,
+  EsiClones,
+  EsiFatigue,
+  EsiClonesSchema,
+  EsiFatigueSchema,
+  EsiTransaction,
+  EsiTransactionSchema,
+  EsiShipSchema,
+  EsiMailLabels,
+  EsiContract,
+  EsiMailLabelsSchema,
+  EsiContractSchema
 } from '../schemas/esi';
 import { z } from 'zod';
 import { mockFleet } from '../utils/mockFleet';
@@ -97,6 +109,18 @@ async function pollData(): Promise<void> {
       let planetsPromise: Promise<EsiResponse<EsiPlanet[]> | null>;
       let walletPromise: Promise<EsiResponse<EsiWallet> | null>;
       let locationPromise: Promise<EsiResponse<EsiLocation> | null>;
+      let shipPromise: Promise<EsiResponse<EsiShip> | null>;
+      let clonesPromise: Promise<EsiResponse<EsiClones> | null>;
+      let fatiguePromise: Promise<EsiResponse<EsiFatigue> | null>;
+      let transactionsPromise: Promise<EsiResponse<EsiTransaction[]> | null>;
+      let mailLabelsPromise: Promise<EsiResponse<EsiMailLabels> | null>;
+      let contractsPromise: Promise<EsiResponse<EsiContract[]> | null>;
+
+      const safeFetch = <T>(url: string, schema: z.ZodType<T>, name: string): Promise<EsiResponse<T> | null> => 
+        fetchEsi({ url, accessToken, characterId: charId, schema }).catch(error => {
+          logger.error(`ESI Worker: Error fetching ${name} for ${charId}`, error);
+          return null;
+        });
 
       if (isMockMode) {
         const mockChar = mockFleet.find(c => c.characterId === charId);
@@ -107,6 +131,12 @@ async function pollData(): Promise<void> {
           planetsPromise = Promise.resolve({ data: z.array(EsiPlanetSchema).parse(mockChar.planets), status: 'Green', cached: false });
           walletPromise = Promise.resolve({ data: EsiWalletSchema.parse(mockChar.isk), status: 'Green', cached: false });
           locationPromise = Promise.resolve({ data: EsiLocationSchema.parse(mockChar.location), status: 'Green', cached: false });
+          shipPromise = Promise.resolve({ data: EsiShipSchema.parse(mockChar.ship), status: 'Green', cached: false });
+          clonesPromise = Promise.resolve({ data: EsiClonesSchema.parse(mockChar.clones), status: 'Green', cached: false });
+          fatiguePromise = Promise.resolve({ data: EsiFatigueSchema.parse(mockChar.fatigue), status: 'Green', cached: false });
+          transactionsPromise = Promise.resolve({ data: z.array(EsiTransactionSchema).parse(mockChar.transactions), status: 'Green', cached: false });
+          mailLabelsPromise = Promise.resolve({ data: EsiMailLabelsSchema.parse(mockChar.mail), status: 'Green', cached: false });
+          contractsPromise = Promise.resolve({ data: z.array(EsiContractSchema).parse(mockChar.contracts), status: 'Green', cached: false });
         } else {
           skillsPromise = Promise.resolve(null);
           charSkillsPromise = Promise.resolve(null);
@@ -114,71 +144,30 @@ async function pollData(): Promise<void> {
           planetsPromise = Promise.resolve(null);
           walletPromise = Promise.resolve(null);
           locationPromise = Promise.resolve(null);
+          shipPromise = Promise.resolve(null);
+          clonesPromise = Promise.resolve(null);
+          fatiguePromise = Promise.resolve(null);
+          transactionsPromise = Promise.resolve(null);
+          mailLabelsPromise = Promise.resolve(null);
+          contractsPromise = Promise.resolve(null);
         }
       } else {
-        skillsPromise = fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/skillqueue/`,
-          accessToken,
-          characterId: charId,
-          schema: z.array(EsiSkillQueueSchema)
-        }).catch(error => {
-          logger.error(`ESI Worker: Error fetching skills for ${charId}`, error);
-          return null;
-        });
-
-        charSkillsPromise = fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/skills/`,
-          accessToken,
-          characterId: charId,
-          schema: EsiCharacterSkillsResponseSchema
-        }).catch(error => {
-          logger.error(`ESI Worker: Error fetching character skills for ${charId}`, error);
-          return null;
-        });
-
-        industryPromise = fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/industry/jobs/`,
-          accessToken,
-          characterId: charId,
-          schema: z.array(EsiIndustryJobSchema)
-        }).catch(error => {
-          logger.error(`ESI Worker: Error fetching industry jobs for ${charId}`, error);
-          return null;
-        });
-
-        planetsPromise = fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/planets/`,
-          accessToken,
-          characterId: charId,
-          schema: z.array(EsiPlanetSchema)
-        }).catch(error => {
-          logger.error(`ESI Worker: Error fetching planets for ${charId}`, error);
-          return null;
-        });
-
-        walletPromise = fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/wallet/`,
-          accessToken,
-          characterId: charId,
-          schema: EsiWalletSchema
-        }).catch(error => {
-          logger.error(`ESI Worker: Error fetching wallet for ${charId}`, error);
-          return null;
-        });
-
-        locationPromise = fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/location/`,
-          accessToken,
-          characterId: charId,
-          schema: EsiLocationSchema
-        }).catch(error => {
-          logger.error(`ESI Worker: Error fetching location for ${charId}`, error);
-          return null;
-        });
+        skillsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/skillqueue/`, z.array(EsiSkillQueueSchema), 'skills');
+        charSkillsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/skills/`, EsiCharacterSkillsResponseSchema, 'character skills');
+        industryPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/industry/jobs/`, z.array(EsiIndustryJobSchema), 'industry jobs');
+        planetsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/planets/`, z.array(EsiPlanetSchema), 'planets');
+        walletPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/wallet/`, EsiWalletSchema, 'wallet');
+        locationPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/location/`, EsiLocationSchema, 'location');
+        shipPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/ship/`, EsiShipSchema, 'ship');
+        clonesPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/clones/`, EsiClonesSchema, 'clones');
+        fatiguePromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/fatigue/`, EsiFatigueSchema, 'fatigue');
+        transactionsPromise = safeFetch(`https://esi.evetech.net/v1/characters/${charId}/wallet/transactions/`, z.array(EsiTransactionSchema), 'transactions');
+        mailLabelsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/mail/labels/`, EsiMailLabelsSchema, 'mail labels');
+        contractsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/contracts/`, z.array(EsiContractSchema), 'contracts');
       }
 
-      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, skillsPromise]).then(async ([charSkillsResult, walletResult, locationResult, skillsResult]) => {
-        await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, skillsResult, isMockMode, (msg) => self.postMessage(msg));
+      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult]) => {
+        await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, isMockMode, (msg) => self.postMessage(msg));
       });
 
       const skillsProcessing = skillsPromise.then((skillsResult) => {

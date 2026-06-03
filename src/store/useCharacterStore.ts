@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { get, set as idbSet } from 'idb-keyval';
 
+import { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract } from '../schemas/esi';
+
 export type StatusLight = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
 export interface CharacterStatus {
@@ -13,9 +15,16 @@ export interface CharacterStatus {
   locationName?: string;
   stationId?: number;
   structureId?: number;
+  location?: EsiLocation;
+  ship?: EsiShip;
   skills: StatusLight;
   industry: StatusLight;
   pi: StatusLight;
+  clones?: EsiClones;
+  fatigue?: EsiFatigue;
+  transactions?: EsiTransaction[];
+  mail?: EsiMailLabels;
+  contracts?: EsiContract[];
 }
 
 export interface CharacterStoreState {

@@ -33,7 +33,12 @@ export default function LoginPage() {
         "esi-industry.read_character_jobs.v1",
         "esi-planets.manage_planets.v1",
         "esi-wallet.read_character_wallet.v1",
-        "esi-location.read_location.v1"
+        "esi-location.read_location.v1",
+        "esi-clones.read_clones.v1",
+        "esi-characters.read_fatigue.v1",
+        "esi-location.read_ship_type.v1",
+        "esi-mail.read_mail.v1",
+        "esi-contracts.read_character_contracts.v1"
       ].join(" ");
 
       const params = new URLSearchParams({

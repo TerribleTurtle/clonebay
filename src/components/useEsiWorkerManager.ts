@@ -37,7 +37,23 @@ export const useEsiWorkerManager = () => {
         if (type === 'ESI_DATA_UPDATE') {
           queueUpdate(payload.characterId, { [payload.dataType]: payload.status });
         } else if (type === 'ESI_METRICS_UPDATE') {
-          queueUpdate(payload.characterId, { name: payload.name, isk: payload.isk, totalSp: payload.totalSp, unallocatedSp: payload.unallocatedSp, locationId: payload.locationId, locationName: payload.locationName, stationId: payload.stationId, structureId: payload.structureId });
+          queueUpdate(payload.characterId, { 
+            name: payload.name, 
+            isk: payload.isk, 
+            totalSp: payload.totalSp, 
+            unallocatedSp: payload.unallocatedSp, 
+            locationId: payload.locationId, 
+            locationName: payload.locationName, 
+            stationId: payload.stationId, 
+            structureId: payload.structureId, 
+            location: payload.location,
+            ship: payload.ship,
+            clones: payload.clones, 
+            fatigue: payload.fatigue,
+            transactions: payload.transactions,
+            mail: payload.mail,
+            contracts: payload.contracts
+          });
         } else if (type === 'POLL_COMPLETE') {
           useCharacterStore.getState().setLastPolled(timestamp);
         } else if (type === 'WORKER_LOG') {

@@ -9,7 +9,19 @@ import {
   EsiIndustryJobSchema,
   EsiPlanetSchema,
   EsiPlanetLayoutSchema,
-  EsiCharacterSkillsResponseSchema
+  EsiCharacterSkillsResponseSchema,
+  EsiClones,
+  EsiFatigue,
+  EsiClonesSchema,
+  EsiFatigueSchema,
+  EsiTransaction,
+  EsiTransactionSchema,
+  EsiShip,
+  EsiShipSchema,
+  EsiMailLabels,
+  EsiMailLabelsSchema,
+  EsiContract,
+  EsiContractSchema
 } from '../schemas/esi';
 
 import mockSkillQueueRaw from '../../tests/fixtures/mockSkillQueue.json';
@@ -25,11 +37,17 @@ export interface MockCharacter {
   isk: number;
   totalSp: number;
   location: { solar_system_id: number };
+  ship: EsiShip;
   skills: EsiSkillQueue[];
   charSkills: EsiCharacterSkillsResponse;
   industry: EsiIndustryJob[];
   planets: EsiPlanet[];
   planetLayouts: Record<number, EsiPlanetLayout>;
+  clones: EsiClones;
+  fatigue: EsiFatigue;
+  transactions: EsiTransaction[];
+  mail: EsiMailLabels;
+  contracts: EsiContract[];
 }
 
 const nowMs = Date.now();
@@ -40,6 +58,12 @@ const HOURS_IN_DAY = 24;
 
 const msPerHour = MINUTES_IN_HOUR * SECONDS_IN_MINUTE * MS_IN_SECOND;
 const msPerDay = HOURS_IN_DAY * msPerHour;
+const TWO_DAYS = 2;
+const TEN_DAYS = 10;
+const TWENTY_HOURS = 20;
+const FIFTEEN_HOURS = 15;
+const FIVE_HOURS = 5;
+const MOCK_IMPLANT_ID = 22118;
 
 const shiftDate = (dateStr: string, offsetMs: number) => {
   return new Date(new Date(dateStr).getTime() + offsetMs).toISOString();
@@ -50,7 +74,6 @@ const shiftDate = (dateStr: string, offsetMs: number) => {
 // ==========================================
 const greenSkillQueue = z.array(EsiSkillQueueSchema).parse(clone(mockSkillQueueRaw));
 const lastSkillFinish = new Date(greenSkillQueue[greenSkillQueue.length - 1]!.finish_date!).getTime();
-const TEN_DAYS = 10;
 const queueOffset = (nowMs + TEN_DAYS * msPerDay) - lastSkillFinish;
 const greenSkills = greenSkillQueue.map(sq => ({
   ...sq,
@@ -70,9 +93,6 @@ EsiCharacterSkillsResponseSchema.parse(greenCharSkills);
 
 const baseIndustry = z.array(EsiIndustryJobSchema).parse(clone(mockIndustryJobsRaw));
 const activeJob = baseIndustry.find(j => j.status === 'active')!;
-const TWENTY_HOURS = 20;
-const FIFTEEN_HOURS = 15;
-const FIVE_HOURS = 5;
 activeJob.end_date = new Date(nowMs + TWENTY_HOURS * msPerHour).toISOString();
 activeJob.start_date = new Date(nowMs - FIVE_HOURS * msPerHour).toISOString();
 const greenIndustry = [activeJob];
@@ -133,6 +153,74 @@ const redIndustryCharSkills: EsiCharacterSkillsResponse = {
 };
 
 // ==========================================
+// 5. CLONES & FATIGUE
+// ==========================================
+const defaultClones: EsiClones = {
+  home_location: { location_id: 1021348135816, location_type: 'station' },
+  jump_clones: [
+    { jump_clone_id: 12345, location_id: 60003463, location_type: 'station', implants: [MOCK_IMPLANT_ID], name: 'Clone 1' }
+  ],
+  last_clone_jump_date: new Date(nowMs - TWO_DAYS * msPerDay).toISOString(),
+  last_station_change_date: new Date(nowMs - TEN_DAYS * msPerDay).toISOString()
+};
+EsiClonesSchema.parse(defaultClones);
+
+const defaultFatigue: EsiFatigue = {
+  jump_fatigue_expire_date: new Date(nowMs + FIVE_HOURS * msPerHour).toISOString(),
+  last_jump_date: new Date(nowMs - FIVE_HOURS * msPerHour).toISOString(),
+  last_update_date: new Date(nowMs - FIVE_HOURS * msPerHour).toISOString()
+};
+EsiFatigueSchema.parse(defaultFatigue);
+
+const defaultTransactions: EsiTransaction[] = [
+  {
+    transaction_id: 1234567890,
+    date: new Date(nowMs - FIVE_HOURS * msPerHour).toISOString(),
+    client_id: 987654321,
+    location_id: 60003760,
+    type_id: 34,
+    unit_price: 500000.0,
+    quantity: 1,
+    is_buy: true,
+    is_personal: true,
+    journal_ref_id: 999888777
+  }
+];
+z.array(EsiTransactionSchema).parse(defaultTransactions);
+
+const defaultShip: EsiShip = {
+  ship_item_id: 1000000016991,
+  ship_name: "SPACESHIPS!!!",
+  ship_type_id: 1233
+};
+EsiShipSchema.parse(defaultShip);
+
+const defaultMail: EsiMailLabels = {
+  total_unread_count: 5,
+  labels: [
+    { label_id: 1, name: 'Inbox', unread_count: 3, color: '#ffffff' },
+    { label_id: 2, name: 'Corp', unread_count: 2, color: '#ff0000' }
+  ]
+};
+EsiMailLabelsSchema.parse(defaultMail);
+
+const defaultContracts: EsiContract[] = [
+  {
+    contract_id: 10001,
+    issuer_id: 90000001,
+    issuer_corporation_id: 1000001,
+    type: 'item_exchange',
+    status: 'outstanding',
+    availability: 'public',
+    date_issued: new Date(nowMs - TWO_DAYS * msPerDay).toISOString(),
+    date_expired: new Date(nowMs + TEN_DAYS * msPerDay).toISOString(),
+    price: 15000000,
+    volume: 100
+  }
+];
+z.array(EsiContractSchema).parse(defaultContracts);
+
+// ==========================================
 // ASSEMBLE FLEET
 // ==========================================
 export const mockFleet: MockCharacter[] = [
@@ -142,11 +230,17 @@ export const mockFleet: MockCharacter[] = [
     isk: 1500000000,
     totalSp: 50000000,
     location: { solar_system_id: 30000142 },
+    ship: defaultShip,
     skills: greenSkills,
     charSkills: greenCharSkills,
     industry: greenIndustry,
     planets: greenPlanets,
-    planetLayouts: greenLayouts
+    planetLayouts: greenLayouts,
+    clones: defaultClones,
+    fatigue: defaultFatigue,
+    transactions: defaultTransactions,
+    mail: defaultMail,
+    contracts: defaultContracts
   },
   {
     characterId: "90000002",
@@ -154,11 +248,17 @@ export const mockFleet: MockCharacter[] = [
     isk: 25000000,
     totalSp: 5000000,
     location: { solar_system_id: 30000142 },
+    ship: defaultShip,
     skills: redSkills,
     charSkills: greenCharSkills,
     industry: greenIndustry,
     planets: greenPlanets,
-    planetLayouts: greenLayouts
+    planetLayouts: greenLayouts,
+    clones: defaultClones,
+    fatigue: defaultFatigue,
+    transactions: defaultTransactions,
+    mail: defaultMail,
+    contracts: defaultContracts
   },
   {
     characterId: "90000003",
@@ -166,11 +266,17 @@ export const mockFleet: MockCharacter[] = [
     isk: 300000000,
     totalSp: 40000000,
     location: { solar_system_id: 30000142 },
+    ship: defaultShip,
     skills: greenSkills,
     charSkills: greenCharSkills,
     industry: greenIndustry,
     planets: greenPlanets,
-    planetLayouts: redLayouts
+    planetLayouts: redLayouts,
+    clones: defaultClones,
+    fatigue: defaultFatigue,
+    transactions: defaultTransactions,
+    mail: defaultMail,
+    contracts: defaultContracts
   },
   {
     characterId: "90000004",
@@ -178,10 +284,16 @@ export const mockFleet: MockCharacter[] = [
     isk: 8000000000,
     totalSp: 150000000,
     location: { solar_system_id: 30000142 },
+    ship: defaultShip,
     skills: greenSkills,
     charSkills: redIndustryCharSkills,
     industry: greenIndustry, // 1 active job, but 6 slots available => RED
     planets: greenPlanets,
-    planetLayouts: greenLayouts
+    planetLayouts: greenLayouts,
+    clones: defaultClones,
+    fatigue: defaultFatigue,
+    transactions: defaultTransactions,
+    mail: defaultMail,
+    contracts: defaultContracts
   }
 ];
