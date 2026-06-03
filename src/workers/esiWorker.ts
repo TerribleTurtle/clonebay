@@ -100,6 +100,11 @@ async function pollData(): Promise<void> {
       const contractsPromise = esiService.getContracts(charId, accessToken);
       const marketOrdersPromise = esiService.getMarketOrders(charId, accessToken);
 
+      // Architectural Reasoning: We group these 11 ESI calls into a single Promise.all block
+      // to ensure an atomic state update for the core UI metrics. Rather than dispatching 11
+      // separate 'ESI_METRICS_UPDATE' events (which would cause rapid UI thrashing/re-rendering),
+      // we await all necessary data and process it together. This minimizes state fragmentation,
+      // guarantees a coherent snapshot of the character's status, and reduces React re-renders.
       const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise, marketOrdersPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult]) => {
         await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult, isMockMode, (msg) => self.postMessage(msg));
       }).catch(err => {

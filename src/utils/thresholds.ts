@@ -20,6 +20,10 @@ import { EsiSkillQueue, EsiIndustryJob } from '../schemas/esi';
  * - RED: Queue is empty OR < 24 hours remaining.
  * - YELLOW: Queue has 1 to 3 days remaining.
  * - GREEN: Queue has > 3 days remaining.
+ *
+ * @param queue - An array of EsiSkillQueue objects representing the character's skill training queue.
+ * @param nowMs - The current time in milliseconds since the UNIX epoch.
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for the skill queue.
  */
 export function calculateSkillQueueStatus(
   queue: EsiSkillQueue[],
@@ -68,6 +72,10 @@ export interface PiPinState {
  * - RED: Extractors stopped, OR Storage 100% full, OR unrouted materials detected.
  * - YELLOW: Extractor cycle ending < 12 hours, OR Storage > 85% full.
  * - GREEN: Extractors active > 12 hours remaining, Storage nominal.
+ *
+ * @param pins - An array of PiPinState objects representing the character's PI pins.
+ * @param nowMs - The current time in milliseconds since the UNIX epoch.
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for the PI status.
  */
 export function calculatePiStatus(
   pins: PiPinState[],
@@ -86,6 +94,10 @@ export function calculatePiStatus(
     }
 
     if (pin.isStorage && pin.storageCapacity !== undefined && pin.storageUsed !== undefined) {
+      // Architectural Note: Zero Capacity Blackhole
+      // Sometimes the ESI API reports a storage capacity of 0 but with > 0 used capacity.
+      // This is an invalid/buggy state from the ESI side, acting as a 'Blackhole'.
+      // We flag this as 'Red' immediately.
       if (pin.storageCapacity === 0 && pin.storageUsed > 0) {
         return 'Red';
       } else if (pin.storageCapacity > 0) {
@@ -126,6 +138,11 @@ export function calculatePiStatus(
  * - RED: Job is Finished (waiting for delivery) OR an available slot is Empty.
  * - YELLOW: Job completing < 12 hours.
  * - GREEN: All jobs running > 12 hours remaining.
+ *
+ * @param jobs - An array of EsiIndustryJob objects representing the character's industry jobs.
+ * @param maxJobs - The maximum number of industry jobs the character can run.
+ * @param nowMs - The current time in milliseconds since the UNIX epoch.
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for the industry jobs.
  */
 export function calculateIndustryStatus(
   jobs: EsiIndustryJob[],
@@ -136,6 +153,12 @@ export function calculateIndustryStatus(
     return maxJobs > 0 ? 'Red' : 'Green';
   }
 
+  // Architectural Note: Industry Job Filtering
+  // We only care about jobs that are currently occupying an industry slot or need player action.
+  // 'active' jobs are currently running and taking up a slot.
+  // 'paused' jobs are halted (e.g. facility offline) but still occupy a slot.
+  // 'ready' jobs are finished and waiting for delivery; they must be delivered by the player to free the slot.
+  // Other states like 'delivered' or 'cancelled' are historical and ignored.
   const relevantJobs = jobs.filter(
     (j) => j.status === 'active' || j.status === 'paused' || j.status === 'ready'
   );
@@ -176,6 +199,10 @@ export function calculateIndustryStatus(
  * Calculates the status of a character's wallet.
  * - RED: ISK is below the minimum threshold (default 100M).
  * - GREEN: ISK is above the threshold.
+ *
+ * @param isk - The character's current ISK balance, or null/undefined if unknown.
+ * @param minThreshold - The minimum ISK threshold for 'Red' status (defaults to 100_000_000).
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for the wallet.
  */
 export function calculateWalletStatus(
   isk?: number | null,
@@ -190,6 +217,9 @@ export function calculateWalletStatus(
  * Calculates the status of a character's mail.
  * - YELLOW: Unread mail > 0.
  * - GREEN: No unread mail.
+ *
+ * @param unreadCount - The number of unread mails, or null/undefined if unknown.
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for mail.
  */
 export function calculateMailStatus(unreadCount?: number | null): DashboardStatus {
   if (unreadCount === undefined || unreadCount === null) return 'Green';
@@ -201,6 +231,10 @@ export function calculateMailStatus(unreadCount?: number | null): DashboardStatu
  * Calculates the status of a character's jump clone cooldown.
  * - YELLOW: Cooldown is active (last jump < 24 hours ago).
  * - GREEN: Jump clone ready.
+ *
+ * @param lastJumpDate - An ISO-8601 string of the character's last jump date, or null/undefined if unknown.
+ * @param nowMs - The current time in milliseconds since the UNIX epoch.
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for jump clones.
  */
 export function calculateCloneStatus(
   lastJumpDate: string | null | undefined,
@@ -222,6 +256,10 @@ export function calculateCloneStatus(
  * Calculates the status of a character's location.
  * - YELLOW: Undocked (no station_id or structure_id).
  * - GREEN: Docked.
+ *
+ * @param stationId - The station ID the character is docked at, or null/undefined if undocked.
+ * @param structureId - The structure ID the character is docked at, or null/undefined if undocked.
+ * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for character location.
  */
 export function calculateLocationStatus(
   stationId?: number | null,

@@ -33,17 +33,78 @@ export interface CharacterStatus {
   marketOrders?: EsiMarketOrder[];
 }
 
+/**
+ * Represents the global application state for managing character data.
+ */
 export interface CharacterStoreState {
+  /**
+   * A dictionary containing the status of all characters, keyed by character ID.
+   */
   characters: Record<string, CharacterStatus>;
+  
+  /**
+   * The timestamp of the last successful polling operation, or null if never polled.
+   */
   lastPolled: number | null;
+  
+  /**
+   * Updates the status of a specific character with partial payload data.
+   * 
+   * @param id - The unique character ID.
+   * @param payload - Partial character status updates to apply.
+   */
   updateCharacterStatus: (id: string, payload: Partial<CharacterStatus>) => void;
+  
+  /**
+   * Updates the status of multiple characters simultaneously.
+   * 
+   * @param updates - A record mapping character IDs to their partial status updates.
+   */
   updateMultipleCharacters: (updates: Record<string, Partial<CharacterStatus>>) => void;
+  
+  /**
+   * Removes a character from the store and underlying auth storage.
+   * 
+   * @param id - The character ID to remove.
+   */
   removeCharacter: (id: string) => Promise<void>;
+  
+  /**
+   * Sets the timestamp for the last polling operation.
+   * 
+   * @param timestamp - The exact time in milliseconds since the epoch.
+   */
   setLastPolled: (timestamp: number) => void;
+  
+  /**
+   * Sets all tracking lights (skills, industry, etc.) to 'Offline' for all characters.
+   */
   setAllOffline: () => void;
+  
+  /**
+   * Clears the entire character state, removing all characters.
+   */
   clearAll: () => void;
+  
+  /**
+   * Toggles the mock mode state in localStorage and reloads the application.
+   * 
+   * @param currentMode - The current mock mode state.
+   */
   toggleMockMode: (currentMode: boolean) => void;
+  
+  /**
+   * Removes a character from the store and forces a full application reload.
+   * 
+   * @param id - The character ID to remove.
+   */
   removeAndReload: (id: string) => Promise<void>;
+  
+  /**
+   * Initializes and retrieves the mock mode state from localStorage.
+   * 
+   * @returns True if mock mode is active, false otherwise.
+   */
   initMockMode: () => boolean;
 }
 
