@@ -1,4 +1,5 @@
 import { getCachedEsiData, setCachedEsiData } from './esiCache';
+import { z } from 'zod';
 
 const DOWNTIME_HOUR_UTC = 11;
 const DOWNTIME_DURATION_MINUTES = 15;
@@ -11,10 +12,11 @@ const HTTP_STATUS_TOO_MANY_REQUESTS = 429;
 const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 const BACKOFF_BASE = 2;
 
-export interface EsiRequestOptions {
+export interface EsiRequestOptions<T> {
   url: string;
   accessToken: string;
   characterId: string;
+  schema: z.ZodSchema<T>;
 }
 
 export interface EsiResponse<T> {
@@ -46,7 +48,7 @@ export function resetGlobalPauseForTests(): void {
   pauseUntil = 0;
 }
 
-export async function fetchEsi<T>(options: EsiRequestOptions, retries: number = DEFAULT_RETRIES): Promise<EsiResponse<T>> {
+export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number = DEFAULT_RETRIES): Promise<EsiResponse<T>> {
   if (checkDailyDowntime()) {
     console.warn("ESI is offline for daily downtime (11:00-11:15 UTC).");
     return { data: null, status: 'Offline', cached: false };
@@ -111,7 +113,8 @@ export async function fetchEsi<T>(options: EsiRequestOptions, retries: number = 
       throw new Error(`ESI request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    const data: T = await response.json();
+    const rawData = await response.json();
+    const data: T = options.schema.parse(rawData);
     const eTag = response.headers.get('ETag');
     const expiresHeader = response.headers.get('Expires');
 

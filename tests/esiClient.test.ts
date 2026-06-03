@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { z } from 'zod';
 import { fetchEsi, checkDailyDowntime, resetGlobalPauseForTests } from '../src/utils/esiClient';
 
 const MOCK_YEAR = 2023;
@@ -32,7 +33,8 @@ describe('ESI Client', () => {
     const result = await fetchEsi({
       url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123'
+      characterId: '123',
+      schema: z.unknown()
     });
 
     expect(result.status).toBe('Offline');
@@ -57,7 +59,8 @@ describe('ESI Client', () => {
     const result1 = await fetchEsi({
       url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123'
+      characterId: '123',
+      schema: z.unknown()
     });
 
     expect(result1.status).toBe('Green');
@@ -66,7 +69,8 @@ describe('ESI Client', () => {
     const result2 = await fetchEsi({
       url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123'
+      characterId: '123',
+      schema: z.unknown()
     });
 
     expect(result2.status).toBe('Offline');

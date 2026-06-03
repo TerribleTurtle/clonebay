@@ -1,5 +1,7 @@
 import { get } from 'idb-keyval';
 import { fetchEsi } from '../utils/esiClient';
+import { EsiSkillQueueSchema, EsiIndustryJobSchema } from '../schemas/esi';
+import { z } from 'zod';
 
 const POLLING_INTERVAL_SECONDS = 60;
 const MS_PER_SECOND = 1000;
@@ -68,10 +70,11 @@ async function pollData() {
       // 1. Fetch Skill Queue
       try {
         const skillUrl = `https://esi.evetech.net/latest/characters/${charId}/skillqueue/`;
-        const result = await fetchEsi<EsiSkillQueueItem[]>({
+        const result = await fetchEsi({
           url: skillUrl,
           accessToken,
-          characterId: charId
+          characterId: charId,
+          schema: z.array(EsiSkillQueueSchema)
         });
         
         self.postMessage({
@@ -99,10 +102,11 @@ async function pollData() {
       // 2. Fetch Industry Jobs
       try {
         const industryUrl = `https://esi.evetech.net/latest/characters/${charId}/industry/jobs/`;
-        const result = await fetchEsi<EsiIndustryJob[]>({
+        const result = await fetchEsi({
           url: industryUrl,
           accessToken,
-          characterId: charId
+          characterId: charId,
+          schema: z.array(EsiIndustryJobSchema)
         });
         
         self.postMessage({

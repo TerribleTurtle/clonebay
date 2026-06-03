@@ -3,8 +3,7 @@ import '@testing-library/jest-dom';
 import { beforeAll, afterEach, afterAll } from 'vitest';
 import { setupServer } from 'msw/node';
 
-// Placeholder for MSW request handlers (to be populated when building the API clients)
-export const handlers = [];
+import { handlers } from './handlers';
 
 export const server = setupServer(...handlers);
 
