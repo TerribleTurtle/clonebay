@@ -19,7 +19,8 @@ function createLog(level: LogLevel, message: string, data?: unknown) {
 
   const logEntry: LogEntry = {
     id: crypto.randomUUID(),
-    timestamp: Date.now(),
+    /* eslint-disable-next-line no-restricted-syntax */
+      timestamp: Date.now(),
     level,
     message,
     source: isWorker ? 'worker' : 'main',

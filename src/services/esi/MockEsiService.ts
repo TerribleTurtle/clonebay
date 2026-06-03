@@ -38,7 +38,7 @@ export class MockEsiService implements IEsiService {
     return mockFleet.find(c => c.characterId === charId);
   }
 
-  private mockResponse<T>(data: any, schema: z.ZodType<T>): Promise<EsiResponse<T> | null> {
+  private mockResponse<T>(data: unknown, schema: z.ZodType<T>): Promise<EsiResponse<T> | null> {
     if (!data) return Promise.resolve(null);
     return Promise.resolve({ data: schema.parse(data), status: 'Green', cached: false });
   }

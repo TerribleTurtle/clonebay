@@ -18,7 +18,7 @@ export function processIndustry(
     const maxJobs = 1 + massProd + advMassProd;
 
     const manufacturingJobs = industryResult.data.filter(job => job.activity_id === 1);
-    const status = calculateIndustryStatus(manufacturingJobs, maxJobs);
+    const status = calculateIndustryStatus(manufacturingJobs, maxJobs, Date.now());
     
     postMessage({
       type: 'ESI_DATA_UPDATE',

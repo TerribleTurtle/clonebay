@@ -8,7 +8,7 @@ export function processSkills(
   postMessage: (msg: unknown) => void
 ) {
   if (skillsResult && skillsResult.data) {
-    const status = calculateSkillQueueStatus(skillsResult.data);
+    const status = calculateSkillQueueStatus(skillsResult.data, Date.now());
     postMessage({
       type: 'ESI_DATA_UPDATE',
       payload: { characterId: charId, dataType: 'skills', status, data: skillsResult.data }

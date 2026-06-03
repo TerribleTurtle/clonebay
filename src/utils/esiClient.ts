@@ -7,7 +7,10 @@ import { checkDailyDowntime, getAdjustedNow, isPaused, updateClockDrift, checkAn
 import { refreshAccessToken } from './esiAuth';
 
 const DEFAULT_RETRIES = 3;
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_MULTIPLE_CHOICES = 300;
 const HTTP_STATUS_NOT_MODIFIED = 304;
+const HTTP_STATUS_BAD_REQUEST = 400;
 const HTTP_STATUS_UNAUTHORIZED = 401;
 const HTTP_STATUS_TOO_MANY_REQUESTS = 429;
 const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
@@ -39,11 +42,11 @@ export const esiDowntimeInterceptor: HttpInterceptor = async (req, next) => {
 };
 
 export const esiCacheInterceptor: HttpInterceptor = async (req, next) => {
-  const cachedEntry = await getCachedEsiData<any>(req.url);
+  const cachedEntry = await getCachedEsiData<unknown>(req.url, getAdjustedNow());
   
   if (cachedEntry !== null) {
-    if (getAdjustedNow().getTime() < cachedEntry.expires) {
-      return { status: 200, headers: new Headers(), data: cachedEntry.data, cached: true, esiStatus: 'Green' };
+    if (getAdjustedNow() < cachedEntry.expires) {
+      return { status: HTTP_STATUS_OK, headers: new Headers(), data: cachedEntry.data, cached: true, esiStatus: 'Green' };
     }
     if (cachedEntry.eTag !== null) {
       req.headers = { ...req.headers, 'If-None-Match': cachedEntry.eTag };
@@ -54,14 +57,14 @@ export const esiCacheInterceptor: HttpInterceptor = async (req, next) => {
 
   if (response.status === HTTP_STATUS_NOT_MODIFIED && cachedEntry !== null) {
     const expiresHeader = response.headers.get('Expires');
-    await setCachedEsiData(req.url, cachedEntry.data, cachedEntry.eTag, expiresHeader);
-    return { ...response, status: 200, data: cachedEntry.data, cached: true, esiStatus: 'Green' };
+    await setCachedEsiData(req.url, cachedEntry.data, cachedEntry.eTag, expiresHeader, getAdjustedNow());
+    return { ...response, status: HTTP_STATUS_OK, data: cachedEntry.data, cached: true, esiStatus: 'Green' };
   }
 
-  if (response.status >= 200 && response.status < 300) {
+  if (response.status >= HTTP_STATUS_OK && response.status < HTTP_STATUS_MULTIPLE_CHOICES) {
     const eTag = response.headers.get('ETag');
     const expiresHeader = response.headers.get('Expires');
-    await setCachedEsiData(req.url, response.data, eTag, expiresHeader);
+    await setCachedEsiData(req.url, response.data, eTag, expiresHeader, getAdjustedNow());
   }
 
   return response;
@@ -120,7 +123,7 @@ export const esiAuthInterceptor: HttpInterceptor = async (req, next) => {
 export const esiRetryInterceptor: HttpInterceptor = async (req, next) => {
   const maxRetries = req.context.retries ?? DEFAULT_RETRIES;
   
-  const attempt = async (retriesLeft: number): Promise<any> => {
+  const attempt = async (retriesLeft: number): Promise<import('./http/httpClient').HttpResponse<unknown>> => {
     const response = await next(req);
     
     if (response.status === HTTP_STATUS_TOO_MANY_REQUESTS || response.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR) {
@@ -134,7 +137,7 @@ export const esiRetryInterceptor: HttpInterceptor = async (req, next) => {
       throw new Error(`ESI request failed with status ${response.status} after retries.`);
     }
 
-    if (response.status >= 400 && response.status !== 401) {
+    if (response.status >= HTTP_STATUS_BAD_REQUEST && response.status !== HTTP_STATUS_UNAUTHORIZED) {
       throw new Error(`ESI request failed with status ${response.status}`);
     }
 
@@ -147,7 +150,7 @@ export const esiRetryInterceptor: HttpInterceptor = async (req, next) => {
 export const esiValidationInterceptor: HttpInterceptor = async (req, next) => {
   const response = await next(req);
   
-  if (response.status === 200 && response.data && req.context.schema) {
+  if (response.status === HTTP_STATUS_OK && response.data && req.context.schema) {
     try {
       response.data = req.context.schema.parse(response.data);
     } catch (e) {
@@ -180,12 +183,12 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
         retries
       }
     };
-    const res = await esiClient.request(req);
-    if (res.status === 304) {
+    const res = await esiClient.request<T>(req);
+    if (res.status === HTTP_STATUS_NOT_MODIFIED) {
       throw new Error('ESI request failed with status 304: Not Modified');
     }
     return {
-      data: res.data as T,
+      data: res.data,
       status: res.esiStatus,
       cached: res.cached
     };

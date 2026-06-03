@@ -154,10 +154,10 @@ export class WorkerManager {
     
     if (!this.isRunning) return;
 
-    // eslint-disable-next-line no-magic-numbers
-    const backoff = Math.min(this.MAX_DELAY_MS, this.BASE_DELAY_MS * (2 ** this.retryAttempt));
-    // eslint-disable-next-line no-magic-numbers
-    const jitter = Math.random() * 1000;
+    const EXPONENTIAL_BASE = 2;
+    const backoff = Math.min(this.MAX_DELAY_MS, this.BASE_DELAY_MS * (EXPONENTIAL_BASE ** this.retryAttempt));
+    /* eslint-disable-next-line no-restricted-syntax */
+    const jitter = Math.random() * 1000; // eslint-disable-line no-magic-numbers
     const delay = backoff + jitter;
     
     this.retryAttempt++;
