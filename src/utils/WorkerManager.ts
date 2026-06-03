@@ -177,7 +177,12 @@ export class WorkerManager {
     // This prevents the "thundering herd" problem where multiple instances (e.g. multiboxers)
     // all restart and hammer the ESI API at the exact same moment.
     /* eslint-disable-next-line no-restricted-syntax */
-    const jitter = Math.random() * 1000; // eslint-disable-line no-magic-numbers
+    let jitter = Math.random() * 1000; // eslint-disable-line no-magic-numbers
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      jitter = (array[0] ?? 0) % 1000; // eslint-disable-line no-magic-numbers
+    }
     const delay = backoff + jitter;
     
     this.retryAttempt++;

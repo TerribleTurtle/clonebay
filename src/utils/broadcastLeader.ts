@@ -36,7 +36,10 @@ export class BroadcastLeader<T> {
     // crypto.randomUUID() requires a secure context. Fallback to Math.random if needed.
     this.tabId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
       ? crypto.randomUUID()
-      : Math.random().toString(RANDOM_STRING_RADIX).substring(RANDOM_STRING_START_INDEX, RANDOM_STRING_END_INDEX);
+      : typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function'
+        // eslint-disable-next-line no-magic-numbers
+        ? Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('')
+        : Math.random().toString(RANDOM_STRING_RADIX).substring(RANDOM_STRING_START_INDEX, RANDOM_STRING_END_INDEX);
 
     if (typeof BroadcastChannel !== 'undefined') {
       this.channel = new BroadcastChannel('eve_dash_election');
@@ -51,7 +54,10 @@ export class BroadcastLeader<T> {
     if (msg.type !== 'DATA_UPDATE' && msg.tabId === this.tabId) {
       this.tabId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
-        : Math.random().toString(RANDOM_STRING_RADIX).substring(RANDOM_STRING_START_INDEX, RANDOM_STRING_END_INDEX);
+        : typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function'
+          // eslint-disable-next-line no-magic-numbers
+          ? Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('')
+          : Math.random().toString(RANDOM_STRING_RADIX).substring(RANDOM_STRING_START_INDEX, RANDOM_STRING_END_INDEX);
       this.startElection();
       return;
     }
@@ -151,7 +157,12 @@ export class BroadcastLeader<T> {
       this.masterTimeout = null;
       // Master is dead (heartbeats stopped), hold a new election
       // Add a small random jitter to prevent election storms
-      const jitter = Math.floor(Math.random() * MAX_JITTER_MS);
+      let jitter = Math.floor(Math.random() * MAX_JITTER_MS);
+      if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        jitter = (array[0] ?? 0) % MAX_JITTER_MS;
+      }
       this.jitterTimeout = setTimeout(() => {
         this.jitterTimeout = null;
         this.startElection();
