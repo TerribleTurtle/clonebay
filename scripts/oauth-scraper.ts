@@ -10,7 +10,7 @@ dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 
 const EVE_CLIENT_ID: string | undefined = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
 const EVE_CALLBACK_URL: string | undefined = process.env['NEXT_PUBLIC_EVE_CALLBACK_URL'];
-// eslint-disable-next-line no-restricted-syntax
+ 
 const EVE_CLIENT_SECRET: string | undefined = process.env['EVE_CLIENT_SECRET'];
 
 const SCOPES: string = 'esi-skills.read_skills.v1 esi-skills.read_skillqueue.v1 esi-industry.read_character_jobs.v1 esi-planets.manage_planets.v1 esi-planets.read_customs_offices.v1';

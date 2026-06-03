@@ -1,9 +1,9 @@
 import React from 'react';
-import { CharacterStatus, useCharacterStore, StatusLight } from '../store/useCharacterStore';
+import { useShallow } from 'zustand/react/shallow';
+import { useCharacterStore, StatusLight } from '../store/useCharacterStore';
 
 interface CharacterRowProps {
   characterId: string;
-  status: CharacterStatus;
 }
 const getStatusColor = (s: string) => {
   switch (s) {
@@ -21,7 +21,8 @@ const StatusPill: React.FC<{ label: string; status: StatusLight }> = ({ label, s
   </div>
 );
 
-export const CharacterRow: React.FC<CharacterRowProps> = ({ characterId, status }) => {
+export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ characterId }) => {
+  const status = useCharacterStore(useShallow((state) => state.characters[characterId]));
   const handleRemove = async () => {
     try {
       await useCharacterStore.getState().removeCharacter(characterId);
@@ -31,6 +32,8 @@ export const CharacterRow: React.FC<CharacterRowProps> = ({ characterId, status 
       throw error;
     }
   };
+
+  if (!status) return null;
 
   const displayName = status.name || characterId;
   const locationText = status.locationName || 'UNKNOWN SYSTEM';
@@ -70,4 +73,6 @@ export const CharacterRow: React.FC<CharacterRowProps> = ({ characterId, status 
       </div>
     </div>
   );
-};
+});
+
+CharacterRow.displayName = 'CharacterRow';

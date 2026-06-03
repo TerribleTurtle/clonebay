@@ -11,7 +11,7 @@ async function checkEsiStatus() {
     
     const data = await response.json();
     console.log("ESI Server Status Response:");
-    // eslint-disable-next-line no-magic-numbers
+     
     console.log(JSON.stringify(data, null, 2));
   } catch (error) {
     console.error("Failed to ping ESI Server Status:", error);
