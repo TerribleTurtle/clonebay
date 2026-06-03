@@ -1,5 +1,12 @@
 import { get, update, clear as idbClear } from "idb-keyval";
 
+export class StorageError extends Error {
+  constructor(message: string, public originalError?: unknown) {
+    super(message);
+    this.name = 'StorageError';
+  }
+}
+
 export interface CharacterAuth {
   accessToken: string;
   refreshToken: string;
@@ -15,15 +22,23 @@ const AUTH_STORE_KEY = "eve_auth_tokens";
  * Retrieves the full dictionary of authenticated characters.
  */
 export async function getAuthDictionary(): Promise<AuthDictionary> {
-  const data = await get<AuthDictionary>(AUTH_STORE_KEY);
-  return data || {};
+  try {
+    const data = await get<AuthDictionary>(AUTH_STORE_KEY);
+    return data || {};
+  } catch (error) {
+    throw new StorageError("Failed to get auth dictionary from storage", error);
+  }
 }
 
 /**
  * Overwrites the entire auth dictionary.
  */
 export async function setAuthDictionary(dict: AuthDictionary): Promise<void> {
-  await update<AuthDictionary>(AUTH_STORE_KEY, () => dict);
+  try {
+    await update<AuthDictionary>(AUTH_STORE_KEY, () => dict);
+  } catch (error) {
+    throw new StorageError("Failed to set auth dictionary in storage", error);
+  }
 }
 
 /**
@@ -33,22 +48,30 @@ export async function addOrUpdateCharacter(
   characterId: string,
   authData: CharacterAuth
 ): Promise<void> {
-  await update<AuthDictionary>(AUTH_STORE_KEY, (val) => {
-    const dict = val || {};
-    dict[characterId] = authData;
-    return dict;
-  });
+  try {
+    await update<AuthDictionary>(AUTH_STORE_KEY, (val) => {
+      const dict = val || {};
+      dict[characterId] = authData;
+      return dict;
+    });
+  } catch (error) {
+    throw new StorageError(`Failed to add or update character ${characterId} in storage`, error);
+  }
 }
 
 /**
  * Removes a character from the auth dictionary.
  */
 export async function removeCharacter(characterId: string): Promise<void> {
-  await update<AuthDictionary>(AUTH_STORE_KEY, (val) => {
-    const dict = val || {};
-    delete dict[characterId];
-    return dict;
-  });
+  try {
+    await update<AuthDictionary>(AUTH_STORE_KEY, (val) => {
+      const dict = val || {};
+      delete dict[characterId];
+      return dict;
+    });
+  } catch (error) {
+    throw new StorageError(`Failed to remove character ${characterId} from storage`, error);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -93,5 +116,9 @@ export function clearPkceData(): void {
  * Clears all auth data from IndexedDB.
  */
 export async function clearAuthDictionary(): Promise<void> {
-  await idbClear();
+  try {
+    await idbClear();
+  } catch (error) {
+    throw new StorageError("Failed to clear auth dictionary from storage", error);
+  }
 }

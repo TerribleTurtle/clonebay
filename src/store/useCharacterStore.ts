@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { logger } from '../utils/logger';
 import { removeCharacter as removeAuthCharacter } from '../utils/AuthRepository';
 
 import { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
@@ -56,7 +57,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
         try {
           await removeAuthCharacter(id);
         } catch (error) {
-          console.error(`Failed to remove token for ${id}:`, error);
+          logger.error(`Failed to remove token for ${id}:`, error);
           throw error;
         }
         set((state) => {
@@ -77,7 +78,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
           });
           window.location.reload();
         } catch (error) {
-          console.error(`Failed to remove character ${id}:`, error);
+          logger.error(`Failed to remove character ${id}:`, error);
           throw error;
         }
       },
@@ -88,7 +89,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
           set({ characters: {} }); // clearAll equivalent
           window.location.reload();
         } catch (error) {
-          console.error("Failed to write eve_mock_mode to localStorage:", error);
+          logger.error("Failed to write eve_mock_mode to localStorage:", error);
           throw error;
         }
       },
@@ -96,6 +97,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
         try {
           return localStorage.getItem('eve_mock_mode') === 'true';
         } catch (error) {
+          logger.error("Failed to read eve_mock_mode from localStorage:", error);
           console.error("Failed to read eve_mock_mode from localStorage:", error);
           return false;
         }
@@ -165,3 +167,4 @@ export const useCharacterStore = create<CharacterStoreState>()(
     }
   )
 );
+

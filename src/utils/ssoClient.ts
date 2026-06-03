@@ -1,4 +1,5 @@
 import { EveSsoTokenResponseSchema, EveSsoJwtPayloadSchema } from "@/schemas/auth";
+import { logger } from "./logger";
 
 const EXPECTED_JWT_PARTS = 3;
 const HEX_RADIX = 16;
@@ -19,19 +20,25 @@ export async function exchangeCodeForToken(
   clientId: string,
   redirectUri: string
 ): Promise<TokenExchangeResult> {
-  const response = await fetch("https://login.eveonline.com/v2/oauth/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      client_id: clientId,
-      code: code,
-      code_verifier: codeVerifier,
-      redirect_uri: redirectUri,
-    }),
-  });
+  let response;
+  try {
+    response = await fetch("https://login.eveonline.com/v2/oauth/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        client_id: clientId,
+        code: code,
+        code_verifier: codeVerifier,
+        redirect_uri: redirectUri,
+      }),
+    });
+  } catch (error) {
+    logger.error("Network error exchanging code for token", error);
+    throw new Error(`Network error exchanging code for token: ${error}`);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
