@@ -13,48 +13,52 @@ function CallbackLogic() {
 
   useEffect(() => {
     async function handleCallback() {
-      const code = searchParams.get("code");
-      const state = searchParams.get("state");
-      const savedState = sessionStorage.getItem("oauth_state");
-      const codeVerifier = sessionStorage.getItem("code_verifier");
+      try {
+        const code = searchParams.get("code");
+        const state = searchParams.get("state");
+        const savedState = sessionStorage.getItem("oauth_state");
+        const codeVerifier = sessionStorage.getItem("code_verifier");
 
-      if (!code || !state || !savedState || !codeVerifier) {
-        throw new Error("Missing callback parameters or session data.");
+        if (!code || !state || !savedState || !codeVerifier) {
+          throw new Error("Missing callback parameters or session data.");
+        }
+
+        if (state !== savedState) {
+          throw new Error("Invalid state parameter (CSRF mismatch).");
+        }
+
+        const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
+        if (!clientId) {
+          throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
+        }
+
+        const redirectUri = `${window.location.origin}/auth/callback`;
+
+        const { accessToken, refreshToken, expiresIn, characterId, characterName } = await exchangeCodeForToken(
+          code,
+          codeVerifier,
+          clientId,
+          redirectUri
+        );
+
+        const MS_PER_SECOND = 1000;
+        const SAFETY_BUFFER_SEC = 60;
+        const safeExpiresIn = Math.max(0, expiresIn - SAFETY_BUFFER_SEC);
+
+        // Store in IndexedDB dictionary
+        await addOrUpdateCharacter(characterId, {
+          accessToken,
+          refreshToken,
+          expiresAt: Date.now() + safeExpiresIn * MS_PER_SECOND,
+          characterName,
+        });
+
+        router.push("/");
+      } finally {
+        // Clean up session storage regardless of success or failure
+        sessionStorage.removeItem("oauth_state");
+        sessionStorage.removeItem("code_verifier");
       }
-
-      if (state !== savedState) {
-        throw new Error("Invalid state parameter (CSRF mismatch).");
-      }
-
-      const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
-      if (!clientId) {
-        throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
-      }
-
-      const redirectUri = `${window.location.origin}/auth/callback`;
-
-      const { accessToken, refreshToken, expiresIn, characterId, characterName } = await exchangeCodeForToken(
-        code,
-        codeVerifier,
-        clientId,
-        redirectUri
-      );
-
-      const MS_PER_SECOND = 1000;
-
-      // Store in IndexedDB dictionary
-      await addOrUpdateCharacter(characterId, {
-        accessToken,
-        refreshToken,
-        expiresAt: Date.now() + expiresIn * MS_PER_SECOND,
-        characterName,
-      });
-
-      // Clean up session storage
-      sessionStorage.removeItem("oauth_state");
-      sessionStorage.removeItem("code_verifier");
-
-      router.push("/");
     }
 
     handleCallback().catch((err) => {
