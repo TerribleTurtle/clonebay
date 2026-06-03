@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
-import Page from './page'
+import ComingSoonPage from './page'
 
-test('renders the landing page heading', () => {
-  render(<Page />)
-  expect(screen.getByRole('heading', { level: 1, name: 'EVE Online Unified Multibox Command Center' })).toBeDefined()
+test('renders the coming soon heading', () => {
+  render(<ComingSoonPage />)
+  expect(screen.getByText(/coming soon/i)).toBeDefined()
+  expect(screen.getByRole('status')).toBeDefined()
 })
