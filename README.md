@@ -27,7 +27,25 @@ A "Single Pane of Glass" read-only dashboard that monitors the passive and async
    npm install
    ```
 2. Set up your EVE Developer application at [developers.eveonline.com](https://developers.eveonline.com/).
-3. Create a `.env` file in the root directory with your `NEXT_PUBLIC_EVE_CLIENT_ID`.
+   - When creating your application, ensure you add the following **Callback URL**: `http://localhost:3006/auth/callback`
+   - You must request the following **OAuth Scopes**:
+     - `esi-skills.read_skillqueue.v1`
+     - `esi-skills.read_skills.v1`
+     - `esi-industry.read_character_jobs.v1`
+     - `esi-planets.manage_planets.v1`
+     - `esi-wallet.read_character_wallet.v1`
+     - `esi-location.read_location.v1`
+     - `esi-clones.read_clones.v1`
+     - `esi-characters.read_fatigue.v1`
+     - `esi-location.read_ship_type.v1`
+     - `esi-mail.read_mail.v1`
+     - `esi-contracts.read_character_contracts.v1`
+     - `esi-markets.read_character_orders.v1`
+3. Copy the `.env.example` file to create your own `.env` file in the root directory:
+   ```bash
+   cp .env.example .env
+   ```
+   Then add your `NEXT_PUBLIC_EVE_CLIENT_ID` to the `.env` file.
 4. Run the development server:
    ```bash
    npm run dev
