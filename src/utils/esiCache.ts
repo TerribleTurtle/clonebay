@@ -1,4 +1,5 @@
 import { get, set } from 'idb-keyval';
+import { logger } from './logger';
 
 const DEFAULT_CACHE_MINUTES = 5;
 const SECONDS_PER_MINUTE = 60;
@@ -21,7 +22,7 @@ export async function getCachedEsiData<T>(url: string, nowMs: number): Promise<C
     }
     return null;
   } catch (error) {
-    console.error(`Failed to get cache for ${url}`, error);
+    logger.error(`Failed to get cache for ${url}`, error);
     throw error;
   }
 }
@@ -50,7 +51,7 @@ export async function setCachedEsiData<T>(
     
     await set(url, entry);
   } catch (error) {
-    console.error(`Failed to set cache for ${url}`, error);
+    logger.error(`Failed to set cache for ${url}`, error);
     throw error;
   }
 }

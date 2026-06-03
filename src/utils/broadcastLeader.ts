@@ -8,6 +8,7 @@
  */
 
 import type { LeaderElectionCallbacks, ElectionMessage } from './broadcastTypes';
+import { logger } from './logger';
 
 const HEARTBEAT_INTERVAL_MS = 1000;
 const MASTER_TIMEOUT_DURATION_MS = 3000;
@@ -172,7 +173,7 @@ export class BroadcastLeader<T> {
 
   public broadcastEsiUpdate(payload: T) {
     if (this.state !== 'MASTER') {
-      console.error('BroadcastLeader: Attempted to broadcast data from a slave tab. Ignoring to prevent duplicate ESI requests.');
+      logger.error('BroadcastLeader: Attempted to broadcast data from a slave tab. Ignoring to prevent duplicate ESI requests.');
       return;
     }
     this.channel?.postMessage({ type: 'DATA_UPDATE', payload });

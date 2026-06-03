@@ -1,6 +1,7 @@
 import { get, set } from 'idb-keyval';
 import { z } from 'zod';
 import { EsiSdeTypeSchema, EsiSdeSystemSchema, type EsiSdeType } from '../schemas/esi';
+import { logger } from './logger';
 
 export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   const cacheKey = `sde_type_${typeId}`;
@@ -12,7 +13,13 @@ export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   }
 
   // Fetch from ESI if not cached
-  const response = await fetch(`https://esi.evetech.net/latest/universe/types/${typeId}/`);
+  let response;
+  try {
+    response = await fetch(`https://esi.evetech.net/latest/universe/types/${typeId}/`);
+  } catch (error) {
+    logger.error(`Network error fetching SDE type ${typeId}`, error);
+    throw new Error(`Network error fetching SDE type ${typeId}: ${error}`);
+  }
   if (!response.ok) {
     throw new Error(`Failed to fetch SDE type ${typeId}: ${response.statusText}`);
   }
@@ -36,7 +43,13 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
   }
 
   // Fetch from ESI if not cached
-  const response = await fetch(`https://esi.evetech.net/latest/universe/systems/${systemId}/`);
+  let response;
+  try {
+    response = await fetch(`https://esi.evetech.net/latest/universe/systems/${systemId}/`);
+  } catch (error) {
+    logger.error(`Network error fetching SDE system ${systemId}`, error);
+    throw new Error(`Network error fetching SDE system ${systemId}: ${error}`);
+  }
   if (!response.ok) {
     throw new Error(`Failed to fetch SDE system ${systemId}: ${response.statusText}`);
   }
