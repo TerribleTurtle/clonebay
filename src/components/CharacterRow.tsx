@@ -32,20 +32,27 @@ export const CharacterRow: React.FC<CharacterRowProps> = ({ characterName, statu
   };
 
   const displayName = status.name || characterName;
-  const iskFormatted = status.isk !== undefined ? `${status.isk.toLocaleString()} ISK` : '--- ISK';
-  const spFormatted = status.totalSp !== undefined ? `${status.totalSp.toLocaleString()} SP` : '--- SP';
   const locationText = status.locationName || 'UNKNOWN SYSTEM';
 
   return (
     <div className="flex flex-col xl:flex-row items-center justify-between border border-zinc-800 bg-zinc-900/30 p-3 hover:bg-zinc-900 transition-colors">
       <div className="flex flex-col w-full xl:w-auto mb-3 xl:mb-0">
-        <div className="text-amber-500 font-bold tracking-wide uppercase text-lg truncate">
+        <div className="text-amber-500 font-bold tracking-wide uppercase text-lg truncate flex items-baseline gap-2">
           {displayName}
+          <span className="text-xs text-zinc-500 font-mono tracking-wider ml-2">[{locationText}]</span>
         </div>
-        <div className="flex gap-4 text-xs text-zinc-400 font-mono mt-1 uppercase tracking-wider">
-          <span>{iskFormatted}</span>
-          <span>{spFormatted}</span>
-          <span className="text-zinc-500">[{locationText}]</span>
+        <div className="flex gap-4 text-xs font-mono mt-1">
+          <span className="text-zinc-400">
+            ISK: <span className="text-amber-500 font-bold">{status.isk?.toLocaleString() ?? '???'}</span>
+          </span>
+          <span className="text-zinc-400">
+            Allocated SP: <span className="text-emerald-500 font-bold">{status.totalSp?.toLocaleString() ?? '???'}</span>
+          </span>
+          {status.unallocatedSp !== undefined && status.unallocatedSp > 0 && (
+            <span className="text-zinc-400">
+              Unallocated: <span className="text-cyan-500 font-bold">{status.unallocatedSp.toLocaleString()}</span>
+            </span>
+          )}
         </div>
       </div>
       <div className="flex gap-2 w-full sm:w-auto tabular-nums">

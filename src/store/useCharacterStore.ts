@@ -7,6 +7,7 @@ export interface CharacterStatus {
   name?: string;
   isk?: number;
   totalSp?: number;
+  unallocatedSp?: number;
   locationId?: number;
   locationName?: string;
   stationId?: number;

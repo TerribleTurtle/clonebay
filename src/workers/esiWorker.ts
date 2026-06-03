@@ -178,10 +178,35 @@ async function pollData() {
         });
       }
 
-      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise]).then(async ([charSkillsResult, walletResult, locationResult]) => {
+      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, skillsPromise]).then(async ([charSkillsResult, walletResult, locationResult, skillsResult]) => {
         try {
           const mockChar = isMockMode ? mockFleet.find(c => c.characterId === charId) : null;
-          const totalSp = charSkillsResult?.data?.total_sp;
+          
+          let totalSp = charSkillsResult?.data?.total_sp;
+          const unallocatedSp = charSkillsResult?.data?.unallocated_sp || 0;
+          
+          if (totalSp !== undefined && skillsResult?.data) {
+            const now = Date.now();
+            const activeSkill = skillsResult.data.find(s => {
+              if (!s.start_date || !s.finish_date) return false;
+              const start = new Date(s.start_date).getTime();
+              const finish = new Date(s.finish_date).getTime();
+              return now >= start && now <= finish;
+            });
+
+            if (activeSkill && activeSkill.start_date && activeSkill.finish_date) {
+              const start = new Date(activeSkill.start_date).getTime();
+              const finish = new Date(activeSkill.finish_date).getTime();
+              const durationMs = finish - start;
+              const elapsedMs = now - start;
+              if (durationMs > 0 && elapsedMs > 0) {
+                const spToTrain = activeSkill.level_end_sp - activeSkill.training_start_sp;
+                const spPerMs = spToTrain / durationMs;
+                totalSp += Math.floor(elapsedMs * spPerMs);
+              }
+            }
+          }
+
           const isk = walletResult?.data;
           const locationId = locationResult?.data?.solar_system_id;
           const stationId = locationResult?.data?.station_id;
@@ -202,6 +227,7 @@ async function pollData() {
               name: tokenInfo?.characterName || mockChar?.characterName, 
               isk, 
               totalSp, 
+              unallocatedSp,
               locationId, 
               locationName,
               stationId,

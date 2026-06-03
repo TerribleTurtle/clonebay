@@ -39,6 +39,7 @@ export const Dashboard: React.FC = () => {
             name: payload.name,
             isk: payload.isk,
             totalSp: payload.totalSp,
+            unallocatedSp: payload.unallocatedSp,
             locationId: payload.locationId,
             locationName: payload.locationName,
             stationId: payload.stationId,
