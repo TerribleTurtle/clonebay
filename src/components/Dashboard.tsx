@@ -44,8 +44,8 @@ export const Dashboard: React.FC = () => {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-300 p-4 font-mono flex items-center justify-center">
-        <div className="text-amber-500 font-bold uppercase tracking-widest animate-pulse">
+      <div className="flex-1 flex items-center justify-center font-mono">
+        <div className="text-status-yellow font-bold uppercase tracking-widest animate-pulse">
           Initializing Neural Link...
         </div>
       </div>
@@ -53,31 +53,28 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 p-4 font-mono">
-      <header className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
-        <h1 className="text-xl text-amber-500 font-bold uppercase tracking-widest">EVE Fleet Command</h1>
-        <div className="flex gap-2">
-          {!isMockMode && (
-            <button 
-              type="button" 
-              onClick={() => window.location.href = '/auth/login'}
-              className="border border-emerald-700 bg-emerald-950/30 text-emerald-400 px-4 py-1 hover:bg-emerald-900/50 transition-colors uppercase text-xs tracking-wider"
-            >
-              Add Clone
-            </button>
-          )}
+    <div className="flex-1 flex flex-col font-mono text-zinc-300">
+      <div className="flex justify-end items-center mb-4 border-b border-eve-border pb-2 gap-2">
+        {!isMockMode && (
           <button 
             type="button" 
-            onClick={toggleMockMode}
-            className="border border-cyan-700 bg-cyan-950/30 text-cyan-400 px-4 py-1 hover:bg-cyan-900/50 transition-colors uppercase text-xs tracking-wider"
+            onClick={() => window.location.href = '/auth/login'}
+            className="border border-status-green bg-emerald-950/30 text-status-green px-4 py-1 hover:bg-emerald-900/50 transition-colors uppercase text-xs tracking-wider"
           >
-            Mock Mode: {isMockMode ? 'ON' : 'OFF'}
+            Add Clone
           </button>
-        </div>
-      </header>
+        )}
+        <button 
+          type="button" 
+          onClick={toggleMockMode}
+          className="border border-status-cyan bg-cyan-950/30 text-status-cyan px-4 py-1 hover:bg-cyan-900/50 transition-colors uppercase text-xs tracking-wider"
+        >
+          Mock Mode: {isMockMode ? 'ON' : 'OFF'}
+        </button>
+      </div>
       
       {characterIds.length === 0 ? (
-        <div className="border border-zinc-800 bg-zinc-900/50 p-6 text-center text-zinc-500">
+        <div className="border border-eve-border bg-eve-panel p-6 text-center text-zinc-500">
           NO CLONES CONNECTED. AWAITING NEURAL LINK.
         </div>
       ) : (

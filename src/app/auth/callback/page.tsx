@@ -69,7 +69,7 @@ function CallbackLogic() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 text-red-500">
+      <div className="flex flex-1 flex-col items-center justify-center text-status-red">
         <h1 className="mb-4 text-2xl font-bold">Authentication Failed</h1>
         <p className="max-w-md text-center">{error}</p>
       </div>
@@ -77,16 +77,16 @@ function CallbackLogic() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 text-zinc-50">
-      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-amber-500 border-t-transparent"></div>
-      <p>Verifying authentication...</p>
+    <div className="flex flex-1 flex-col items-center justify-center font-mono">
+      <div className="mb-4 h-8 w-8 animate-spin rounded-none border-t-2 border-l-2 border-status-cyan"></div>
+      <p className="uppercase tracking-widest text-sm text-status-cyan">Verifying Authorization Protocols...</p>
     </div>
   );
 }
 
 export default function CallbackPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-50"><p>Loading...</p></div>}>
+    <Suspense fallback={<div className="flex flex-1 items-center justify-center"><p>Loading...</p></div>}>
       <CallbackLogic />
     </Suspense>
   );

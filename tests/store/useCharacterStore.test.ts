@@ -22,20 +22,28 @@ describe('useCharacterStore', () => {
       skills: 'Green',
       industry: 'Offline',
       pi: 'Offline',
+      walletStatus: 'Offline',
+      mailStatus: 'Offline',
+      cloneStatus: 'Offline',
+      locationStatus: 'Offline'
     });
   });
 
   it('updates an existing character status without overwriting unprovided fields', () => {
-    const { updateCharacterStatus } = useCharacterStore.getState();
+    useCharacterStore.getState().updateCharacterStatus('char-1', { skills: 'Green', industry: 'Green', pi: 'Red' });
     
-    updateCharacterStatus('char-1', { skills: 'Green', industry: 'Yellow' });
-    updateCharacterStatus('char-1', { industry: 'Green', pi: 'Red' });
-    
+    // Now update just PI
+    useCharacterStore.getState().updateCharacterStatus('char-1', { pi: 'Green' });
+
     const state = useCharacterStore.getState();
     expect(state.characters['char-1']).toEqual({
       skills: 'Green',
       industry: 'Green',
-      pi: 'Red',
+      pi: 'Green',
+      walletStatus: 'Offline',
+      mailStatus: 'Offline',
+      cloneStatus: 'Offline',
+      locationStatus: 'Offline'
     });
   });
 });

@@ -25,7 +25,9 @@ import {
   EsiMailLabels,
   EsiContract,
   EsiMailLabelsSchema,
-  EsiContractSchema
+  EsiContractSchema,
+  EsiMarketOrder,
+  EsiMarketOrdersArraySchema
 } from '../schemas/esi';
 import { z } from 'zod';
 import { mockFleet } from '../utils/mockFleet';
@@ -115,6 +117,7 @@ async function pollData(): Promise<void> {
       let transactionsPromise: Promise<EsiResponse<EsiTransaction[]> | null>;
       let mailLabelsPromise: Promise<EsiResponse<EsiMailLabels> | null>;
       let contractsPromise: Promise<EsiResponse<EsiContract[]> | null>;
+      let marketOrdersPromise: Promise<EsiResponse<EsiMarketOrder[]> | null>;
 
       const safeFetch = <T>(url: string, schema: z.ZodType<T>, name: string): Promise<EsiResponse<T> | null> => 
         fetchEsi({ url, accessToken, characterId: charId, schema }).catch(error => {
@@ -137,6 +140,7 @@ async function pollData(): Promise<void> {
           transactionsPromise = Promise.resolve({ data: z.array(EsiTransactionSchema).parse(mockChar.transactions), status: 'Green', cached: false });
           mailLabelsPromise = Promise.resolve({ data: EsiMailLabelsSchema.parse(mockChar.mail), status: 'Green', cached: false });
           contractsPromise = Promise.resolve({ data: z.array(EsiContractSchema).parse(mockChar.contracts), status: 'Green', cached: false });
+          marketOrdersPromise = Promise.resolve({ data: EsiMarketOrdersArraySchema.parse(mockChar.marketOrders), status: 'Green', cached: false });
         } else {
           skillsPromise = Promise.resolve(null);
           charSkillsPromise = Promise.resolve(null);
@@ -150,6 +154,7 @@ async function pollData(): Promise<void> {
           transactionsPromise = Promise.resolve(null);
           mailLabelsPromise = Promise.resolve(null);
           contractsPromise = Promise.resolve(null);
+          marketOrdersPromise = Promise.resolve(null);
         }
       } else {
         skillsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/skillqueue/`, z.array(EsiSkillQueueSchema), 'skills');
@@ -164,10 +169,11 @@ async function pollData(): Promise<void> {
         transactionsPromise = safeFetch(`https://esi.evetech.net/v1/characters/${charId}/wallet/transactions/`, z.array(EsiTransactionSchema), 'transactions');
         mailLabelsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/mail/labels/`, EsiMailLabelsSchema, 'mail labels');
         contractsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/contracts/`, z.array(EsiContractSchema), 'contracts');
+        marketOrdersPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/orders/`, EsiMarketOrdersArraySchema, 'market orders');
       }
 
-      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult]) => {
-        await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, isMockMode, (msg) => self.postMessage(msg));
+      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise, marketOrdersPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult]) => {
+        await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult, isMockMode, (msg) => self.postMessage(msg));
       });
 
       const skillsProcessing = skillsPromise.then((skillsResult) => {

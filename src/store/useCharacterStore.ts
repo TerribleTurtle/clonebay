@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { get, set as idbSet } from 'idb-keyval';
 
-import { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract } from '../schemas/esi';
+import { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
 
 export type StatusLight = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
@@ -20,11 +20,16 @@ export interface CharacterStatus {
   skills: StatusLight;
   industry: StatusLight;
   pi: StatusLight;
+  walletStatus: StatusLight;
+  mailStatus: StatusLight;
+  cloneStatus: StatusLight;
+  locationStatus: StatusLight;
   clones?: EsiClones;
   fatigue?: EsiFatigue;
   transactions?: EsiTransaction[];
   mail?: EsiMailLabels;
   contracts?: EsiContract[];
+  marketOrders?: EsiMarketOrder[];
 }
 
 export interface CharacterStoreState {
@@ -68,7 +73,11 @@ export const useCharacterStore = create<CharacterStoreState>()(
               ...state.characters[id],
               skills: 'Offline', 
               industry: 'Offline', 
-              pi: 'Offline' 
+              pi: 'Offline',
+              walletStatus: 'Offline',
+              mailStatus: 'Offline',
+              cloneStatus: 'Offline',
+              locationStatus: 'Offline'
             };
           }
           return { characters: offlineChars };
@@ -77,7 +86,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
         set((state) => {
           const nextChars = { ...state.characters };
           for (const [id, payload] of Object.entries(updates)) {
-            const existing = nextChars[id] ?? { skills: 'Offline', industry: 'Offline', pi: 'Offline' };
+            const existing = nextChars[id] ?? { skills: 'Offline', industry: 'Offline', pi: 'Offline', walletStatus: 'Offline', mailStatus: 'Offline', cloneStatus: 'Offline', locationStatus: 'Offline' };
             nextChars[id] = { ...existing, ...payload };
           }
           return { characters: nextChars };
@@ -88,6 +97,10 @@ export const useCharacterStore = create<CharacterStoreState>()(
             skills: 'Offline',
             industry: 'Offline',
             pi: 'Offline',
+            walletStatus: 'Offline',
+            mailStatus: 'Offline',
+            cloneStatus: 'Offline',
+            locationStatus: 'Offline'
           };
           
           return {
@@ -107,7 +120,8 @@ export const useCharacterStore = create<CharacterStoreState>()(
         ...state,
         characters: Object.fromEntries(
           Object.entries(state.characters).map(([id, char]) => {
-            const { transactions, mail, contracts, ...rest } = char;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { transactions, mail, contracts, marketOrders, ...rest } = char;
             return [id, rest];
           })
         ),

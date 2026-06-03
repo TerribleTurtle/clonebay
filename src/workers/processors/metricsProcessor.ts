@@ -1,8 +1,9 @@
 import { fetchSdeSystem } from '../../utils/sdeClient';
 import { logger } from '../../utils/logger';
 import { mockFleet } from '../../utils/mockFleet';
-import type { EsiSkillQueue, EsiCharacterSkillsResponse, EsiWallet, EsiLocation, EsiShip, EsiClones, EsiFatigue, EsiTransaction, EsiMailLabels, EsiContract } from '../../schemas/esi';
+import type { EsiSkillQueue, EsiCharacterSkillsResponse, EsiWallet, EsiLocation, EsiShip, EsiClones, EsiFatigue, EsiTransaction, EsiMailLabels, EsiContract, EsiMarketOrder } from '../../schemas/esi';
 import type { EsiResponse } from '../../utils/esiClient';
+import { calculateWalletStatus, calculateMailStatus, calculateCloneStatus, calculateLocationStatus } from '../../utils/thresholds';
 
 export async function processMetrics(
   charId: string,
@@ -17,6 +18,7 @@ export async function processMetrics(
   transactionsResult: EsiResponse<EsiTransaction[]> | null | undefined,
   mailLabelsResult: EsiResponse<EsiMailLabels> | null | undefined,
   contractsResult: EsiResponse<EsiContract[]> | null | undefined,
+  marketOrdersResult: EsiResponse<EsiMarketOrder[]> | null | undefined,
   isMockMode: boolean,
   postMessage: (msg: unknown) => void
 ) {
@@ -68,6 +70,13 @@ export async function processMetrics(
     const transactions = transactionsResult?.data;
     const mail = mailLabelsResult?.data;
     const contracts = contractsResult?.data;
+    const marketOrders = marketOrdersResult?.data;
+
+    const now = Date.now();
+    const walletStatus = calculateWalletStatus(isk);
+    const locationStatus = calculateLocationStatus(stationId, structureId);
+    const mailStatus = calculateMailStatus(mail?.total_unread_count);
+    const cloneStatus = calculateCloneStatus(clones?.last_clone_jump_date, now);
 
     postMessage({ 
       type: 'ESI_METRICS_UPDATE', 
@@ -87,7 +96,12 @@ export async function processMetrics(
         fatigue,
         transactions,
         mail,
-        contracts
+        contracts,
+        marketOrders,
+        walletStatus,
+        locationStatus,
+        mailStatus,
+        cloneStatus
       } 
     });
   // eslint-disable-next-line no-restricted-syntax

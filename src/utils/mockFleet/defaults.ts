@@ -11,7 +11,8 @@ import {
   EsiMailLabels,
   EsiMailLabelsSchema,
   EsiContract,
-  EsiContractSchema
+  EsiContractSchema,
+  EsiMarketOrder
 } from '../../schemas/esi';
 import { nowMs, msPerHour, msPerDay, TWO_DAYS, TEN_DAYS, FIVE_HOURS, clone } from './constants';
 
@@ -47,3 +48,22 @@ export const defaultContracts: EsiContract[] = z.array(EsiContractSchema).parse(
 defaultContracts[0]!.date_issued = new Date(nowMs - TWO_DAYS * msPerDay).toISOString();
 defaultContracts[0]!.date_expired = new Date(nowMs + TEN_DAYS * msPerDay).toISOString();
 z.array(EsiContractSchema).parse(defaultContracts);
+
+export const defaultMarketOrders: EsiMarketOrder[] = [
+  {
+    duration: 30,
+    escrow: 45.6,
+    is_buy_order: true,
+    is_corporation: false,
+    issued: "2016-09-03T05:12:25Z",
+    location_id: 60003760,
+    min_volume: 1,
+    order_id: 123456789,
+    price: 33.3,
+    range: "station",
+    region_id: 10000002,
+    type_id: 34,
+    volume_remain: 4422,
+    volume_total: 123456
+  }
+];

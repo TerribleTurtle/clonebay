@@ -1,0 +1,20 @@
+# EVE-Dash
+> Eliminate alt-tab fatigue with this zero-backend EVE Online dashboard.
+
+## Overview
+EVE-Dash is an open-source, purely client-side SPA (Single Page Application) built with Next.js (App Router, static export), React, Tailwind CSS, and Zustand. It serves as a unified command center for multiboxers in the game EVE Online.
+
+## Architecture & Security (Zero-Backend)
+EVE-Dash uses a strict Zero-Trust, Zero-Backend architecture. 
+- It uses the EVE SSO PKCE OAuth flow, meaning no `client_secret` is ever required.
+- Access and Refresh tokens are stored strictly within the browser's IndexedDB (`idb-keyval`) using Web Crypto API encryption.
+- No central database or API exists. All data fetches to the EVE Swagger Interface (ESI) occur directly from the user's browser via Web Workers to prevent UI thread blocking.
+
+## Tech Stack
+- Framework: Next.js (Static Export)
+- Styling: Tailwind CSS (Strictly forbidding generic shadow/rounded classes in favor of an EVE NeoCom aesthetic)
+- State Management: Zustand
+- Data Validation: Zod (Strict schema validation for all ESI payloads)
+
+## Data Polling
+Polling logic (`esiWorker.ts`) handles HTTP 429 exponential backoffs and gracefully pauses during EVE Online's daily downtime (11:00-11:15 UTC).

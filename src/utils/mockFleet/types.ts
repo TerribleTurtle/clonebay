@@ -9,7 +9,8 @@ import {
   EsiTransaction,
   EsiShip,
   EsiMailLabels,
-  EsiContract
+  EsiContract,
+  EsiMarketOrder
 } from '../../schemas/esi';
 
 export interface MockCharacter {
@@ -29,4 +30,5 @@ export interface MockCharacter {
   transactions: EsiTransaction[];
   mail: EsiMailLabels;
   contracts: EsiContract[];
+  marketOrders: EsiMarketOrder[];
 }

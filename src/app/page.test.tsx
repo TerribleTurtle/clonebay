@@ -4,5 +4,5 @@ import Home from './page'
 
 test('renders the Dashboard', () => {
   render(<Home />)
-  expect(screen.getByText(/EVE Fleet Command/i)).toBeDefined()
+  expect(screen.getByText(/NO CLONES CONNECTED/i)).toBeDefined()
 })

@@ -7,6 +7,8 @@ export const HOURS_IN_DAY = 24;
 export const YELLOW_THRESHOLD_DAYS = 3;
 export const YELLOW_THRESHOLD_PI_PERCENT = 0.85;
 export const YELLOW_THRESHOLD_HOURS = 12;
+export const DEFAULT_WALLET_MIN_THRESHOLD = 100_000_000;
+export const DEFAULT_CLONE_COOLDOWN_HOURS = 24;
 
 const MS_IN_HOUR = MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 const MS_IN_DAY = HOURS_IN_DAY * MS_IN_HOUR;
@@ -169,3 +171,65 @@ export function calculateIndustryStatus(
 
   return 'Green';
 }
+
+/**
+ * Calculates the status of a character's wallet.
+ * - RED: ISK is below the minimum threshold (default 100M).
+ * - GREEN: ISK is above the threshold.
+ */
+export function calculateWalletStatus(
+  isk?: number | null,
+  minThreshold: number = DEFAULT_WALLET_MIN_THRESHOLD
+): DashboardStatus {
+  if (isk === undefined || isk === null) return 'Green'; // Default green if no data
+  if (isk < minThreshold) return 'Red';
+  return 'Green';
+}
+
+/**
+ * Calculates the status of a character's mail.
+ * - YELLOW: Unread mail > 0.
+ * - GREEN: No unread mail.
+ */
+export function calculateMailStatus(unreadCount?: number | null): DashboardStatus {
+  if (unreadCount === undefined || unreadCount === null) return 'Green';
+  if (unreadCount > 0) return 'Yellow';
+  return 'Green';
+}
+
+/**
+ * Calculates the status of a character's jump clone cooldown.
+ * - YELLOW: Cooldown is active (last jump < 24 hours ago).
+ * - GREEN: Jump clone ready.
+ */
+export function calculateCloneStatus(
+  lastJumpDate?: string | null,
+  nowMs: number = Date.now()
+): DashboardStatus {
+  if (!lastJumpDate) return 'Green';
+  
+  const lastJumpTime = new Date(lastJumpDate).getTime();
+  const cooldownMs = DEFAULT_CLONE_COOLDOWN_HOURS * MS_IN_HOUR; // Default 24h, can be reduced by skills
+  
+  if (nowMs < lastJumpTime + cooldownMs) {
+    return 'Yellow';
+  }
+  
+  return 'Green';
+}
+
+/**
+ * Calculates the status of a character's location.
+ * - YELLOW: Undocked (no station_id or structure_id).
+ * - GREEN: Docked.
+ */
+export function calculateLocationStatus(
+  stationId?: number | null,
+  structureId?: number | null
+): DashboardStatus {
+  if (stationId || structureId) {
+    return 'Green'; // Docked
+  }
+  return 'Yellow'; // Undocked
+}
+

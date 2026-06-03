@@ -5,7 +5,8 @@ import {
   defaultTransactions,
   defaultShip,
   defaultMail,
-  defaultContracts
+  defaultContracts,
+  defaultMarketOrders
 } from './defaults';
 import {
   greenSkills,
@@ -38,7 +39,8 @@ export const mockFleet: MockCharacter[] = [
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
     mail: defaultMail,
-    contracts: defaultContracts
+    contracts: defaultContracts,
+    marketOrders: defaultMarketOrders
   },
   {
     characterId: "90000002",
@@ -56,7 +58,8 @@ export const mockFleet: MockCharacter[] = [
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
     mail: defaultMail,
-    contracts: defaultContracts
+    contracts: defaultContracts,
+    marketOrders: defaultMarketOrders
   },
   {
     characterId: "90000003",
@@ -74,7 +77,8 @@ export const mockFleet: MockCharacter[] = [
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
     mail: defaultMail,
-    contracts: defaultContracts
+    contracts: defaultContracts,
+    marketOrders: defaultMarketOrders
   },
   {
     characterId: "90000004",
@@ -92,6 +96,7 @@ export const mockFleet: MockCharacter[] = [
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
     mail: defaultMail,
-    contracts: defaultContracts
+    contracts: defaultContracts,
+    marketOrders: defaultMarketOrders
   }
 ];

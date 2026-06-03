@@ -76,6 +76,9 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
           <span className="text-zinc-400">
             Contracts: <span className="text-zinc-200 font-bold">{status.contracts ? status.contracts.length : '???'}</span>
           </span>
+          <span className="text-zinc-400">
+            Market Orders: <span className="text-zinc-200 font-bold">{status.marketOrders ? status.marketOrders.length : '???'}</span>
+          </span>
         </div>
         <div className="flex gap-4 text-xs font-mono mt-1">
           <span className="text-zinc-400">
@@ -86,10 +89,14 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
           </span>
         </div>
       </div>
-      <div className="flex gap-2 w-full sm:w-auto tabular-nums">
+      <div className="flex gap-2 w-full sm:w-auto tabular-nums flex-wrap justify-end">
         <StatusPill label="SKILL" status={status.skills} />
         <StatusPill label="IND" status={status.industry} />
         <StatusPill label="PI" status={status.pi} />
+        <StatusPill label="WAL" status={status.walletStatus} />
+        <StatusPill label="LOC" status={status.locationStatus} />
+        <StatusPill label="MAIL" status={status.mailStatus} />
+        <StatusPill label="CLN" status={status.cloneStatus} />
         <button
           type="button"
           onClick={handleRemove}
