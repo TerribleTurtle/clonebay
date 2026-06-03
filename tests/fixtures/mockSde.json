@@ -1,0 +1,8 @@
+{
+  "type_id": 1234,
+  "name": "Plagioclase",
+  "description": "A very common ore.",
+  "capacity": 100,
+  "volume": 0.35,
+  "group_id": 18
+}

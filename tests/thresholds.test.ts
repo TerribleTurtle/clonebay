@@ -37,6 +37,11 @@ describe('Threshold Calculations', () => {
       expect(calculateSkillQueueStatus(queue, NOW)).toBe('Red');
     });
 
+    it('should return Red when finish_date exactly matches nowMs (Exact Zero Boundary)', () => {
+      const queue: SkillQueueItem[] = [{ finish_date: new Date(NOW).toISOString() }];
+      expect(calculateSkillQueueStatus(queue, NOW)).toBe('Red');
+    });
+
     it('should return Red when remaining time is < 24 hours', () => {
       const queue: SkillQueueItem[] = [{ finish_date: new Date(NOW + RED_THRESHOLD_HOURS_MINUS_ONE * HOURS_IN_MS).toISOString() }];
       expect(calculateSkillQueueStatus(queue, NOW)).toBe('Red');
@@ -101,6 +106,17 @@ describe('Threshold Calculations', () => {
       expect(calculatePiStatus(pins, NOW)).toBe('Green');
     });
 
+    it('should return Red for Zero Capacity Blackhole (capacity 0, used > 0)', () => {
+      const pins: PiPinState[] = [{
+        isExtractor: false,
+        isStorage: true,
+        storageCapacity: 0,
+        storageUsed: 500,
+        hasUnroutedMaterials: false
+      }];
+      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+    });
+
     it('should return Red when extractor has no expiry time', () => {
       const pins: PiPinState[] = [{
         isExtractor: true,
@@ -114,6 +130,16 @@ describe('Threshold Calculations', () => {
       const pins: PiPinState[] = [{
         isExtractor: true,
         extractorExpiryTime: new Date(NOW - MS_PER_SECOND).toISOString(),
+        isStorage: false,
+        hasUnroutedMaterials: false
+      }];
+      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+    });
+
+    it('should return Red when extractor expiry exactly matches nowMs (Exact Zero Boundary)', () => {
+      const pins: PiPinState[] = [{
+        isExtractor: true,
+        extractorExpiryTime: new Date(NOW).toISOString(),
         isStorage: false,
         hasUnroutedMaterials: false
       }];
@@ -166,6 +192,14 @@ describe('Threshold Calculations', () => {
     it('should return Red when an active job is finished (end_date <= now)', () => {
       const jobs: IndustryJobState[] = [
         { status: 'active', end_date: new Date(NOW - MS_PER_SECOND).toISOString() },
+        { status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() }
+      ];
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');
+    });
+
+    it('should return Red when an active job end_date exactly matches nowMs (Exact Zero Boundary)', () => {
+      const jobs: IndustryJobState[] = [
+        { status: 'active', end_date: new Date(NOW).toISOString() },
         { status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() }
       ];
       expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');

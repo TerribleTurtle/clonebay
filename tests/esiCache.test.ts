@@ -1,20 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getCachedEsiData, setCachedEsiData } from '../src/utils/esiCache';
-
-let mockStore: Record<string, unknown> = {};
-
-vi.mock('idb-keyval', () => {
-  return {
-    get: vi.fn(async (key: string) => mockStore[key]),
-    set: vi.fn(async (key: string, val: unknown) => { mockStore[key] = val; })
-  };
-});
+import { clear } from 'idb-keyval';
 
 describe('esiCache', () => {
-  beforeEach(() => {
-    mockStore = {};
+  beforeEach(async () => {
+    await clear();
     vi.clearAllMocks();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['Date'] });
   });
 
   afterEach(() => {

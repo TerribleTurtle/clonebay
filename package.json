@@ -34,6 +34,7 @@
     "@vitejs/plugin-react": "^6.0.2",
     "@vitest/coverage-v8": "^4.1.8",
     "dependency-cruiser": "^17.4.3",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "eslint-plugin-boundaries": "^6.0.2",

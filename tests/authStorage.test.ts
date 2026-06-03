@@ -1,22 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addOrUpdateCharacter, getAuthDictionary } from '../src/utils/authStorage';
-
-let mockStore: Record<string, unknown> = {};
-
-vi.mock('idb-keyval', () => {
-  return {
-    get: vi.fn(async (key: string) => mockStore[key]),
-    set: vi.fn(async (key: string, val: unknown) => { mockStore[key] = val; }),
-    update: vi.fn(async (key: string, updater: (val: unknown) => unknown) => {
-      mockStore[key] = updater(mockStore[key]);
-    })
-  };
-});
+import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../src/utils/authStorage';
+import { clear } from 'idb-keyval';
 
 describe('authStorage', () => {
-  beforeEach(() => {
-    mockStore = {};
+  beforeEach(async () => {
+    await clear();
     vi.clearAllMocks();
+  });
+
+  it('returns empty dictionary when no data exists', async () => {
+    const dict = await getAuthDictionary();
+    expect(dict).toEqual({});
   });
 
   it('addOrUpdateCharacter merges tokens without deleting old ones', async () => {
@@ -52,5 +46,39 @@ describe('authStorage', () => {
     
     const EXPECTED_DICT_LENGTH = 2;
     expect(Object.keys(dict).length).toBe(EXPECTED_DICT_LENGTH);
+  });
+
+  it('setAuthDictionary overwrites the entire dictionary', async () => {
+    await setAuthDictionary({
+      'char3': {
+        accessToken: 'token3',
+        refreshToken: 'refresh3',
+        characterName: 'Charlie'
+      }
+    });
+
+    const dict = await getAuthDictionary();
+    expect(Object.keys(dict).length).toBe(1);
+    expect(dict['char3']?.characterName).toBe('Charlie');
+  });
+
+  it('removeCharacter removes only the specified character', async () => {
+    await addOrUpdateCharacter('char1', {
+      accessToken: 'token1',
+      refreshToken: 'refresh1',
+      characterName: 'Alice'
+    });
+    await addOrUpdateCharacter('char2', {
+      accessToken: 'token2',
+      refreshToken: 'refresh2',
+      characterName: 'Bob'
+    });
+
+    await removeCharacter('char1');
+
+    const dict = await getAuthDictionary();
+    expect(Object.keys(dict).length).toBe(1);
+    expect(dict['char1']).toBeUndefined();
+    expect(dict['char2']?.characterName).toBe('Bob');
   });
 });

@@ -124,6 +124,13 @@ const eslintConfig = defineConfig([
         }
       ]
     }
+  },
+  {
+    files: ["tests/**/*.ts", "tests/**/*.tsx", "src/**/*.test.ts", "src/**/*.test.tsx", "scripts/**/*.ts"],
+    rules: {
+      "no-magic-numbers": "off",
+      "no-restricted-syntax": "off"
+    }
   }
 ]);
 

@@ -13,6 +13,35 @@ export const EsiIndustryJobSchema = z.object({
   end_date: z.string()
 }).passthrough();
 
-export const EsiPlanetaryInteractionSchema = z.object({
-  // Add PI fields here later as needed
+export const EsiPlanetSchema = z.object({
+  planet_id: z.number(),
+  planet_type: z.string(),
+  upgrade_level: z.number(),
+  num_pins: z.number(),
+  last_update: z.string(),
+}).passthrough();
+
+export const EsiPlanetLayoutSchema = z.object({
+  pins: z.array(
+    z.object({
+      pin_id: z.number(),
+      type_id: z.number(),
+      expiry_time: z.string().optional(),
+      contents: z.array(
+        z.object({
+          type_id: z.number(),
+          amount: z.number()
+        }).passthrough()
+      ).optional(),
+    }).passthrough()
+  )
+}).passthrough();
+
+export const EsiCharacterSkillsResponseSchema = z.object({
+  skills: z.array(
+    z.object({
+      skill_id: z.number(),
+      active_skill_level: z.number(),
+    }).passthrough()
+  )
 }).passthrough();

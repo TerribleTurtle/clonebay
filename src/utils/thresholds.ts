@@ -86,7 +86,9 @@ export function calculatePiStatus(
     }
 
     if (pin.isStorage && pin.storageCapacity !== undefined && pin.storageUsed !== undefined) {
-      if (pin.storageCapacity > 0) {
+      if (pin.storageCapacity === 0 && pin.storageUsed > 0) {
+        return 'Red';
+      } else if (pin.storageCapacity > 0) {
         const fillRatio = pin.storageUsed / pin.storageCapacity;
         if (fillRatio >= 1.0) {
           return 'Red';
@@ -133,6 +135,10 @@ export function calculateIndustryStatus(
   maxJobs: number,
   nowMs: number = Date.now()
 ): DashboardStatus {
+  if (!jobs) {
+    return maxJobs > 0 ? 'Red' : 'Green';
+  }
+
   const relevantJobs = jobs.filter(
     (j) => j.status === 'active' || j.status === 'paused' || j.status === 'ready'
   );

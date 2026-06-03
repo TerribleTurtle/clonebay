@@ -1,4 +1,4 @@
-import { get, set, update } from "idb-keyval";
+import { get, update } from "idb-keyval";
 
 export interface CharacterAuth {
   accessToken: string;
@@ -22,7 +22,7 @@ export async function getAuthDictionary(): Promise<AuthDictionary> {
  * Overwrites the entire auth dictionary.
  */
 export async function setAuthDictionary(dict: AuthDictionary): Promise<void> {
-  await set(AUTH_STORE_KEY, dict);
+  await update<AuthDictionary>(AUTH_STORE_KEY, () => dict);
 }
 
 /**

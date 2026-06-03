@@ -1,0 +1,6 @@
+{
+  "access_token": "mock_new_access_token",
+  "expires_in": 1200,
+  "token_type": "Bearer",
+  "refresh_token": "mock_new_refresh_token"
+}
