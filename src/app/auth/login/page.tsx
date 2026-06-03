@@ -7,6 +7,8 @@ import { setPkceState, setCodeVerifier } from "@/utils/AuthRepository";
 import { generateRandomString, generateCodeChallenge } from "@/utils/pkce";
 import { logger } from "@/utils/logger";
 
+import { useSettingsStore } from "@/store/useSettingsStore";
+
 const STATE_LENGTH = 16;
 const CODE_VERIFIER_LENGTH = 32;
 
@@ -17,6 +19,11 @@ export default function LoginPage() {
   useEffect(() => {
     async function startLogin() {
       try {
+        const consentStatus = useSettingsStore.getState().consentStatus;
+        if (consentStatus !== "granted") {
+          throw new Error("Storage Protocol Authorization is required to establish a neural link. Please return to the main terminal and authorize storage protocols.");
+        }
+
         const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
         if (!clientId) {
           throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");

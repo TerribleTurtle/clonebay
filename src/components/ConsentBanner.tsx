@@ -23,7 +23,8 @@ export const ConsentBanner: React.FC = () => {
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex-1 text-sm font-mono text-zinc-400">
           <p className="mb-1 text-amber-500 font-bold uppercase tracking-wider">Storage Protocol Authorization</p>
-          This terminal requires local storage access (IndexedDB & LocalStorage) to securely store your EVE SSO tokens and character states entirely within your browser. No data is sent to external servers.
+          This terminal requires local storage access (IndexedDB & LocalStorage) to securely store your EVE SSO tokens and character states entirely within your browser. No data is sent to external servers.{' '}
+          <a href="/privacy" className="text-amber-500 hover:text-amber-400 underline underline-offset-2">View Privacy Policy</a>
         </div>
         <div className="flex items-center gap-3 tabular-nums">
           <button
