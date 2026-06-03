@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addOrUpdateCharacter } from "@/utils/AuthRepository";
+import { addOrUpdateCharacter, getPkceState, getCodeVerifier, clearPkceData } from "@/utils/AuthRepository";
 
 import { exchangeCodeForToken } from "@/utils/ssoClient";
 
@@ -16,8 +16,8 @@ function CallbackLogic() {
       try {
         const code = searchParams.get("code");
         const state = searchParams.get("state");
-        const savedState = sessionStorage.getItem("oauth_state");
-        const codeVerifier = sessionStorage.getItem("code_verifier");
+        const savedState = getPkceState();
+        const codeVerifier = getCodeVerifier();
 
         if (!code || !state || !savedState || !codeVerifier) {
           throw new Error("Missing callback parameters or session data.");
@@ -32,6 +32,7 @@ function CallbackLogic() {
           throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
         }
 
+        // eslint-disable-next-line no-restricted-properties
         const redirectUri = `${window.location.origin}/auth/callback`;
 
         const { accessToken, refreshToken, expiresIn, characterId, characterName } = await exchangeCodeForToken(
@@ -56,8 +57,7 @@ function CallbackLogic() {
         router.push("/");
       } finally {
         // Clean up session storage regardless of success or failure
-        sessionStorage.removeItem("oauth_state");
-        sessionStorage.removeItem("code_verifier");
+        clearPkceData();
       }
     }
 

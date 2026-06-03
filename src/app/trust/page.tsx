@@ -1,13 +1,16 @@
 'use client';
 
-import { clear as clearIdb } from 'idb-keyval';
+import { clearAuthDictionary } from '../../utils/AuthRepository';
+import { clearAllStorage } from '../../store/useSettingsStore';
+import { useRouter } from 'next/navigation';
 
 export default function TrustPage() {
+  const router = useRouter();
   const handleWipe = async () => {
     if (confirm('Are you sure? This will permanently wipe all stored EVE SSO tokens and character states from your browser.')) {
-      await clearIdb();
-      localStorage.clear();
-      window.location.href = '/';
+      await clearAuthDictionary();
+      clearAllStorage();
+      router.push('/');
     }
   };
 

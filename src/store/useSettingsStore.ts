@@ -7,11 +7,14 @@ export interface SettingsState {
   setWalletYellowThreshold: (val: number) => void;
   setWalletRedThreshold: (val: number) => void;
   resetToDefaults: () => void;
+  consentStatus: "granted" | "denied" | "unknown";
+  setConsentStatus: (val: "granted" | "denied" | "unknown") => void;
 }
 
 const DEFAULT_SETTINGS = {
   walletYellowThreshold: 500000000, // 500m
   walletRedThreshold: 100000000,    // 100m
+  consentStatus: "unknown",
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -20,6 +23,7 @@ export const useSettingsStore = create<SettingsState>()(
       ...DEFAULT_SETTINGS,
       setWalletYellowThreshold: (val) => set({ walletYellowThreshold: val }),
       setWalletRedThreshold: (val) => set({ walletRedThreshold: val }),
+      setConsentStatus: (val) => set({ consentStatus: val }),
       resetToDefaults: () => set(DEFAULT_SETTINGS),
     }),
     {
@@ -27,3 +31,11 @@ export const useSettingsStore = create<SettingsState>()(
     }
   )
 );
+
+
+export const clearAllStorage = () => {
+  if (typeof window !== "undefined") {
+    localStorage.clear();
+    sessionStorage.clear();
+  }
+};

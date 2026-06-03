@@ -1,4 +1,4 @@
-import { get, update } from "idb-keyval";
+import { get, update, clear as idbClear } from "idb-keyval";
 
 export interface CharacterAuth {
   accessToken: string;
@@ -49,4 +49,49 @@ export async function removeCharacter(characterId: string): Promise<void> {
     delete dict[characterId];
     return dict;
   });
+}
+
+// -----------------------------------------------------------------------------
+// PKCE Session Storage Encapsulation
+// -----------------------------------------------------------------------------
+
+export function setPkceState(state: string): void {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('oauth_state', state);
+  }
+}
+
+export function getPkceState(): string | null {
+  if (typeof window !== 'undefined') {
+    return sessionStorage.getItem('oauth_state');
+  }
+  return null;
+}
+
+export function setCodeVerifier(verifier: string): void {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('code_verifier', verifier);
+  }
+}
+
+export function getCodeVerifier(): string | null {
+  if (typeof window !== 'undefined') {
+    return sessionStorage.getItem('code_verifier');
+  }
+  return null;
+}
+
+export function clearPkceData(): void {
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem('oauth_state');
+    sessionStorage.removeItem('code_verifier');
+  }
+}
+
+
+/**
+ * Clears all auth data from IndexedDB.
+ */
+export async function clearAuthDictionary(): Promise<void> {
+  await idbClear();
 }

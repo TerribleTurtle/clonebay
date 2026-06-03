@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { clear as clearIdb } from 'idb-keyval';
+import { clearAuthDictionary } from '../../utils/AuthRepository';
+import { clearAllStorage } from '../../store/useSettingsStore';
+import { useRouter } from 'next/navigation';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
 export default function SettingsPage() {
   const settings = useSettingsStore();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -15,9 +18,9 @@ export default function SettingsPage() {
 
   const handleWipeData = async () => {
     if (window.confirm("WARNING: This will wipe all SSO tokens and ESI cache. You will need to log back in. Continue?")) {
-      await clearIdb();
-      localStorage.clear();
-      window.location.href = "/";
+      await clearAuthDictionary();
+      clearAllStorage();
+      router.push("/");
     }
   };
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { setPkceState, setCodeVerifier } from "@/utils/AuthRepository";
 
 import { generateRandomString, generateCodeChallenge } from "@/utils/pkce";
 
@@ -20,13 +21,14 @@ export default function LoginPage() {
           throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
         }
 
+        // eslint-disable-next-line no-restricted-properties
         const redirectUri = `${window.location.origin}/auth/callback`;
         const state = generateRandomString(STATE_LENGTH);
         const codeVerifier = generateRandomString(CODE_VERIFIER_LENGTH);
         const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-        sessionStorage.setItem("oauth_state", state);
-        sessionStorage.setItem("code_verifier", codeVerifier);
+        setPkceState(state);
+        setCodeVerifier(codeVerifier);
 
         const scopes = [
           "esi-skills.read_skillqueue.v1",
@@ -53,6 +55,7 @@ export default function LoginPage() {
           code_challenge_method: "S256",
         });
 
+        // eslint-disable-next-line no-restricted-properties
         window.location.href = `https://login.eveonline.com/v2/oauth/authorize?${params.toString()}`;
       } catch (err) {
         console.error("Failed to start login:", err);

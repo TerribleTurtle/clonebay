@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useCharacterStore } from '../store/useCharacterStore';
@@ -12,6 +13,7 @@ export const Dashboard: React.FC = () => {
   const characterIds = useCharacterStore(useShallow((state) => Object.keys(state.characters)));
   const [mounted, setMounted] = useState<boolean>(false);
   const [isMockMode, setIsMockMode] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -49,7 +51,7 @@ export const Dashboard: React.FC = () => {
         {!isMockMode && (
           <button 
             type="button" 
-            onClick={() => window.location.href = '/auth/login'}
+            onClick={() => router.push('/auth/login')}
             className="border border-status-green bg-emerald-950/30 text-status-green px-4 py-1 hover:bg-emerald-900/50 transition-colors uppercase text-xs tracking-wider"
           >
             Add Clone

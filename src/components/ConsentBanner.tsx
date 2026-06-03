@@ -1,24 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSettingsStore } from '../store/useSettingsStore';
 
 export const ConsentBanner: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const { consentStatus, setConsentStatus } = useSettingsStore();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const hasConsent = localStorage.getItem('eve_dash_consent');
-    if (!hasConsent) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsVisible(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
   }, []);
 
   const handleConsent = (consented: boolean) => {
-    localStorage.setItem('eve_dash_consent', consented ? 'granted' : 'denied');
-    setIsVisible(false);
+    setConsentStatus(consented ? 'granted' : 'denied');
   };
 
-  if (!isVisible) return null;
+  if (!mounted || consentStatus !== 'unknown') return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-zinc-950/95 border-t border-amber-900/50 backdrop-blur-md shadow-[0_-10px_40px_-10px_rgba(245,158,11,0.15)]">
