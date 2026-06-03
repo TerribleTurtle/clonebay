@@ -1,4 +1,5 @@
 import { get, set } from 'idb-keyval';
+import { z } from 'zod';
 import { EsiSdeTypeSchema, EsiSdeSystemSchema, type EsiSdeType } from '../schemas/esi';
 
 export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
@@ -7,7 +8,7 @@ export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   // Check IndexedDB first
   const cachedData = await get<EsiSdeType>(cacheKey);
   if (cachedData) {
-    return cachedData;
+    return EsiSdeTypeSchema.parse(cachedData);
   }
 
   // Fetch from ESI if not cached
@@ -31,7 +32,7 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
   // Check IndexedDB first
   const cachedData = await get<string>(cacheKey);
   if (cachedData) {
-    return cachedData;
+    return z.string().parse(cachedData);
   }
 
   // Fetch from ESI if not cached

@@ -3,17 +3,17 @@ import { http, HttpResponse } from 'msw';
 import { server } from './setup';
 
 const mockPostMessage = vi.fn();
-const mockClearInterval = vi.fn();
-const MOCK_INTERVAL_ID = 123;
-const mockSetInterval = vi.fn().mockReturnValue(MOCK_INTERVAL_ID);
+const mockClearTimeout = vi.fn();
+const MOCK_TIMEOUT_ID = 123;
+const mockSetTimeout = vi.fn().mockReturnValue(MOCK_TIMEOUT_ID);
 
 const mockOnMessage: unknown = null;
 
 vi.stubGlobal('self', {
   onmessage: mockOnMessage,
   postMessage: mockPostMessage,
-  setInterval: mockSetInterval,
-  clearInterval: mockClearInterval,
+  setTimeout: mockSetTimeout,
+  clearTimeout: mockClearTimeout,
 });
 
 let mockStore: Record<string, unknown> = {};
@@ -77,17 +77,18 @@ describe('esiWorker', () => {
     );
   });
 
-  it('clears polling interval when STOP_POLLING is received', async () => {
+  it('clears polling timeout when STOP_POLLING is received', async () => {
     await import('../src/workers/esiWorker');
     const selfObj = global.self;
     if (selfObj && typeof selfObj.onmessage === 'function') {
       // First start polling to set the interval
       await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Now stop polling
       await selfObj.onmessage(new MessageEvent('message', { data: { type: 'STOP_POLLING' } }));
     }
-    expect(mockClearInterval).toHaveBeenCalledWith(MOCK_INTERVAL_ID);
+    expect(mockClearTimeout).toHaveBeenCalledWith(MOCK_TIMEOUT_ID);
   });
 
   it('correctly calculates maxJobs using character_skills (Mass Production and Advanced Mass Production)', async () => {
