@@ -95,7 +95,9 @@ export const EsiPlanetLayoutSchema = z.object({
         }).strict()
       ).optional(),
     }).strict()
-  )
+  ),
+  links: z.array(z.any()).optional(),
+  routes: z.array(z.any()).optional()
 }).strict();
 export type EsiPlanetLayout = z.infer<typeof EsiPlanetLayoutSchema>;
 

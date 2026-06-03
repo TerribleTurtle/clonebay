@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useCharacterStore } from '../store/useCharacterStore';
 import { logger } from '../utils/logger';
@@ -8,7 +9,8 @@ import { CharacterRow } from './CharacterRow';
 import { useEsiWorkerManager } from './useEsiWorkerManager';
 
 export const Dashboard: React.FC = () => {
-  const characters = useCharacterStore((state) => state.characters);
+  const characterIds = useCharacterStore(useShallow((state) => Object.keys(state.characters)));
+  const [mounted, setMounted] = useState<boolean>(false);
   const [isMockMode, setIsMockMode] = useState<boolean>(false);
 
   useEffect(() => {
@@ -16,6 +18,7 @@ export const Dashboard: React.FC = () => {
       const mockMode = localStorage.getItem('eve_mock_mode') === 'true';
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsMockMode(mockMode);
+      setMounted(true);
     } catch (error) {
       logger.error("Failed to read eve_mock_mode from localStorage:", error);
       throw error; // Fail loudly
@@ -37,7 +40,17 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const characterEntries = Object.entries(characters);
+  
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-zinc-300 p-4 font-mono flex items-center justify-center">
+        <div className="text-amber-500 font-bold uppercase tracking-widest animate-pulse">
+          Initializing Neural Link...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-300 p-4 font-mono">
@@ -63,17 +76,17 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
       
-      {characterEntries.length === 0 ? (
+      {characterIds.length === 0 ? (
         <div className="border border-zinc-800 bg-zinc-900/50 p-6 text-center text-zinc-500">
           NO CLONES CONNECTED. AWAITING NEURAL LINK.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-2">
-          {characterEntries.map(([id, status]) => (
+          {characterIds.map((id) => (
             <CharacterRow 
               key={id} 
               characterId={id} 
-              status={status} 
+               
             />
           ))}
         </div>

@@ -33,7 +33,7 @@ export interface CharacterAuthToken {
 
 // Global state for polling loop
 let isPolling = false;
-let pollingInterval: number | null = null;
+let pollingTimeout: number | null = null;
 let activeMockMode = false;
 
 self.onmessage = async (event: MessageEvent) => {
@@ -46,18 +46,31 @@ self.onmessage = async (event: MessageEvent) => {
       logger.info("ESI Worker: Polling started");
       activeMockMode = isMockMode || false;
       isPolling = true;
-      await pollData();
-      pollingInterval = self.setInterval(pollData, POLLING_INTERVAL_SECONDS * MS_PER_SECOND); // Poll every minute
+      pollLoop();
     }
   } else if (type === 'STOP_POLLING') {
-    if (isPolling && pollingInterval !== null) {
+    if (isPolling) {
       logger.info("ESI Worker: Polling stopped");
-      self.clearInterval(pollingInterval);
-      pollingInterval = null;
+      if (pollingTimeout !== null) {
+        self.clearTimeout(pollingTimeout);
+        pollingTimeout = null;
+      }
       isPolling = false;
     }
   }
 };
+
+async function pollLoop() {
+  if (!isPolling) return;
+  try {
+    await pollData();
+  } catch (error) {
+    console.error("ESI Worker: Unhandled error in pollData cycle:", error);
+  }
+  if (isPolling) {
+    pollingTimeout = self.setTimeout(pollLoop, POLLING_INTERVAL_SECONDS * MS_PER_SECOND);
+  }
+}
 
 async function pollData(): Promise<void> {
   try {

@@ -46,7 +46,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
 
     if (cachedEntry !== null) {
       if (getAdjustedNow().getTime() < cachedEntry.expires) {
-        return { data: cachedEntry.data, status: 'Green', cached: true };
+        return { data: options.schema.parse(cachedEntry.data), status: 'Green', cached: true };
       }
       if (cachedEntry.eTag !== null) {
         headers['If-None-Match'] = cachedEntry.eTag;
@@ -70,7 +70,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
         const expiresHeader = response.headers.get('Expires');
         await setCachedEsiData(url, cachedEntry.data, cachedEntry.eTag, expiresHeader);
         dequeueRequest();
-        return { data: cachedEntry.data, status: 'Green', cached: true };
+        return { data: options.schema.parse(cachedEntry.data), status: 'Green', cached: true };
       }
 
       if (response.status === HTTP_STATUS_UNAUTHORIZED) {
@@ -78,7 +78,7 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
           options.accessToken = await refreshAccessToken(characterId);
         } catch (refreshError) {
           logger.error('Failed to refresh token:', refreshError);
-          dequeueRequest();
+          // Fixed Double Release: outer catch block will dequeueRequest
           throw refreshError;
         }
         
@@ -91,8 +91,8 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
           const attempt = DEFAULT_RETRIES - retries + 1;
           const backoff = Math.pow(BACKOFF_BASE, attempt - 1) * MS_PER_SECOND;
           logger.warn(`ESI returned ${response.status}. Retrying in ${backoff}ms...`);
+          dequeueRequest(); // Fix starvation deadlock
           await sleep(backoff);
-          dequeueRequest();
           return fetchEsi<T>(options, retries - 1);
         }
         throw new Error(`ESI request failed with status ${response.status} after retries.`);

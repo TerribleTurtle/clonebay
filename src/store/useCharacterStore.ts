@@ -22,6 +22,7 @@ export interface CharacterStoreState {
   characters: Record<string, CharacterStatus>;
   lastPolled: number | null;
   updateCharacterStatus: (id: string, payload: Partial<CharacterStatus>) => void;
+  updateMultipleCharacters: (updates: Record<string, Partial<CharacterStatus>>) => void;
   removeCharacter: (id: string) => Promise<void>;
   setLastPolled: (timestamp: number) => void;
   setAllOffline: () => void;
@@ -62,6 +63,15 @@ export const useCharacterStore = create<CharacterStoreState>()(
             };
           }
           return { characters: offlineChars };
+        }),
+      updateMultipleCharacters: (updates) =>
+        set((state) => {
+          const nextChars = { ...state.characters };
+          for (const [id, payload] of Object.entries(updates)) {
+            const existing = nextChars[id] ?? { skills: 'Offline', industry: 'Offline', pi: 'Offline' };
+            nextChars[id] = { ...existing, ...payload };
+          }
+          return { characters: nextChars };
         }),
       updateCharacterStatus: (id, payload) =>
         set((state) => {

@@ -12,7 +12,7 @@ vi.mock('../src/utils/logger', () => ({
 }));
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 class MockWorker {
   onmessage: ((ev: MessageEvent) => unknown) | null = null;
   onerror: ((ev: ErrorEvent) => unknown) | null = null;
@@ -24,7 +24,7 @@ class MockWorker {
   terminate() {}
 }
 /* eslint-enable @typescript-eslint/no-unused-vars */
-/* eslint-enable @typescript-eslint/no-explicit-any */
+ 
 
 beforeAll(() => {
   vi.stubGlobal('Worker', MockWorker);

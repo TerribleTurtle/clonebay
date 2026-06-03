@@ -15,7 +15,7 @@ describe('sdeClient', () => {
   });
 
   it('should return cached data from IndexedDB if available', async () => {
-    const mockCachedData = { capacity: 100, volume: 0.5, group_id: 10 };
+    const mockCachedData = { capacity: 100, volume: 0.5, group_id: 10, name: "Cached Type", published: true, type_id: 2256 };
     vi.mocked(get).mockResolvedValue(mockCachedData);
 
     const result = await fetchSdeType(2256);
