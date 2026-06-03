@@ -4,7 +4,16 @@ import { z } from 'zod';
 import { 
   EsiSkillQueueSchema, 
   EsiIndustryJobSchema, 
-  EsiPlanetSchema 
+  EsiPlanetSchema,
+  EsiCharacterSkillsResponseSchema,
+  EsiClonesSchema,
+  EsiFatigueSchema,
+  EsiTransactionSchema,
+  EsiShipSchema,
+  EsiMailLabelsSchema,
+  EsiContractSchema,
+  EsiPlanetLayoutSchema,
+  EsiSdeTypeSchema
 } from '../src/schemas/esi';
 
 async function verifyMock(filename: string, schema: z.ZodTypeAny) {
@@ -30,10 +39,15 @@ async function main() {
   await verifyMock('mockSkillQueue.json', z.array(EsiSkillQueueSchema));
   await verifyMock('mockPlanets.json', z.array(EsiPlanetSchema));
   
-  // mockSde.json contains our command center structures to simulate Planet Layout
-  // Wait, EsiCharacterSkillsResponse and EsiPlanetLayout are not currently represented in dedicated mock files
-  // They are inline mocked in the MSW tests. I will log that they are natively strict.
-  console.log('[PASS] Nested strictness enforced on EsiPlanetLayoutSchema & EsiCharacterSkillsResponseSchema.');
+  await verifyMock('character_skills.json', EsiCharacterSkillsResponseSchema);
+  await verifyMock('character_clones.json', EsiClonesSchema);
+  await verifyMock('character_fatigue.json', EsiFatigueSchema);
+  await verifyMock('character_transactions.json', z.array(EsiTransactionSchema));
+  await verifyMock('character_ship.json', EsiShipSchema);
+  await verifyMock('character_mail_labels.json', EsiMailLabelsSchema);
+  await verifyMock('character_contracts.json', z.array(EsiContractSchema));
+  await verifyMock('character_planet.json', EsiPlanetLayoutSchema);
+  await verifyMock('universe_type.json', EsiSdeTypeSchema);
   
   console.log('\nAll mock data is 100% compliant with Zod schemas!');
 }

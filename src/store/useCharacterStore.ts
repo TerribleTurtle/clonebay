@@ -103,6 +103,15 @@ export const useCharacterStore = create<CharacterStoreState>()(
     }),
     {
       name: 'eve-dashboard-storage',
+      partialize: (state) => ({
+        ...state,
+        characters: Object.fromEntries(
+          Object.entries(state.characters).map(([id, char]) => {
+            const { transactions, mail, contracts, ...rest } = char;
+            return [id, rest];
+          })
+        ),
+      }),
     }
   )
 );

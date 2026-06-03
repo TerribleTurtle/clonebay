@@ -3,6 +3,7 @@ import { fetchSdeType } from '../src/utils/sdeClient';
 import { get, set } from 'idb-keyval';
 import { HttpResponse, http } from 'msw';
 import { server } from './setup';
+import universeTypeRaw from './fixtures/universe_type.json';
 
 vi.mock('idb-keyval', () => ({
   get: vi.fn(),
@@ -15,7 +16,7 @@ describe('sdeClient', () => {
   });
 
   it('should return cached data from IndexedDB if available', async () => {
-    const mockCachedData = { capacity: 100, volume: 0.5, group_id: 10, name: "Cached Type", published: true, type_id: 2256 };
+    const mockCachedData = { ...universeTypeRaw, type_id: 2256 };
     vi.mocked(get).mockResolvedValue(mockCachedData);
 
     const result = await fetchSdeType(2256);
@@ -29,11 +30,7 @@ describe('sdeClient', () => {
     vi.mocked(get).mockResolvedValue(undefined);
 
     const fullMockData = {
-      capacity: 200,
-      volume: 1.5,
-      group_id: 20,
-      name: 'Test Type',
-      published: true,
+      ...universeTypeRaw,
       type_id: 2588
     };
 

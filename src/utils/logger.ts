@@ -12,7 +12,8 @@ function createLog(level: LogLevel, message: string, data?: unknown) {
     try {
       safeData = JSON.parse(JSON.stringify(data));
     // eslint-disable-next-line no-restricted-syntax
-    } catch {
+    } catch (error) {
+      console.error('Failed to stringify log data:', error);
       safeData = '[Uncloneable Object]';
     }
   }

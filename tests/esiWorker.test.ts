@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from './setup';
+import characterSkillsRaw from './fixtures/character_skills.json';
+import characterPlanetRaw from './fixtures/character_planet.json';
 
 const mockPostMessage = vi.fn();
 const mockClearTimeout = vi.fn();
@@ -47,10 +49,10 @@ describe('esiWorker', () => {
 
     server.use(
       http.get('https://esi.evetech.net/latest/characters/:characterId/skills/', () => {
-        return HttpResponse.json({ skills: [] });
+        return HttpResponse.json(characterSkillsRaw);
       }),
       http.get('https://esi.evetech.net/latest/characters/:characterId/planets/:planetId/', () => {
-        return HttpResponse.json({ pins: [] });
+        return HttpResponse.json(characterPlanetRaw);
       })
     );
 
@@ -103,14 +105,16 @@ describe('esiWorker', () => {
     server.use(
       http.get('https://esi.evetech.net/latest/characters/:characterId/skills/', () => {
         return HttpResponse.json({
+          ...characterSkillsRaw,
           skills: [
-            { skill_id: 3388, active_skill_level: 4, trained_skill_level: 4 },  // Mass Production
-            { skill_id: 24630, active_skill_level: 2, trained_skill_level: 2 } // Advanced Mass Production
+            ...characterSkillsRaw.skills,
+            { skill_id: 3388, active_skill_level: 4, trained_skill_level: 4, skillpoints_in_skill: 100000 },  // Mass Production
+            { skill_id: 24630, active_skill_level: 2, trained_skill_level: 2, skillpoints_in_skill: 100000 } // Advanced Mass Production
           ]
         });
       }),
       http.get('https://esi.evetech.net/latest/characters/:characterId/planets/:planetId/', () => {
-        return HttpResponse.json({ pins: [] });
+        return HttpResponse.json(characterPlanetRaw);
       })
     );
 
@@ -148,11 +152,13 @@ describe('esiWorker', () => {
 
     server.use(
       http.get('https://esi.evetech.net/latest/characters/:characterId/skills/', () => {
-        return HttpResponse.json({ skills: [] });
+        return HttpResponse.json(characterSkillsRaw);
       }),
       http.get('https://esi.evetech.net/latest/characters/:characterId/planets/:planetId/', () => {
         return HttpResponse.json({
+          ...characterPlanetRaw,
           pins: [
+            ...characterPlanetRaw.pins,
             {
               pin_id: 1023456789012,
               type_id: 2256 // Storage facility based on SDE?
