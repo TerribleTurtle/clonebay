@@ -26,7 +26,12 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
   const removeAndReload = useCharacterStore((state) => state.removeAndReload);
   
   const handleRemove = async () => {
-    await removeAndReload(characterId);
+    try {
+      await removeAndReload(characterId);
+    } catch (e) {
+      console.error('[CharacterRow] Failed to remove character ' + characterId + ' from IDB:', e);
+      throw e;
+    }
   };
 
   if (!status) return null;
@@ -106,3 +111,4 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
 });
 
 CharacterRow.displayName = 'CharacterRow';
+

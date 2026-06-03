@@ -49,7 +49,8 @@ export const useEsiWorkerManager = () => {
       const isMock = localStorage.getItem('eve_mock_mode') === 'true';
       manager.start(isMock);
     } catch (error) {
-      logger.error("Failed to start ESI Worker via WorkerManager:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`[useEsiWorkerManager] Critical Failure: ESI Web Worker failed to initialize or start. Background polling is offline. Details: ${errorMessage}`, error);
       throw error; // Fail loudly
     }
 
