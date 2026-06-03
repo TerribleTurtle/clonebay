@@ -17,7 +17,9 @@ export function processIndustry(
     const advMassProd = skills.find(s => s.skill_id === SKILL_ID_ADVANCED_MASS_PRODUCTION)?.active_skill_level || 0;
     const maxJobs = 1 + massProd + advMassProd;
 
-    const status = calculateIndustryStatus(industryResult.data, maxJobs);
+    const manufacturingJobs = industryResult.data.filter(job => job.activity_id === 1);
+    const status = calculateIndustryStatus(manufacturingJobs, maxJobs);
+    
     postMessage({
       type: 'ESI_DATA_UPDATE',
       payload: { characterId: charId, dataType: 'industry', status, data: industryResult.data }
