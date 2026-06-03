@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react'
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import Home from './page'
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() })
+}));
 
 test('renders the Dashboard', () => {
   render(<Home />)

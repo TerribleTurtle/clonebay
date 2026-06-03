@@ -12,9 +12,13 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => mockSearchParams
 }));
 
-vi.mock('../src/utils/AuthRepository', () => ({
-  addOrUpdateCharacter: vi.fn()
-}));
+vi.mock('../src/utils/AuthRepository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/utils/AuthRepository')>();
+  return {
+    ...actual,
+    addOrUpdateCharacter: vi.fn()
+  };
+});
 
 function createFakeJWT(payload: Record<string, unknown>) {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));

@@ -67,7 +67,7 @@ export class HttpClient {
           try {
             data = JSON.parse(text);
           } catch {
-            // @ts-expect-error
+            // @ts-expect-error fallback if JSON parse fails
             data = text;
           }
         }
@@ -82,6 +82,6 @@ export class HttpClient {
       };
     };
 
-    return (await next(req)) as unknown as HttpResponse<T>; // eslint-disable-line no-restricted-syntax
+    return (await next(req)) as unknown as HttpResponse<T>;
   }
 }

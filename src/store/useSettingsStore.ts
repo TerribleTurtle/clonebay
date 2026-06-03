@@ -14,7 +14,7 @@ export interface SettingsState {
 const DEFAULT_SETTINGS = {
   walletYellowThreshold: 500000000, // 500m
   walletRedThreshold: 100000000,    // 100m
-  consentStatus: "unknown",
+  consentStatus: "unknown" as const,
 };
 
 export const useSettingsStore = create<SettingsState>()(
