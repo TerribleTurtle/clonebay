@@ -50,8 +50,9 @@ async function pollLoop() {
   if (!isPolling) return;
   try {
     await pollData();
+  // eslint-disable-next-line no-restricted-syntax
   } catch (error) {
-    console.error("ESI Worker: Unhandled error in pollData cycle:", error);
+    logger.error("ESI Worker: Unhandled error in pollData cycle:", error);
   }
   if (isPolling) {
     pollingTimeout = self.setTimeout(pollLoop, POLLING_INTERVAL_SECONDS * MS_PER_SECOND);
@@ -59,19 +60,26 @@ async function pollLoop() {
 }
 
 async function pollData(): Promise<void> {
+  const isMockMode = activeMockMode;
+  let authTokens;
   try {
-    const isMockMode = activeMockMode;
-    const authTokens = await get<Record<string, CharacterAuthToken>>('eve_auth_tokens');
-    
-    if (authTokens === undefined && !isMockMode) {
-      logger.warn("ESI Worker: No auth tokens found in indexedDB.");
-      return;
-    }
+    authTokens = await get('eve_auth_tokens');
+  // eslint-disable-next-line no-restricted-syntax
+  } catch (err) {
+    logger.error("ESI Worker: Failed to get auth tokens", err);
+    return;
+  }
+  
+  if (authTokens === undefined && !isMockMode) {
+    logger.warn("ESI Worker: No auth tokens found in indexedDB.");
+    return;
+  }
 
-    const characterIds = isMockMode ? mockFleet.map(c => c.characterId) : Object.keys(authTokens || {});
-    const esiService = isMockMode ? new MockEsiService() : new LiveEsiService();
-    
-    for (const charId of characterIds) {
+  const characterIds = isMockMode ? mockFleet.map(c => c.characterId) : Object.keys(authTokens || {});
+  const esiService = isMockMode ? new MockEsiService() : new LiveEsiService();
+  
+  for (const charId of characterIds) {
+    try {
       const tokenInfo = authTokens ? authTokens[charId] : undefined;
       if (!isMockMode && tokenInfo === undefined) {
           continue;
@@ -94,27 +102,38 @@ async function pollData(): Promise<void> {
 
       const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise, marketOrdersPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult]) => {
         await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult, isMockMode, (msg) => self.postMessage(msg));
+      }).catch(err => {
+        logger.error(`ESI Worker: Error processing metrics for ${charId}`, err);
+        self.postMessage({ type: 'ESI_METRICS_UPDATE', payload: { characterId: charId, walletStatus: 'Red', locationStatus: 'Red', mailStatus: 'Red', cloneStatus: 'Red' } });
       });
 
       const skillsProcessing = skillsPromise.then((skillsResult) => {
         processSkills(charId, skillsResult, (msg) => self.postMessage(msg));
+      }).catch(err => {
+        logger.error(`ESI Worker: Error processing skills for ${charId}`, err);
+        self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'skills', status: 'Red', data: null } });
       });
 
       const industryProcessing = Promise.all([industryPromise, charSkillsPromise]).then(([industryResult, charSkillsResult]) => {
         processIndustry(charId, industryResult, charSkillsResult, (msg) => self.postMessage(msg));
+      }).catch(err => {
+        logger.error(`ESI Worker: Error processing industry for ${charId}`, err);
+        self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'industry', status: 'Red', data: null } });
       });
 
       const piProcessing = planetsPromise.then(async (planetsResult) => {
         await processPi(charId, planetsResult, esiService, accessToken, (msg) => self.postMessage(msg));
+      }).catch(err => {
+        logger.error(`ESI Worker: Error processing PI for ${charId}`, err);
+        self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'pi', status: 'Red', data: null } });
       });
 
       await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing]);
+    // eslint-disable-next-line no-restricted-syntax
+    } catch (err) {
+      logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);
     }
-    
-    // Notify main thread that a full polling cycle completed successfully
-    self.postMessage({ type: 'POLL_COMPLETE', timestamp: Date.now() });
-  } catch (error) {
-    logger.error("ESI Worker: Error during polling loop:", error);
-    throw error;
   }
+  
+  self.postMessage({ type: 'POLL_COMPLETE', timestamp: Date.now() });
 }
