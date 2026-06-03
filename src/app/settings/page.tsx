@@ -5,6 +5,7 @@ import { clearAuthDictionary } from '../../utils/AuthRepository';
 import { clearAllStorage } from '../../store/useSettingsStore';
 import { useRouter } from 'next/navigation';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { logger } from '../../utils/logger';
 
 export default function SettingsPage() {
   const settings = useSettingsStore();
@@ -18,9 +19,14 @@ export default function SettingsPage() {
 
   const handleWipeData = async () => {
     if (window.confirm("WARNING: This will wipe all SSO tokens and ESI cache. You will need to log back in. Continue?")) {
-      await clearAuthDictionary();
-      clearAllStorage();
-      router.push("/");
+      try {
+        await clearAuthDictionary();
+        clearAllStorage();
+        router.push("/");
+      } catch (err) {
+        logger.error("Failed to wipe local data", err);
+        window.alert("CRITICAL ERROR: Failed to wipe data. Tokens may still exist.");
+      }
     }
   };
 

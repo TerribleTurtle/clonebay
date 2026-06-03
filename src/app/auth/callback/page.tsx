@@ -5,6 +5,35 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { addOrUpdateCharacter, getPkceState, getCodeVerifier, clearPkceData } from "@/utils/AuthRepository";
 
 import { exchangeCodeForToken } from "@/utils/ssoClient";
+import { logger } from "@/utils/logger";
+
+class SsoError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SsoError';
+  }
+}
+
+class CsrfError extends SsoError {
+  constructor(message: string = "Invalid state parameter (CSRF mismatch).") {
+    super(message);
+    this.name = 'CsrfError';
+  }
+}
+
+class ConfigurationError extends SsoError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConfigurationError';
+  }
+}
+
+class SessionDataError extends SsoError {
+  constructor(message: string = "Missing callback parameters or session data.") {
+    super(message);
+    this.name = 'SessionDataError';
+  }
+}
 
 function CallbackLogic() {
   const router = useRouter();
@@ -20,16 +49,16 @@ function CallbackLogic() {
         const codeVerifier = getCodeVerifier();
 
         if (!code || !state || !savedState || !codeVerifier) {
-          throw new Error("Missing callback parameters or session data.");
+          throw new SessionDataError();
         }
 
         if (state !== savedState) {
-          throw new Error("Invalid state parameter (CSRF mismatch).");
+          throw new CsrfError();
         }
 
         const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
         if (!clientId) {
-          throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
+          throw new ConfigurationError("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
         }
 
         // eslint-disable-next-line no-restricted-properties
@@ -62,7 +91,7 @@ function CallbackLogic() {
     }
 
     handleCallback().catch((err) => {
-      console.error("SSO Callback Critical Error:", err);
+      logger.error("SSO Callback Critical Error", err);
       setError(err instanceof Error ? err.message : "Unknown error");
     });
   }, [router, searchParams]);
