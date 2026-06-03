@@ -6,17 +6,7 @@
  * API polling, while other tabs (Slaves) listen for updates.
  */
 
-export interface LeaderElectionCallbacks<T> {
-  onBecomeMaster: () => void;
-  onBecomeSlave: () => void;
-  onDataUpdate: (data: T) => void;
-}
-
-type ElectionMessage<T> =
-  | { type: 'ELECTION_REQUEST'; tabId: string }
-  | { type: 'ELECTION_RESPONSE'; tabId: string }
-  | { type: 'HEARTBEAT'; tabId: string }
-  | { type: 'DATA_UPDATE'; payload: T };
+import type { LeaderElectionCallbacks, ElectionMessage } from './broadcastTypes';
 
 const HEARTBEAT_INTERVAL_MS = 1000;
 const MASTER_TIMEOUT_DURATION_MS = 3000;

@@ -1,12 +1,10 @@
 import React from 'react';
-import { CharacterStatus, useCharacterStore } from '../store/useCharacterStore';
-import { get, set } from 'idb-keyval';
+import { CharacterStatus, useCharacterStore, StatusLight } from '../store/useCharacterStore';
 
 interface CharacterRowProps {
-  characterName: string;
+  characterId: string;
   status: CharacterStatus;
 }
-
 const getStatusColor = (s: string) => {
   switch (s) {
     case 'Green': return 'text-emerald-400 bg-emerald-950/30 border-emerald-800';
@@ -17,21 +15,24 @@ const getStatusColor = (s: string) => {
   }
 };
 
-export const CharacterRow: React.FC<CharacterRowProps> = ({ characterName, status }) => {
+const StatusPill: React.FC<{ label: string; status: StatusLight }> = ({ label, status }) => (
+  <div className={`flex-1 sm:flex-none border px-3 py-1 text-xs uppercase tracking-widest text-center min-w-[100px] ${getStatusColor(status)}`}>
+    {label}: {status}
+  </div>
+);
+
+export const CharacterRow: React.FC<CharacterRowProps> = ({ characterId, status }) => {
   const handleRemove = async () => {
     try {
-      const tokens = await get<Record<string, unknown>>('eve_auth_tokens') || {};
-      delete tokens[characterName];
-      await set('eve_auth_tokens', tokens);
-      useCharacterStore.getState().removeCharacter(characterName);
+      await useCharacterStore.getState().removeCharacter(characterId);
       window.location.reload();
     } catch (error) {
-      console.error(`Failed to remove character ${characterName}:`, error);
+      console.error(`Failed to remove character ${characterId}:`, error);
       throw error;
     }
   };
 
-  const displayName = status.name || characterName;
+  const displayName = status.name || characterId;
   const locationText = status.locationName || 'UNKNOWN SYSTEM';
 
   return (
@@ -56,15 +57,9 @@ export const CharacterRow: React.FC<CharacterRowProps> = ({ characterName, statu
         </div>
       </div>
       <div className="flex gap-2 w-full sm:w-auto tabular-nums">
-        <div className={`flex-1 sm:flex-none border px-3 py-1 text-xs uppercase tracking-widest text-center min-w-[100px] ${getStatusColor(status.skills)}`}>
-          SKILL: {status.skills}
-        </div>
-        <div className={`flex-1 sm:flex-none border px-3 py-1 text-xs uppercase tracking-widest text-center min-w-[100px] ${getStatusColor(status.industry)}`}>
-          IND: {status.industry}
-        </div>
-        <div className={`flex-1 sm:flex-none border px-3 py-1 text-xs uppercase tracking-widest text-center min-w-[100px] ${getStatusColor(status.pi)}`}>
-          PI: {status.pi}
-        </div>
+        <StatusPill label="SKILL" status={status.skills} />
+        <StatusPill label="IND" status={status.industry} />
+        <StatusPill label="PI" status={status.pi} />
         <button
           type="button"
           onClick={handleRemove}

@@ -3,26 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const HEX_RADIX = 16;
-const SLICE_OFFSET = -2;
+import { generateRandomString, generateCodeChallenge } from "@/utils/pkce";
+
 const STATE_LENGTH = 16;
 const CODE_VERIFIER_LENGTH = 32;
-
-function generateRandomString(length: number) {
-  const array = new Uint8Array(length);
-  crypto.getRandomValues(array);
-  return Array.from(array, (dec) => ("0" + dec.toString(HEX_RADIX)).slice(SLICE_OFFSET)).join("");
-}
-
-async function generateCodeChallenge(codeVerifier: string) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(codeVerifier);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
 
 export default function LoginPage() {
   const router = useRouter();

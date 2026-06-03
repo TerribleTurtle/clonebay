@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { get, set as idbSet } from 'idb-keyval';
 
 export type StatusLight = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
@@ -21,7 +22,7 @@ export interface CharacterStoreState {
   characters: Record<string, CharacterStatus>;
   lastPolled: number | null;
   updateCharacterStatus: (id: string, payload: Partial<CharacterStatus>) => void;
-  removeCharacter: (id: string) => void;
+  removeCharacter: (id: string) => Promise<void>;
   setLastPolled: (timestamp: number) => void;
   setAllOffline: () => void;
   clearAll: () => void;
@@ -33,18 +34,32 @@ export const useCharacterStore = create<CharacterStoreState>()(
       characters: {},
       lastPolled: null,
       setLastPolled: (timestamp) => set({ lastPolled: timestamp }),
-      removeCharacter: (id) =>
+      removeCharacter: async (id) => {
+        try {
+          const tokens = await get<Record<string, unknown>>('eve_auth_tokens') || {};
+          delete tokens[id];
+          await idbSet('eve_auth_tokens', tokens);
+        } catch (error) {
+          console.error(`Failed to remove token for ${id}:`, error);
+          throw error;
+        }
         set((state) => {
           const newCharacters = { ...state.characters };
           delete newCharacters[id];
           return { characters: newCharacters };
-        }),
+        });
+      },
       clearAll: () => set({ characters: {} }),
       setAllOffline: () => 
         set((state) => {
           const offlineChars: Record<string, CharacterStatus> = {};
           for (const id of Object.keys(state.characters)) {
-            offlineChars[id] = { skills: 'Offline', industry: 'Offline', pi: 'Offline' };
+            offlineChars[id] = { 
+              ...state.characters[id],
+              skills: 'Offline', 
+              industry: 'Offline', 
+              pi: 'Offline' 
+            };
           }
           return { characters: offlineChars };
         }),

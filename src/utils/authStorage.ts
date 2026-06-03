@@ -3,6 +3,7 @@ import { get, update } from "idb-keyval";
 export interface CharacterAuth {
   accessToken: string;
   refreshToken: string;
+  expiresAt: number;
   characterName: string;
 }
 

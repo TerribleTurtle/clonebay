@@ -30,8 +30,14 @@ export const handlers = [
     return HttpResponse.json({ solar_system_id: 30000142 });
   }),
 
-  http.get('https://esi.evetech.net/latest/universe/systems/:systemId/', () => {
-    return HttpResponse.json({ name: 'Jita' });
+  http.get('https://esi.evetech.net/latest/universe/systems/:systemId/', ({ params }) => {
+    return HttpResponse.json({ 
+      constellation_id: 20000020,
+      name: 'Jita',
+      position: { x: 0, y: 0, z: 0 },
+      security_status: 0.9,
+      system_id: Number(params['systemId']) || 30000142
+    });
   }),
 
   http.get('https://esi.evetech.net/latest/universe/types/:typeId/', ({ params }) => {

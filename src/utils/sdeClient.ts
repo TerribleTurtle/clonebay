@@ -1,16 +1,11 @@
 import { get, set } from 'idb-keyval';
+import { EsiSdeTypeSchema, EsiSdeSystemSchema, type EsiSdeType } from '../schemas/esi';
 
-export interface SdeTypeData {
-  capacity?: number;
-  volume?: number;
-  group_id?: number;
-}
-
-export async function fetchSdeType(typeId: number): Promise<SdeTypeData> {
+export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   const cacheKey = `sde_type_${typeId}`;
   
   // Check IndexedDB first
-  const cachedData = await get<SdeTypeData>(cacheKey);
+  const cachedData = await get<EsiSdeType>(cacheKey);
   if (cachedData) {
     return cachedData;
   }
@@ -21,13 +16,8 @@ export async function fetchSdeType(typeId: number): Promise<SdeTypeData> {
     throw new Error(`Failed to fetch SDE type ${typeId}: ${response.statusText}`);
   }
 
-  const data = await response.json();
-  
-  const result: SdeTypeData = {
-    capacity: data.capacity,
-    volume: data.volume,
-    group_id: data.group_id,
-  };
+  const rawData = await response.json();
+  const result = EsiSdeTypeSchema.parse(rawData);
 
   // Permanently cache the result
   await set(cacheKey, result);
@@ -50,8 +40,9 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
     throw new Error(`Failed to fetch SDE system ${systemId}: ${response.statusText}`);
   }
 
-  const data = await response.json();
-  const name = String(data.name);
+  const rawData = await response.json();
+  const data = EsiSdeSystemSchema.parse(rawData);
+  const name = data.name;
 
   // Permanently cache the result
   await set(cacheKey, name);

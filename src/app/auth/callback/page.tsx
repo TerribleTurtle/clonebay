@@ -4,9 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { addOrUpdateCharacter } from "@/utils/authStorage";
 
-const EXPECTED_JWT_PARTS = 3;
-const HEX_RADIX = 16;
-const SLICE_LAST_TWO = -2;
+import { exchangeCodeForToken } from "@/utils/ssoClient";
 
 function CallbackLogic() {
   const router = useRouter();
@@ -35,55 +33,21 @@ function CallbackLogic() {
 
       const redirectUri = `${window.location.origin}/auth/callback`;
 
-      const response = await fetch("https://login.eveonline.com/v2/oauth/token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Host": "login.eveonline.com"
-        },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          client_id: clientId,
-          code: code,
-          code_verifier: codeVerifier,
-          redirect_uri: redirectUri,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch token: ${errorText}`);
-      }
-
-      const tokenData = await response.json();
-      
-      // Decode JWT to extract character identity
-      const tokenParts = tokenData.access_token.split(".");
-      if (tokenParts.length !== EXPECTED_JWT_PARTS) {
-        throw new Error("Invalid JWT format received from EVE SSO.");
-      }
-
-      const payloadBase64 = tokenParts[1].replace(/-/g, "+").replace(/_/g, "/");
-      const payloadJson = decodeURIComponent(
-        atob(payloadBase64)
-          .split("")
-          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(HEX_RADIX)).slice(SLICE_LAST_TWO))
-          .join("")
+      const { accessToken, refreshToken, expiresIn, characterId, characterName } = await exchangeCodeForToken(
+        code,
+        codeVerifier,
+        clientId,
+        redirectUri
       );
-      const payload = JSON.parse(payloadJson);
 
-      const characterId = payload.sub?.split(":").pop();
-      const characterName = payload.name;
-
-      if (!characterId || !characterName) {
-        throw new Error("Missing 'sub' or 'name' claims in token payload.");
-      }
+      const MS_PER_SECOND = 1000;
 
       // Store in IndexedDB dictionary
       await addOrUpdateCharacter(characterId, {
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token,
-        characterName: characterName,
+        accessToken,
+        refreshToken,
+        expiresAt: Date.now() + expiresIn * MS_PER_SECOND,
+        characterName,
       });
 
       // Clean up session storage

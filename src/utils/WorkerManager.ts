@@ -9,6 +9,7 @@ export class WorkerManager {
   
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private pongTimeout: ReturnType<typeof setTimeout> | null = null;
+  private restartTimeout: ReturnType<typeof setTimeout> | null = null;
   
   private retryAttempt = 0;
   private isRunning = false;
@@ -104,6 +105,10 @@ export class WorkerManager {
       clearTimeout(this.pongTimeout);
       this.pongTimeout = null;
     }
+    if (this.restartTimeout !== null) {
+      clearTimeout(this.restartTimeout);
+      this.restartTimeout = null;
+    }
     if (this.worker) {
       this.worker.terminate();
       this.worker = null;
@@ -149,7 +154,8 @@ export class WorkerManager {
     
     logger.info(`WorkerManager: Restarting worker in ${Math.round(delay)}ms (Attempt ${this.retryAttempt})`);
     
-    setTimeout(() => {
+    this.restartTimeout = setTimeout(() => {
+      this.restartTimeout = null;
       if (this.isRunning) {
         this.initWorker();
       }

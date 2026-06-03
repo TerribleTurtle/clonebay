@@ -17,12 +17,14 @@ describe('authStorage', () => {
     await addOrUpdateCharacter('char1', {
       accessToken: 'token1',
       refreshToken: 'refresh1',
+      expiresAt: 1234567890,
       characterName: 'Alice'
     });
 
     await addOrUpdateCharacter('char2', {
       accessToken: 'token2',
       refreshToken: 'refresh2',
+      expiresAt: 1234567890,
       characterName: 'Bob'
     });
 
@@ -53,6 +55,7 @@ describe('authStorage', () => {
       'char3': {
         accessToken: 'token3',
         refreshToken: 'refresh3',
+        expiresAt: 1234567890,
         characterName: 'Charlie'
       }
     });
@@ -66,11 +69,13 @@ describe('authStorage', () => {
     await addOrUpdateCharacter('char1', {
       accessToken: 'token1',
       refreshToken: 'refresh1',
+      expiresAt: 1234567890,
       characterName: 'Alice'
     });
     await addOrUpdateCharacter('char2', {
       accessToken: 'token2',
       refreshToken: 'refresh2',
+      expiresAt: 1234567890,
       characterName: 'Bob'
     });
 

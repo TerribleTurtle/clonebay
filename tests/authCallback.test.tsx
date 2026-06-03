@@ -59,12 +59,14 @@ describe('Auth Callback', () => {
       name: 'Test Character'
     });
 
-    vi.mocked(global.fetch).mockResolvedValue(
+    vi.mocked(global.fetch).mockImplementation(() => Promise.resolve(
       new Response(JSON.stringify({
         access_token: fakeJwt,
-        refresh_token: 'fake-refresh'
+        refresh_token: 'fake-refresh',
+        expires_in: 1200,
+        token_type: 'Bearer'
       }), { status: 200 })
-    );
+    ));
 
     render(<CallbackPage />);
 
@@ -76,6 +78,7 @@ describe('Auth Callback', () => {
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('123456789', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
+      expiresAt: expect.any(Number),
       characterName: 'Test Character'
     });
   });
@@ -99,12 +102,14 @@ describe('Auth Callback', () => {
     const body = btoa(bodyStr).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     const fakeJwt = `${header}.${body}.fake_signature`;
 
-    vi.mocked(global.fetch).mockResolvedValue(
+    vi.mocked(global.fetch).mockImplementation(() => Promise.resolve(
       new Response(JSON.stringify({
         access_token: fakeJwt,
-        refresh_token: 'fake-refresh'
+        refresh_token: 'fake-refresh',
+        expires_in: 1200,
+        token_type: 'Bearer'
       }), { status: 200 })
-    );
+    ));
 
     render(<CallbackPage />);
 
@@ -116,6 +121,7 @@ describe('Auth Callback', () => {
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('9999', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
+      expiresAt: expect.any(Number),
       characterName: 'Jön Dœ 🚀'
     });
   });

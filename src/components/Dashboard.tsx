@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 
 import { useCharacterStore } from '../store/useCharacterStore';
-import { useLogStore } from '../store/useLogStore';
 import { logger } from '../utils/logger';
-import { WorkerManager } from '../utils/WorkerManager';
 import { CharacterRow } from './CharacterRow';
+import { useEsiWorkerManager } from './useEsiWorkerManager';
 
 export const Dashboard: React.FC = () => {
   const characters = useCharacterStore((state) => state.characters);
@@ -23,49 +22,7 @@ export const Dashboard: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    let unsubscribe: () => void;
-    try {
-      const manager = WorkerManager.getInstance();
-      
-      unsubscribe = manager.subscribe((event) => {
-        const { type, payload, timestamp } = event.data;
-        if (type === 'ESI_DATA_UPDATE') {
-          useCharacterStore.getState().updateCharacterStatus(payload.characterId, {
-            [payload.dataType]: payload.status
-          });
-        } else if (type === 'ESI_METRICS_UPDATE') {
-          useCharacterStore.getState().updateCharacterStatus(payload.characterId, {
-            name: payload.name,
-            isk: payload.isk,
-            totalSp: payload.totalSp,
-            unallocatedSp: payload.unallocatedSp,
-            locationId: payload.locationId,
-            locationName: payload.locationName,
-            stationId: payload.stationId,
-            structureId: payload.structureId
-          });
-        } else if (type === 'POLL_COMPLETE') {
-          useCharacterStore.getState().setLastPolled(timestamp);
-        } else if (type === 'WORKER_LOG') {
-          useLogStore.getState().addLog(payload);
-        }
-      });
-      
-      const isMock = localStorage.getItem('eve_mock_mode') === 'true';
-      manager.start(isMock);
-    } catch (error) {
-      logger.error("Failed to start ESI Worker via WorkerManager:", error);
-      throw error; // Fail loudly
-    }
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-      WorkerManager.getInstance().stop();
-    };
-  }, []);
+  useEsiWorkerManager();
 
   const toggleMockMode = () => {
     try {
@@ -115,7 +72,7 @@ export const Dashboard: React.FC = () => {
           {characterEntries.map(([id, status]) => (
             <CharacterRow 
               key={id} 
-              characterName={id} 
+              characterId={id} 
               status={status} 
             />
           ))}

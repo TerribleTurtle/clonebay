@@ -28,23 +28,27 @@ describe('sdeClient', () => {
   it('should fetch from ESI and cache to IndexedDB if not cached', async () => {
     vi.mocked(get).mockResolvedValue(undefined);
 
+    const fullMockData = {
+      capacity: 200,
+      volume: 1.5,
+      group_id: 20,
+      name: 'Test Type',
+      published: true,
+      type_id: 2588
+    };
+
     // Provide a custom override for this specific test
     server.use(
       http.get('https://esi.evetech.net/latest/universe/types/:typeId/', () => {
-        return HttpResponse.json({
-          capacity: 200,
-          volume: 1.5,
-          group_id: 20,
-          name: 'Test Type'
-        });
+        return HttpResponse.json(fullMockData);
       })
     );
 
     const result = await fetchSdeType(2588);
 
     expect(get).toHaveBeenCalledWith('sde_type_2588');
-    expect(result).toEqual({ capacity: 200, volume: 1.5, group_id: 20 });
-    expect(set).toHaveBeenCalledWith('sde_type_2588', { capacity: 200, volume: 1.5, group_id: 20 });
+    expect(result).toEqual(fullMockData);
+    expect(set).toHaveBeenCalledWith('sde_type_2588', fullMockData);
   });
 
   it('should throw an error if fetch fails', async () => {
