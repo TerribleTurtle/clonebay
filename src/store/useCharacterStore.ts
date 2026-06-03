@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { get, set as idbSet } from 'idb-keyval';
+import { removeCharacter as removeAuthCharacter } from '../utils/AuthRepository';
 
 import { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
 
@@ -41,6 +41,9 @@ export interface CharacterStoreState {
   setLastPolled: (timestamp: number) => void;
   setAllOffline: () => void;
   clearAll: () => void;
+  toggleMockMode: (currentMode: boolean) => void;
+  removeAndReload: (id: string) => Promise<void>;
+  initMockMode: () => boolean;
 }
 
 export const useCharacterStore = create<CharacterStoreState>()(
@@ -51,9 +54,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
       setLastPolled: (timestamp) => set({ lastPolled: timestamp }),
       removeCharacter: async (id) => {
         try {
-          const tokens = await get<Record<string, unknown>>('eve_auth_tokens') || {};
-          delete tokens[id];
-          await idbSet('eve_auth_tokens', tokens);
+          await removeAuthCharacter(id);
         } catch (error) {
           console.error(`Failed to remove token for ${id}:`, error);
           throw error;
@@ -63,6 +64,41 @@ export const useCharacterStore = create<CharacterStoreState>()(
           delete newCharacters[id];
           return { characters: newCharacters };
         });
+      },
+      removeAndReload: async (id) => {
+        // We'll just call the store's removeCharacter then window.location.reload()
+        try {
+          // Note: using the same logic since we're in the store
+          await removeAuthCharacter(id);
+          set((s) => {
+            const newCharacters = { ...s.characters };
+            delete newCharacters[id];
+            return { characters: newCharacters };
+          });
+          window.location.reload();
+        } catch (error) {
+          console.error(`Failed to remove character ${id}:`, error);
+          throw error;
+        }
+      },
+      toggleMockMode: (currentMode: boolean) => {
+        try {
+          const newMockMode = !currentMode;
+          localStorage.setItem('eve_mock_mode', String(newMockMode));
+          set({ characters: {} }); // clearAll equivalent
+          window.location.reload();
+        } catch (error) {
+          console.error("Failed to write eve_mock_mode to localStorage:", error);
+          throw error;
+        }
+      },
+      initMockMode: () => {
+        try {
+          return localStorage.getItem('eve_mock_mode') === 'true';
+        } catch (error) {
+          console.error("Failed to read eve_mock_mode from localStorage:", error);
+          return false;
+        }
       },
       clearAll: () => set({ characters: {} }),
       setAllOffline: () => 

@@ -8,12 +8,14 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
     globals: true,
+    mockReset: true,
+    restoreMocks: true,
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
     coverage: {
       provider: 'v8',
-      include: ['src/lib/thresholds/**', 'src/lib/esi/**'],
+      include: ['src/utils/thresholds.ts'],
       thresholds: {
         statements: 100,
         branches: 100,

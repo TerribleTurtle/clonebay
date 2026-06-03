@@ -3,6 +3,8 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import boundaries from "eslint-plugin-boundaries";
 import importPlugin from "eslint-plugin-import";
+import promisePlugin from "eslint-plugin-promise";
+import functionalPlugin from "eslint-plugin-functional";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -19,6 +21,8 @@ const eslintConfig = defineConfig([
     plugins: {
       "boundaries": boundaries,
       "import": importPlugin,
+      "promise": promisePlugin,
+      "functional": functionalPlugin,
     },
     settings: {
       "boundaries/elements": [
@@ -99,8 +103,24 @@ const eslintConfig = defineConfig([
           "message": "FAIL LOUDLY: Accessing non-NEXT_PUBLIC_ environment variables is banned. EVE SSO tokens must be stored client-side."
         }
       ],
+      "max-lines": ["warn", { "max": 200, "skipBlankLines": true, "skipComments": true }],
       "no-magic-numbers": ["error", { "ignore": [0, 1, -1] }],
       "no-empty": ["error", { "allowEmptyCatch": false }],
+      "promise/catch-or-return": "error",
+      "promise/no-return-wrap": "error",
+      "no-restricted-imports": [
+        "error",
+        {
+          "paths": [
+            { "name": "next/server", "message": "FAIL LOUDLY: Server features are banned." },
+            { "name": "next/headers", "message": "FAIL LOUDLY: Server features are banned." },
+            { "name": "next/cache", "message": "FAIL LOUDLY: Server features are banned." },
+            { "name": "fs", "message": "FAIL LOUDLY: Node.js backend features are banned." },
+            { "name": "child_process", "message": "FAIL LOUDLY: Node.js backend features are banned." },
+            { "name": "crypto", "message": "FAIL LOUDLY: Node.js backend features are banned." }
+          ]
+        }
+      ],
       "import/no-cycle": "error",
       "boundaries/element-types": [
         "error",
@@ -126,10 +146,82 @@ const eslintConfig = defineConfig([
     }
   },
   {
+    files: ["src/app/**/*.tsx", "src/components/**/*.tsx"],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        {
+          "name": "localStorage",
+          "message": "FAIL LOUDLY: Direct access to localStorage is banned in UI. Route it through the Zustand store."
+        },
+        {
+          "name": "sessionStorage",
+          "message": "FAIL LOUDLY: Direct access to sessionStorage is banned in UI. Route it through the Zustand store."
+        }
+      ],
+      "no-restricted-properties": [
+        "error",
+        {
+          "object": "window",
+          "property": "location",
+          "message": "FAIL LOUDLY: window.location access is banned in UI components. Delegate to the store or router."
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/app/**/*.tsx", "src/components/**/*.tsx", "src/store/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          "paths": [
+            {
+              "name": "idb-keyval",
+              "message": "FAIL LOUDLY: Direct idb-keyval imports are BANNED here. Encapsulate inside dedicated repositories (e.g., AuthRepository)."
+            },
+            { "name": "next/server", "message": "FAIL LOUDLY: Server features are banned." },
+            { "name": "next/headers", "message": "FAIL LOUDLY: Server features are banned." },
+            { "name": "next/cache", "message": "FAIL LOUDLY: Server features are banned." },
+            { "name": "fs", "message": "FAIL LOUDLY: Node.js backend features are banned." },
+            { "name": "child_process", "message": "FAIL LOUDLY: Node.js backend features are banned." },
+            { "name": "crypto", "message": "FAIL LOUDLY: Node.js backend features are banned." }
+          ]
+        }
+      ]
+    }
+  },
+  {
     files: ["tests/**/*.ts", "tests/**/*.tsx", "src/**/*.test.ts", "src/**/*.test.tsx", "scripts/**/*.ts"],
     rules: {
       "no-magic-numbers": "off",
       "no-restricted-syntax": "off"
+    }
+  },
+  {
+    files: ["src/utils/**/*.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "CallExpression[callee.object.name='Math'][callee.property.name='random']",
+          "message": "FAIL LOUDLY: Math.random is banned in pure utility functions."
+        },
+        {
+          "selector": "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          "message": "FAIL LOUDLY: Date.now is banned in pure utility functions. Pass time as a parameter."
+        },
+        {
+          "selector": "NewExpression[callee.name='Date'][arguments.length=0]",
+          "message": "FAIL LOUDLY: new Date() is banned in pure utility functions. Pass time as a parameter."
+        }
+      ]
+    }
+  },
+  {
+    files: ["src/schemas/**/*.ts"],
+    rules: {
+      "functional/immutable-data": "error"
     }
   }
 ]);

@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => mockSearchParams
 }));
 
-vi.mock('../src/utils/authStorage', () => ({
+vi.mock('../src/utils/AuthRepository', () => ({
   addOrUpdateCharacter: vi.fn()
 }));
 
@@ -74,7 +74,7 @@ describe('Auth Callback', () => {
       expect(mockPush).toHaveBeenCalledWith('/');
     });
 
-    const { addOrUpdateCharacter } = await import('../src/utils/authStorage');
+    const { addOrUpdateCharacter } = await import('../src/utils/AuthRepository');
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('123456789', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
@@ -117,7 +117,7 @@ describe('Auth Callback', () => {
       expect(mockPush).toHaveBeenCalledWith('/');
     });
 
-    const { addOrUpdateCharacter } = await import('../src/utils/authStorage');
+    const { addOrUpdateCharacter } = await import('../src/utils/AuthRepository');
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('9999', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',

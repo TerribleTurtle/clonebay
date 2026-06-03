@@ -15,6 +15,9 @@ import { handlers } from './handlers';
 
 export const server = setupServer(...handlers);
 
+import { vi } from 'vitest';
+vi.stubGlobal('fetch', vi.fn(() => { throw new Error('Global fetch called without explicit mock!'); }));
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());

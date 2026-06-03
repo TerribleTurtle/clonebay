@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { http, HttpResponse } from 'msw';
 import { fetchEsi, checkDailyDowntime, resetGlobalPauseForTests, getAdjustedNow } from '../src/utils/esiClient';
-import { getAuthDictionary } from '../src/utils/authStorage';
+import { getAuthDictionary } from '../src/utils/AuthRepository';
 import { server } from './setup';
 
 const MOCK_YEAR = 2023;
@@ -15,16 +15,25 @@ vi.mock('../src/utils/esiCache', () => ({
   setCachedEsiData: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../src/utils/authStorage', () => ({
+vi.mock('../src/utils/AuthRepository', () => ({
   getAuthDictionary: vi.fn().mockResolvedValue({}),
   addOrUpdateCharacter: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('ESI Client', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.useFakeTimers();
     resetGlobalPauseForTests();
     vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', 'test-client-id');
+    
+    // Restore default mock behaviors since mockReset clears them
+    const esiCache = await import('../src/utils/esiCache');
+    vi.mocked(esiCache.getCachedEsiData).mockResolvedValue(null);
+    vi.mocked(esiCache.setCachedEsiData).mockResolvedValue(undefined);
+    
+    const authRepo = await import('../src/utils/AuthRepository');
+    vi.mocked(authRepo.getAuthDictionary).mockResolvedValue({});
+    vi.mocked(authRepo.addOrUpdateCharacter).mockResolvedValue(undefined);
   });
 
   afterEach(() => {

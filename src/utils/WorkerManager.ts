@@ -22,11 +22,19 @@ export class WorkerManager {
   private readonly PONG_TIMEOUT_MS = 5000;
   /* eslint-enable no-magic-numbers */
 
-  private constructor() {}
+  private workerFactory: (() => Worker) | null = null;
 
-  public static getInstance(): WorkerManager {
+  private constructor(factory?: () => Worker) {
+    if (factory) {
+      this.workerFactory = factory;
+    }
+  }
+
+  public static getInstance(factory?: () => Worker): WorkerManager {
     if (!WorkerManager.instance) {
-      WorkerManager.instance = new WorkerManager();
+      WorkerManager.instance = new WorkerManager(factory);
+    } else if (factory && !WorkerManager.instance.workerFactory) {
+      WorkerManager.instance.workerFactory = factory;
     }
     return WorkerManager.instance;
   }
@@ -57,7 +65,9 @@ export class WorkerManager {
     }
 
     try {
-      this.worker = new Worker(new URL('../workers/esiWorker.ts', import.meta.url));
+      this.worker = this.workerFactory 
+        ? this.workerFactory() 
+        : new Worker(new URL('../workers/esiWorker.ts', import.meta.url));
       
       this.worker.onmessage = (event) => {
         if (event.data.type === 'PONG') {

@@ -15,32 +15,23 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     try {
-      const mockMode = localStorage.getItem('eve_mock_mode') === 'true';
+      const mockMode = useCharacterStore.getState().initMockMode();
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsMockMode(mockMode);
       setMounted(true);
     } catch (error) {
-      logger.error("Failed to read eve_mock_mode from localStorage:", error);
+      logger.error("Failed to init mock mode:", error);
       throw error; // Fail loudly
     }
   }, []);
 
   useEsiWorkerManager();
 
-  const toggleMockMode = () => {
-    try {
-      const newMockMode = !isMockMode;
-      localStorage.setItem('eve_mock_mode', String(newMockMode));
-      setIsMockMode(newMockMode);
-      useCharacterStore.getState().clearAll();
-      window.location.reload(); 
-    } catch (error) {
-      logger.error("Failed to write eve_mock_mode to localStorage:", error);
-      throw error; // Fail loudly
-    }
-  };
+  const toggleMockModeAction = useCharacterStore((state) => state.toggleMockMode);
 
-  
+  const toggleMockMode = () => {
+    toggleMockModeAction(isMockMode);
+  };
 
   if (!mounted) {
     return (

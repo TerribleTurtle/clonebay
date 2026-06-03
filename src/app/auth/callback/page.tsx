@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addOrUpdateCharacter } from "@/utils/authStorage";
+import { addOrUpdateCharacter } from "@/utils/AuthRepository";
 
 import { exchangeCodeForToken } from "@/utils/ssoClient";
 

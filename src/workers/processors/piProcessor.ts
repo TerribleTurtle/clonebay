@@ -1,9 +1,10 @@
 import { calculatePiStatus, type PiPinState } from '../../utils/thresholds';
-import { EsiPlanetLayoutSchema, type EsiPlanet, type EsiPlanetLayout, type EsiSdeType } from '../../schemas/esi';
-import { fetchEsi, type EsiResponse } from '../../utils/esiClient';
+import { type EsiPlanet, type EsiSdeType } from '../../schemas/esi';
+import type { EsiResponse } from '../../utils/esiClient';
 import { fetchSdeType } from '../../utils/sdeClient';
 import { logger } from '../../utils/logger';
-import { mockFleet } from '../../utils/mockFleet';
+
+import { IEsiService } from '../../services/esi/IEsiService';
 
 const PI_GROUP_COMMAND_CENTER = 1043;
 const PI_GROUP_SPACEPORT = 1048;
@@ -13,32 +14,20 @@ const PI_GROUP_EXTRACTOR_CONTROL_UNIT = 1063;
 export async function processPi(
   charId: string,
   planetsResult: EsiResponse<EsiPlanet[]> | null,
-  isMockMode: boolean,
+  esiService: IEsiService,
   accessToken: string,
   postMessage: (msg: unknown) => void
 ) {
   if (planetsResult && planetsResult.data) {
     try {
       const layoutPromises = planetsResult.data.map(p => {
-        if (isMockMode) {
-          const mockChar = mockFleet.find(c => c.characterId === charId);
-          if (mockChar && mockChar.planetLayouts[p.planet_id]) {
-            return Promise.resolve<EsiResponse<EsiPlanetLayout>>({ data: EsiPlanetLayoutSchema.parse(mockChar.planetLayouts[p.planet_id]), status: 'Green', cached: false });
-          }
-          return Promise.resolve<EsiResponse<EsiPlanetLayout>>({ data: { pins: [] }, status: 'Green', cached: false });
-        }
-        return fetchEsi({
-          url: `https://esi.evetech.net/latest/characters/${charId}/planets/${p.planet_id}/`,
-          accessToken,
-          characterId: charId,
-          schema: EsiPlanetLayoutSchema
-        });
+        return esiService.getPlanetLayout(charId, accessToken, p.planet_id);
       });
       
       const layouts = await Promise.all(layoutPromises);
       const typeIdsToFetch = new Set<number>();
       for (const layoutRes of layouts) {
-        if (!layoutRes.data || !layoutRes.data.pins) continue;
+        if (!layoutRes || !layoutRes.data || !layoutRes.data.pins) continue;
         for (const pin of layoutRes.data.pins) {
           typeIdsToFetch.add(pin.type_id);
           if (pin.contents) {
@@ -60,7 +49,7 @@ export async function processPi(
 
       const allPins: PiPinState[] = [];
       for (const layoutRes of layouts) {
-        if (!layoutRes.data || !layoutRes.data.pins) continue;
+        if (!layoutRes || !layoutRes.data || !layoutRes.data.pins) continue;
         
         for (const pin of layoutRes.data.pins) {
           const sdeData = sdeMap.get(pin.type_id);

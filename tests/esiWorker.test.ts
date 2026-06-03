@@ -32,6 +32,7 @@ vi.mock('idb-keyval', () => {
 describe('esiWorker', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockSetTimeout.mockReturnValue(MOCK_TIMEOUT_ID);
     mockStore = {};
     
     // reset module cache to re-evaluate esiWorker and attach onmessage fresh

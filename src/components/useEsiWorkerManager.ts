@@ -9,7 +9,7 @@ export const useEsiWorkerManager = () => {
     let unsubscribe: () => void;
     let flushTimeout: ReturnType<typeof setTimeout> | null = null;
     try {
-      const manager = WorkerManager.getInstance();
+      const manager = WorkerManager.getInstance(() => new Worker(new URL('../workers/esiWorker.ts', import.meta.url)));
       
       let pendingUpdates: Record<string, Partial<CharacterStatus>> = {};
       const flushUpdates = () => {

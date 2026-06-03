@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../src/utils/authStorage';
+import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../src/utils/AuthRepository';
 import { clear } from 'idb-keyval';
 
-describe('authStorage', () => {
+describe('AuthRepository', () => {
   beforeEach(async () => {
     await clear();
     vi.clearAllMocks();

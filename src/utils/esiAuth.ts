@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getAuthDictionary, addOrUpdateCharacter } from './authStorage';
+import { getAuthDictionary, addOrUpdateCharacter } from './AuthRepository';
 
 export const EsiTokenRefreshResponseSchema = z.object({
   access_token: z.string(),

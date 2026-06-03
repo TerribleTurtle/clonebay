@@ -1,1 +1,4 @@
+#!/bin/sh
+if [ -d "src/app/api" ]; then echo "FAIL: Backend routes are banned"; exit 1; fi
+npx tsx scripts/verify-mocks.ts
 npm run verify

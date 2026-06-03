@@ -23,14 +23,10 @@ const StatusPill: React.FC<{ label: string; status: StatusLight }> = ({ label, s
 
 export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ characterId }) => {
   const status = useCharacterStore(useShallow((state) => state.characters[characterId]));
+  const removeAndReload = useCharacterStore((state) => state.removeAndReload);
+  
   const handleRemove = async () => {
-    try {
-      await useCharacterStore.getState().removeCharacter(characterId);
-      window.location.reload();
-    } catch (error) {
-      console.error(`Failed to remove character ${characterId}:`, error);
-      throw error;
-    }
+    await removeAndReload(characterId);
   };
 
   if (!status) return null;

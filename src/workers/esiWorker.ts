@@ -1,40 +1,12 @@
 import { get } from 'idb-keyval';
-import { fetchEsi, type EsiResponse } from '../utils/esiClient';
 import { logger } from '../utils/logger';
-import { 
-  EsiSkillQueueSchema, 
-  EsiIndustryJobSchema,
-  EsiCharacterSkillsResponseSchema,
-  EsiPlanetSchema,
-  EsiWalletSchema,
-  EsiLocationSchema,
-  EsiSkillQueue,
-  EsiIndustryJob,
-  EsiPlanet,
-  EsiCharacterSkillsResponse,
-  EsiWallet,
-  EsiLocation,
-  EsiShip,
-  EsiClones,
-  EsiFatigue,
-  EsiClonesSchema,
-  EsiFatigueSchema,
-  EsiTransaction,
-  EsiTransactionSchema,
-  EsiShipSchema,
-  EsiMailLabels,
-  EsiContract,
-  EsiMailLabelsSchema,
-  EsiContractSchema,
-  EsiMarketOrder,
-  EsiMarketOrdersArraySchema
-} from '../schemas/esi';
-import { z } from 'zod';
 import { mockFleet } from '../utils/mockFleet';
 import { processSkills } from './processors/skillsProcessor';
 import { processIndustry } from './processors/industryProcessor';
 import { processPi } from './processors/piProcessor';
 import { processMetrics } from './processors/metricsProcessor';
+import { LiveEsiService } from '../services/esi/LiveEsiService';
+import { MockEsiService } from '../services/esi/MockEsiService';
 
 const POLLING_INTERVAL_SECONDS = 60;
 const MS_PER_SECOND = 1000;
@@ -97,6 +69,7 @@ async function pollData(): Promise<void> {
     }
 
     const characterIds = isMockMode ? mockFleet.map(c => c.characterId) : Object.keys(authTokens || {});
+    const esiService = isMockMode ? new MockEsiService() : new LiveEsiService();
     
     for (const charId of characterIds) {
       const tokenInfo = authTokens ? authTokens[charId] : undefined;
@@ -105,72 +78,19 @@ async function pollData(): Promise<void> {
       }
       const accessToken = tokenInfo?.accessToken || 'mock_token';
 
-      let skillsPromise: Promise<EsiResponse<EsiSkillQueue[]> | null>;
-      let charSkillsPromise: Promise<EsiResponse<EsiCharacterSkillsResponse> | null>;
-      let industryPromise: Promise<EsiResponse<EsiIndustryJob[]> | null>;
-      let planetsPromise: Promise<EsiResponse<EsiPlanet[]> | null>;
-      let walletPromise: Promise<EsiResponse<EsiWallet> | null>;
-      let locationPromise: Promise<EsiResponse<EsiLocation> | null>;
-      let shipPromise: Promise<EsiResponse<EsiShip> | null>;
-      let clonesPromise: Promise<EsiResponse<EsiClones> | null>;
-      let fatiguePromise: Promise<EsiResponse<EsiFatigue> | null>;
-      let transactionsPromise: Promise<EsiResponse<EsiTransaction[]> | null>;
-      let mailLabelsPromise: Promise<EsiResponse<EsiMailLabels> | null>;
-      let contractsPromise: Promise<EsiResponse<EsiContract[]> | null>;
-      let marketOrdersPromise: Promise<EsiResponse<EsiMarketOrder[]> | null>;
-
-      const safeFetch = <T>(url: string, schema: z.ZodType<T>, name: string): Promise<EsiResponse<T> | null> => 
-        fetchEsi({ url, accessToken, characterId: charId, schema }).catch(error => {
-          logger.error(`ESI Worker: Error fetching ${name} for ${charId}`, error);
-          return null;
-        });
-
-      if (isMockMode) {
-        const mockChar = mockFleet.find(c => c.characterId === charId);
-        if (mockChar) {
-          skillsPromise = Promise.resolve({ data: z.array(EsiSkillQueueSchema).parse(mockChar.skills), status: 'Green', cached: false });
-          charSkillsPromise = Promise.resolve({ data: EsiCharacterSkillsResponseSchema.parse(mockChar.charSkills), status: 'Green', cached: false });
-          industryPromise = Promise.resolve({ data: z.array(EsiIndustryJobSchema).parse(mockChar.industry), status: 'Green', cached: false });
-          planetsPromise = Promise.resolve({ data: z.array(EsiPlanetSchema).parse(mockChar.planets), status: 'Green', cached: false });
-          walletPromise = Promise.resolve({ data: EsiWalletSchema.parse(mockChar.isk), status: 'Green', cached: false });
-          locationPromise = Promise.resolve({ data: EsiLocationSchema.parse(mockChar.location), status: 'Green', cached: false });
-          shipPromise = Promise.resolve({ data: EsiShipSchema.parse(mockChar.ship), status: 'Green', cached: false });
-          clonesPromise = Promise.resolve({ data: EsiClonesSchema.parse(mockChar.clones), status: 'Green', cached: false });
-          fatiguePromise = Promise.resolve({ data: EsiFatigueSchema.parse(mockChar.fatigue), status: 'Green', cached: false });
-          transactionsPromise = Promise.resolve({ data: z.array(EsiTransactionSchema).parse(mockChar.transactions), status: 'Green', cached: false });
-          mailLabelsPromise = Promise.resolve({ data: EsiMailLabelsSchema.parse(mockChar.mail), status: 'Green', cached: false });
-          contractsPromise = Promise.resolve({ data: z.array(EsiContractSchema).parse(mockChar.contracts), status: 'Green', cached: false });
-          marketOrdersPromise = Promise.resolve({ data: EsiMarketOrdersArraySchema.parse(mockChar.marketOrders), status: 'Green', cached: false });
-        } else {
-          skillsPromise = Promise.resolve(null);
-          charSkillsPromise = Promise.resolve(null);
-          industryPromise = Promise.resolve(null);
-          planetsPromise = Promise.resolve(null);
-          walletPromise = Promise.resolve(null);
-          locationPromise = Promise.resolve(null);
-          shipPromise = Promise.resolve(null);
-          clonesPromise = Promise.resolve(null);
-          fatiguePromise = Promise.resolve(null);
-          transactionsPromise = Promise.resolve(null);
-          mailLabelsPromise = Promise.resolve(null);
-          contractsPromise = Promise.resolve(null);
-          marketOrdersPromise = Promise.resolve(null);
-        }
-      } else {
-        skillsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/skillqueue/`, z.array(EsiSkillQueueSchema), 'skills');
-        charSkillsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/skills/`, EsiCharacterSkillsResponseSchema, 'character skills');
-        industryPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/industry/jobs/`, z.array(EsiIndustryJobSchema), 'industry jobs');
-        planetsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/planets/`, z.array(EsiPlanetSchema), 'planets');
-        walletPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/wallet/`, EsiWalletSchema, 'wallet');
-        locationPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/location/`, EsiLocationSchema, 'location');
-        shipPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/ship/`, EsiShipSchema, 'ship');
-        clonesPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/clones/`, EsiClonesSchema, 'clones');
-        fatiguePromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/fatigue/`, EsiFatigueSchema, 'fatigue');
-        transactionsPromise = safeFetch(`https://esi.evetech.net/v1/characters/${charId}/wallet/transactions/`, z.array(EsiTransactionSchema), 'transactions');
-        mailLabelsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/mail/labels/`, EsiMailLabelsSchema, 'mail labels');
-        contractsPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/contracts/`, z.array(EsiContractSchema), 'contracts');
-        marketOrdersPromise = safeFetch(`https://esi.evetech.net/latest/characters/${charId}/orders/`, EsiMarketOrdersArraySchema, 'market orders');
-      }
+      const skillsPromise = esiService.getSkillQueue(charId, accessToken);
+      const charSkillsPromise = esiService.getCharacterSkills(charId, accessToken);
+      const industryPromise = esiService.getIndustryJobs(charId, accessToken);
+      const planetsPromise = esiService.getPlanets(charId, accessToken);
+      const walletPromise = esiService.getWallet(charId, accessToken);
+      const locationPromise = esiService.getLocation(charId, accessToken);
+      const shipPromise = esiService.getShip(charId, accessToken);
+      const clonesPromise = esiService.getClones(charId, accessToken);
+      const fatiguePromise = esiService.getFatigue(charId, accessToken);
+      const transactionsPromise = esiService.getTransactions(charId, accessToken);
+      const mailLabelsPromise = esiService.getMailLabels(charId, accessToken);
+      const contractsPromise = esiService.getContracts(charId, accessToken);
+      const marketOrdersPromise = esiService.getMarketOrders(charId, accessToken);
 
       const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise, marketOrdersPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult]) => {
         await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult, isMockMode, (msg) => self.postMessage(msg));
@@ -185,7 +105,7 @@ async function pollData(): Promise<void> {
       });
 
       const piProcessing = planetsPromise.then(async (planetsResult) => {
-        await processPi(charId, planetsResult, isMockMode, accessToken, (msg) => self.postMessage(msg));
+        await processPi(charId, planetsResult, esiService, accessToken, (msg) => self.postMessage(msg));
       });
 
       await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing]);
