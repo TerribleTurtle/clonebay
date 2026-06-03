@@ -25,14 +25,55 @@ export interface HttpResponse<T = unknown> {
 export type HttpNext = (req: HttpRequest) => Promise<HttpResponse>;
 export type HttpInterceptor = (req: HttpRequest, next: HttpNext) => Promise<HttpResponse>;
 
+/**
+ * A flexible HTTP client that supports interceptors for request/response mutation.
+ * 
+ * @example
+ * const client = new HttpClient();
+ * client.use(async (req, next) => {
+ *   req.headers = { ...req.headers, 'Authorization': 'Bearer token' };
+ *   const response = await next(req);
+ *   return response;
+ * });
+ * 
+ * const response = await client.request<{ id: number }>({ url: '/api/data', context: {} });
+ */
 export class HttpClient {
   private interceptors: HttpInterceptor[] = [];
 
+  /**
+   * Registers an interceptor to be executed in the request pipeline.
+   * Interceptors are executed in the order they are added.
+   * 
+   * @param interceptor - The interceptor function to add.
+   * @returns The HttpClient instance for chaining.
+   * 
+   * @example
+   * client.use(async (req, next) => {
+   *   console.log('Request started:', req.url);
+   *   return next(req);
+   * });
+   */
   use(interceptor: HttpInterceptor): this {
     this.interceptors.push(interceptor);
     return this;
   }
 
+  /**
+   * Executes an HTTP request through the interceptor pipeline.
+   * 
+   * @template T - The expected type of the response data.
+   * @param req - The request configuration object.
+   * @returns A promise resolving to the HTTP response containing the typed data.
+   * 
+   * @example
+   * const response = await client.request<{ status: string }>({
+   *   url: 'https://esi.evetech.net/latest/status/',
+   *   method: 'GET',
+   *   context: {}
+   * });
+   * console.log(response.data?.status);
+   */
   async request<T = unknown>(req: HttpRequest): Promise<HttpResponse<T>> {
     let index = 0;
     

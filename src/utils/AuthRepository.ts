@@ -78,12 +78,22 @@ export async function removeCharacter(characterId: string): Promise<void> {
 // PKCE Session Storage Encapsulation
 // -----------------------------------------------------------------------------
 
+/**
+ * Stores the PKCE OAuth state parameter in session storage.
+ * 
+ * @param state - The generated state string.
+ */
 export function setPkceState(state: string): void {
   if (typeof window !== 'undefined') {
     sessionStorage.setItem('oauth_state', state);
   }
 }
 
+/**
+ * Retrieves the PKCE OAuth state parameter from session storage.
+ * 
+ * @returns The state string, or null if not found.
+ */
 export function getPkceState(): string | null {
   if (typeof window !== 'undefined') {
     return sessionStorage.getItem('oauth_state');
@@ -91,12 +101,22 @@ export function getPkceState(): string | null {
   return null;
 }
 
+/**
+ * Stores the PKCE code verifier in session storage.
+ * 
+ * @param verifier - The generated code verifier string.
+ */
 export function setCodeVerifier(verifier: string): void {
   if (typeof window !== 'undefined') {
     sessionStorage.setItem('code_verifier', verifier);
   }
 }
 
+/**
+ * Retrieves the PKCE code verifier from session storage.
+ * 
+ * @returns The code verifier string, or null if not found.
+ */
 export function getCodeVerifier(): string | null {
   if (typeof window !== 'undefined') {
     return sessionStorage.getItem('code_verifier');
@@ -104,6 +124,9 @@ export function getCodeVerifier(): string | null {
   return null;
 }
 
+/**
+ * Clears all PKCE-related data from session storage.
+ */
 export function clearPkceData(): void {
   if (typeof window !== 'undefined') {
     sessionStorage.removeItem('oauth_state');
