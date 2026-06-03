@@ -125,14 +125,7 @@ async function pollData() {
       // 1. Process Skills
       if (skillsResult && skillsResult.data) {
         // Map to strictly omit undefined properties for exactOptionalPropertyTypes
-        const validSkills = skillsResult.data.map(item => {
-          const mapped: { finish_date?: string } = {};
-          if (item.finish_date !== undefined) {
-            mapped.finish_date = item.finish_date;
-          }
-          return mapped;
-        });
-        const status = calculateSkillQueueStatus(validSkills);
+        const status = calculateSkillQueueStatus(skillsResult.data);
         self.postMessage({
           type: 'ESI_DATA_UPDATE',
           payload: { characterId: charId, dataType: 'skills', status, data: skillsResult.data }

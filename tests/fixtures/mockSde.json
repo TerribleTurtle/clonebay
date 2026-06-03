@@ -1,8 +1,42 @@
-{
-  "type_id": 1234,
-  "name": "Plagioclase",
-  "description": "A very common ore.",
-  "capacity": 100,
-  "volume": 0.35,
-  "group_id": 18
-}
+[
+  {
+    "capacity": 500,
+    "description": "Command Centers are the primary structures built on planets, providing the infrastructure to support all other facilities.",
+    "group_id": 1365,
+    "name": "Temperate Command Center",
+    "published": true,
+    "radius": 1,
+    "type_id": 2256,
+    "volume": 0
+  },
+  {
+    "capacity": 10000,
+    "description": "Spaceports provide massive storage for planetary commodities and are the only facilities capable of exporting materials to the planet's Customs Office.",
+    "group_id": 1365,
+    "name": "Temperate Spaceport",
+    "published": true,
+    "radius": 1,
+    "type_id": 2588,
+    "volume": 0
+  },
+  {
+    "capacity": 0,
+    "description": "Extractor Control Units coordinate planetary extractor heads.",
+    "group_id": 1365,
+    "name": "Temperate Extractor Control Unit",
+    "published": true,
+    "radius": 1,
+    "type_id": 2544,
+    "volume": 0
+  },
+  {
+    "capacity": 12000,
+    "description": "Storage Facilities provide bulk storage for planetary commodities.",
+    "group_id": 1365,
+    "name": "Temperate Storage Facility",
+    "published": true,
+    "radius": 1,
+    "type_id": 2546,
+    "volume": 0
+  }
+]

@@ -1,6 +1,6 @@
 {
-  "access_token": "mock_new_access_token",
-  "expires_in": 1200,
+  "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Imp3ay1zaWciLCJ0eXAiOiJKV1QifQ.eyJzY3AiOlsiZXNpLXNraWxscy5yZWFkX3NraWxscy52MSIsImVzaS1za2lsbHMucmVhZF9za2lsbHF1ZXVlLnYxIl0sImp0aSI6ImIzYzRhNTU1LWJiZGQtNDMyMS1hYTExLWRkZWYxMjM0NTY3OCIsImtpZCI6Imp3ay1zaWciLCJzdWIiOiJDSEFSQUNURVI6RVZFOjIxMTIzNDU2NzgiLCJhenAiOiIxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZiIsInRlbmFudCI6InRyYW5xdWlsaXR5IiwidGllciI6ImxpdmUiLCJyZWdpb24iOiJ3b3JsZCIsImF1ZCI6WyIxMjM0NTY3ODkwYWJjZGVmMTIzNDU2Nzg5MGFiY2RlZiIsIkVWRSBPbmxpbmUiXSwibmFtZSI6Ik1vY2sgQ2hhcmFjdGVyIiwib3duZXIiOiJiM2M0YTU1NSIsImV4cCI6MTcxNzQyNTAwMCwiaXNzIjoibG9naW4uZXZlb25saW5lLmNvbSJ9.S1g3h2j...",
+  "expires_in": 1199,
   "token_type": "Bearer",
-  "refresh_token": "mock_new_refresh_token"
+  "refresh_token": "A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2"
 }

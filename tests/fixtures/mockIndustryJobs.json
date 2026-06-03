@@ -1,1 +1,45 @@
-[]
+[
+  {
+    "job_id": 412345678,
+    "installer_id": 2112345678,
+    "facility_id": 60003760,
+    "station_id": 60003760,
+    "activity_id": 1,
+    "blueprint_id": 1023456789012,
+    "blueprint_type_id": 689,
+    "blueprint_location_id": 60003760,
+    "output_location_id": 60003760,
+    "runs": 10,
+    "cost": 12500.5,
+    "licensed_runs": 200,
+    "probability": 1.0,
+    "product_type_id": 688,
+    "status": "active",
+    "duration": 86400,
+    "start_date": "2026-06-03T10:14:32Z",
+    "end_date": "2026-06-04T10:14:32Z"
+  },
+  {
+    "job_id": 412345679,
+    "installer_id": 2112345678,
+    "facility_id": 60003760,
+    "station_id": 60003760,
+    "activity_id": 1,
+    "blueprint_id": 1023456789013,
+    "blueprint_type_id": 2047,
+    "blueprint_location_id": 60003760,
+    "output_location_id": 60003760,
+    "runs": 1,
+    "cost": 500.0,
+    "licensed_runs": 1,
+    "probability": 1.0,
+    "product_type_id": 2046,
+    "status": "delivered",
+    "duration": 3600,
+    "start_date": "2026-05-30T10:22:15Z",
+    "end_date": "2026-05-30T11:22:15Z",
+    "completed_date": "2026-05-30T11:45:00Z",
+    "completed_character_id": 2112345678,
+    "successful_runs": 1
+  }
+]

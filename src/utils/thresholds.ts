@@ -11,9 +11,7 @@ export const YELLOW_THRESHOLD_HOURS = 12;
 const MS_IN_HOUR = MINUTES_PER_HOUR * SECONDS_PER_MINUTE * MS_PER_SECOND;
 const MS_IN_DAY = HOURS_IN_DAY * MS_IN_HOUR;
 
-export interface SkillQueueItem {
-  finish_date?: string; // ISO 8601 string
-}
+import { EsiSkillQueue, EsiIndustryJob } from '../schemas/esi';
 
 /**
  * Calculates the status of a character's skill queue.
@@ -22,7 +20,7 @@ export interface SkillQueueItem {
  * - GREEN: Queue has > 3 days remaining.
  */
 export function calculateSkillQueueStatus(
-  queue: SkillQueueItem[],
+  queue: EsiSkillQueue[],
   nowMs: number = Date.now()
 ): DashboardStatus {
   if (!queue || queue.length === 0) {
@@ -119,10 +117,7 @@ export function calculatePiStatus(
   return status;
 }
 
-export interface IndustryJobState {
-  status: string; // e.g. 'active', 'paused', 'ready'
-  end_date?: string; // ISO 8601 string
-}
+
 
 /**
  * Calculates the status of a character's Industry Jobs.
@@ -131,7 +126,7 @@ export interface IndustryJobState {
  * - GREEN: All jobs running > 12 hours remaining.
  */
 export function calculateIndustryStatus(
-  jobs: IndustryJobState[],
+  jobs: EsiIndustryJob[],
   maxJobs: number,
   nowMs: number = Date.now()
 ): DashboardStatus {

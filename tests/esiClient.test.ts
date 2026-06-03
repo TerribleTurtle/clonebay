@@ -39,9 +39,9 @@ describe('ESI Client', () => {
     expect(checkDailyDowntime()).toBe(true);
 
     const result = await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     });
 
@@ -54,26 +54,26 @@ describe('ESI Client', () => {
     vi.setSystemTime(date);
 
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', () => {
-        return HttpResponse.json([{ skill_id: 1 }], {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', () => {
+        return HttpResponse.json([{ skill_id: 3436 }], {
           headers: { 'X-Esi-Error-Limit-Remain': '15' }
         });
       })
     );
 
     const result1 = await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     });
 
     expect(result1.status).toBe('Green');
 
     const result2 = await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     });
 
@@ -86,17 +86,17 @@ describe('ESI Client', () => {
 
     vi.mocked(getAuthDictionary).mockResolvedValue({
       // @ts-expect-error - Testing missing types
-      '123': { accessToken: 'old-token', refreshToken: 'valid-refresh-token' }
+      '2112345678': { accessToken: 'old-token', refreshToken: 'valid-refresh-token' }
     });
 
     let attempt = 0;
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', () => {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', () => {
         attempt++;
         if (attempt === 1) {
           return new HttpResponse(null, { status: 401 });
         }
-        return HttpResponse.json([{ skill_id: 2 }], {
+        return HttpResponse.json([{ skill_id: 3437 }], {
           headers: { 'X-Esi-Error-Limit-Remain': '100' }
         });
       }),
@@ -106,14 +106,14 @@ describe('ESI Client', () => {
     );
 
     const result = await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'old-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     });
 
     expect(result.status).toBe('Green');
-    expect(result.data).toEqual([{ skill_id: 2 }]);
+    expect(result.data).toEqual([{ skill_id: 3437 }]);
     expect(attempt).toBe(2);
   });
 
@@ -125,7 +125,7 @@ describe('ESI Client', () => {
     const serverTime = new Date(localTime.getTime() + 5 * 60 * 1000);
 
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', () => {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', () => {
         return HttpResponse.json([], {
           headers: { 'Date': serverTime.toUTCString() }
         });
@@ -133,9 +133,9 @@ describe('ESI Client', () => {
     );
 
     await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     });
 
@@ -157,18 +157,18 @@ describe('ESI Client', () => {
     });
 
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', async () => {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', async () => {
         handlerCalls++;
         await blockPromise;
-        return HttpResponse.json([{ skill_id: handlerCalls }]);
+        return HttpResponse.json([{ skill_id: 3436 + handlerCalls }]);
       })
     );
 
     // Fire 6 requests instantly
     const requests = Array.from({ length: 6 }).map(() => fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     }));
 
@@ -202,7 +202,7 @@ describe('ESI Client', () => {
     });
 
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', ({ request }) => {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', ({ request }) => {
         if (request.headers.get('If-None-Match') === '"my-etag"') {
           return new HttpResponse(null, { status: 304 });
         }
@@ -211,9 +211,9 @@ describe('ESI Client', () => {
     );
 
     const result = await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     });
 
@@ -228,11 +228,11 @@ describe('ESI Client', () => {
 
     vi.mocked(getAuthDictionary).mockResolvedValue({
       // @ts-expect-error - Testing missing types
-      '123': { accessToken: 'old-token', refreshToken: 'valid-refresh-token' }
+      '2112345678': { accessToken: 'old-token', refreshToken: 'valid-refresh-token' }
     });
 
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', () => {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', () => {
         return new HttpResponse(null, { status: 401 });
       }),
       http.post('https://login.eveonline.com/v2/oauth/token', () => {
@@ -241,9 +241,9 @@ describe('ESI Client', () => {
     );
 
     await expect(fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'old-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     })).rejects.toThrow('ESI OAuth Refresh failed with status 401');
   });
@@ -257,15 +257,15 @@ describe('ESI Client', () => {
     vi.mocked(mockEsiCache.getCachedEsiData).mockResolvedValueOnce(null);
 
     server.use(
-      http.get('https://esi.evetech.net/latest/characters/123/skillqueue/', () => {
+      http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', () => {
         return new HttpResponse(null, { status: 304, statusText: 'Not Modified' }); // Network incorrectly returns 304
       })
     );
 
     await expect(fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/123/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
       accessToken: 'dummy-token',
-      characterId: '123',
+      characterId: '2112345678',
       schema: z.unknown()
     })).rejects.toThrow('ESI request failed with status 304: Not Modified');
   });

@@ -38,7 +38,7 @@ describe('esiWorker', () => {
 
   it('dispatches postMessage with status Green when fetchEsi succeeds via MSW', async () => {
     mockStore['eve_auth_tokens'] = {
-      'char1': {
+      '2112345678': {
         accessToken: 'fake-token',
         refreshToken: 'fake-refresh',
         characterName: 'Alice'
@@ -70,7 +70,7 @@ describe('esiWorker', () => {
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
         payload: expect.objectContaining({
-          characterId: 'char1',
+          characterId: '2112345678',
           dataType: 'skills'
         })
       })
@@ -92,7 +92,7 @@ describe('esiWorker', () => {
 
   it('correctly calculates maxJobs using character_skills (Mass Production and Advanced Mass Production)', async () => {
     mockStore['eve_auth_tokens'] = {
-      'char1': {
+      '2112345678': {
         accessToken: 'fake-token',
         refreshToken: 'fake-refresh',
         characterName: 'Alice'
@@ -103,8 +103,8 @@ describe('esiWorker', () => {
       http.get('https://esi.evetech.net/latest/characters/:characterId/skills/', () => {
         return HttpResponse.json({
           skills: [
-            { skill_id: 3388, active_skill_level: 4 },  // Mass Production
-            { skill_id: 24630, active_skill_level: 2 } // Advanced Mass Production
+            { skill_id: 3388, active_skill_level: 4, trained_skill_level: 4 },  // Mass Production
+            { skill_id: 24630, active_skill_level: 2, trained_skill_level: 2 } // Advanced Mass Production
           ]
         });
       }),
@@ -125,7 +125,7 @@ describe('esiWorker', () => {
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
         payload: expect.objectContaining({
-          characterId: 'char1',
+          characterId: '2112345678',
           dataType: 'industry',
           // maxJobs = 1 + 4 + 2 = 7. 
           // mockIndustryJobs might have fewer than 7 jobs, meaning status will be Red
@@ -138,7 +138,7 @@ describe('esiWorker', () => {
 
   it('verifies Planetary Interaction logic using real mockPlanets.json payload', async () => {
     mockStore['eve_auth_tokens'] = {
-      'char1': {
+      '2112345678': {
         accessToken: 'fake-token',
         refreshToken: 'fake-refresh',
         characterName: 'Alice'
@@ -153,7 +153,7 @@ describe('esiWorker', () => {
         return HttpResponse.json({
           pins: [
             {
-              pin_id: 12345,
+              pin_id: 1023456789012,
               type_id: 2256 // Storage facility based on SDE?
             }
           ]
@@ -173,7 +173,7 @@ describe('esiWorker', () => {
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
         payload: expect.objectContaining({
-          characterId: 'char1',
+          characterId: '2112345678',
           dataType: 'pi'
         })
       })

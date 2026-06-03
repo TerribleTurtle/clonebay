@@ -18,9 +18,9 @@ describe('sdeClient', () => {
     const mockCachedData = { capacity: 100, volume: 0.5, group_id: 10 };
     vi.mocked(get).mockResolvedValue(mockCachedData);
 
-    const result = await fetchSdeType(1234);
+    const result = await fetchSdeType(2256);
 
-    expect(get).toHaveBeenCalledWith('sde_type_1234');
+    expect(get).toHaveBeenCalledWith('sde_type_2256');
     expect(result).toEqual(mockCachedData);
     expect(vi.mocked(set)).not.toHaveBeenCalled();
   });
@@ -40,11 +40,11 @@ describe('sdeClient', () => {
       })
     );
 
-    const result = await fetchSdeType(5678);
+    const result = await fetchSdeType(2588);
 
-    expect(get).toHaveBeenCalledWith('sde_type_5678');
+    expect(get).toHaveBeenCalledWith('sde_type_2588');
     expect(result).toEqual({ capacity: 200, volume: 1.5, group_id: 20 });
-    expect(set).toHaveBeenCalledWith('sde_type_5678', { capacity: 200, volume: 1.5, group_id: 20 });
+    expect(set).toHaveBeenCalledWith('sde_type_2588', { capacity: 200, volume: 1.5, group_id: 20 });
   });
 
   it('should throw an error if fetch fails', async () => {
@@ -56,6 +56,6 @@ describe('sdeClient', () => {
       })
     );
 
-    await expect(fetchSdeType(9999)).rejects.toThrow('Failed to fetch SDE type 9999: Internal Server Error');
+    await expect(fetchSdeType(2544)).rejects.toThrow('Failed to fetch SDE type 2544: Internal Server Error');
   });
 });
