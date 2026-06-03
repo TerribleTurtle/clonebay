@@ -46,7 +46,7 @@ export const CharacterRow: React.FC<CharacterRowProps> = ({ characterName, statu
             ISK: <span className="text-amber-500 font-bold">{status.isk?.toLocaleString() ?? '???'}</span>
           </span>
           <span className="text-zinc-400">
-            Allocated SP: <span className="text-emerald-500 font-bold">{status.totalSp?.toLocaleString() ?? '???'}</span>
+            Total SP: <span className="text-emerald-500 font-bold">{status.totalSp !== undefined ? (status.totalSp + (status.unallocatedSp || 0)).toLocaleString() : '???'}</span>
           </span>
           {status.unallocatedSp !== undefined && status.unallocatedSp > 0 && (
             <span className="text-zinc-400">
