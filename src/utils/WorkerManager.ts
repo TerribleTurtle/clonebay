@@ -39,6 +39,12 @@ export class WorkerManager {
     return WorkerManager.instance;
   }
 
+  /**
+   * Subscribes a handler to receive messages from the worker.
+   * 
+   * @param {WorkerMessageHandler} handler - The function to handle incoming worker messages.
+   * @returns {() => void} A cleanup function that removes the subscribed handler.
+   */
   public subscribe(handler: WorkerMessageHandler) {
     this.messageHandlers.add(handler);
     return () => {
@@ -46,6 +52,12 @@ export class WorkerManager {
     };
   }
 
+  /**
+   * Starts the worker polling loop. 
+   * If the worker is already running, this is a no-op.
+   * 
+   * @param {boolean} [isMockMode=false] - Whether to use mock ESI data instead of real ESI calls.
+   */
   public start(isMockMode: boolean = false) {
     this.isMockMode = isMockMode;
     if (this.isRunning) return;
@@ -54,6 +66,9 @@ export class WorkerManager {
     this.initWorker();
   }
 
+  /**
+   * Stops the worker and cleans up all timeouts/intervals.
+   */
   public stop() {
     this.isRunning = false;
     this.cleanup();
@@ -123,6 +138,9 @@ export class WorkerManager {
     }
   }
 
+  // Ping/Pong Architecture: Ensures the Web Worker hasn't silently died or locked up.
+  // We send a PING periodically; if a PONG isn't returned within a timeout,
+  // we assume the thread is stuck (e.g. frozen by the OS or a tight loop) and forcefully restart it.
   private startPingPong() {
     this.pingInterval = setInterval(() => {
       this.sendPing();
@@ -154,6 +172,10 @@ export class WorkerManager {
 
     const EXPONENTIAL_BASE = 2;
     const backoff = Math.min(this.MAX_DELAY_MS, this.BASE_DELAY_MS * (EXPONENTIAL_BASE ** this.retryAttempt));
+    
+    // Jitter Math: We add up to 1 second of random jitter to the exponential backoff.
+    // This prevents the "thundering herd" problem where multiple instances (e.g. multiboxers)
+    // all restart and hammer the ESI API at the exact same moment.
     /* eslint-disable-next-line no-restricted-syntax */
     const jitter = Math.random() * 1000; // eslint-disable-line no-magic-numbers
     const delay = backoff + jitter;
