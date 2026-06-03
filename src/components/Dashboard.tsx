@@ -22,7 +22,8 @@ export const Dashboard: React.FC = () => {
       setIsMockMode(mockMode);
       setMounted(true);
     } catch (error) {
-      logger.error("Failed to init mock mode:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`[Dashboard] Critical Failure: LocalStorage read failed during mock mode initialization. Details: ${errorMessage}`, error);
       throw error; // Fail loudly
     }
   }, []);
