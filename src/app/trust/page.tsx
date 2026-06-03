@@ -3,14 +3,20 @@
 import { clearAuthDictionary } from '../../utils/AuthRepository';
 import { clearAllStorage } from '../../store/useSettingsStore';
 import { useRouter } from 'next/navigation';
+import { logger } from '../../utils/logger';
 
 export default function TrustPage() {
   const router = useRouter();
   const handleWipe = async () => {
     if (confirm('Are you sure? This will permanently wipe all stored EVE SSO tokens and character states from your browser.')) {
-      await clearAuthDictionary();
-      clearAllStorage();
-      router.push('/');
+      try {
+        await clearAuthDictionary();
+        clearAllStorage();
+        router.push('/');
+      } catch (err) {
+        logger.error("Failed to wipe local data", err);
+        alert("CRITICAL ERROR: Failed to wipe data. Tokens may still exist.");
+      }
     }
   };
 

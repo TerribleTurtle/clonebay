@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { setPkceState, setCodeVerifier } from "@/utils/AuthRepository";
 
 import { generateRandomString, generateCodeChallenge } from "@/utils/pkce";
+import { logger } from "@/utils/logger";
 
 const STATE_LENGTH = 16;
 const CODE_VERIFIER_LENGTH = 32;
@@ -58,7 +59,7 @@ export default function LoginPage() {
         // eslint-disable-next-line no-restricted-properties
         window.location.href = `https://login.eveonline.com/v2/oauth/authorize?${params.toString()}`;
       } catch (err) {
-        console.error("Failed to start login:", err);
+        logger.error("Failed to start login", err);
         setError(err instanceof Error ? err.message : "Unknown error");
       }
     }
