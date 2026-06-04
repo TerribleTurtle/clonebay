@@ -10,7 +10,7 @@ function createLog(level: LogLevel, message: string, data?: unknown) {
     safeData = { name: data.name, message: data.message, stack: data.stack };
   } else if (data !== undefined && data !== null) {
     try {
-      safeData = JSON.parse(JSON.stringify(data));
+      safeData = structuredClone(data);
     } catch (error) {
       console.error('Failed to stringify log data:', error);
       safeData = '[Uncloneable Object]';

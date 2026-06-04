@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSettingsStore } from '../store/useSettingsStore';
 
 export const ConsentBanner: React.FC = () => {
-  const { consentStatus, setConsentStatus } = useSettingsStore();
+  const consentStatus = useSettingsStore((s) => s.consentStatus);
+  const setConsentStatus = useSettingsStore((s) => s.setConsentStatus);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

@@ -15,8 +15,11 @@ export function processIndustry(
   try {
     if (industryResult && industryResult.data && charSkillsResult && charSkillsResult.data) {
       const skills = charSkillsResult.data.skills;
-      const massProd = skills.find(s => s.skill_id === SKILL_ID_MASS_PRODUCTION)?.active_skill_level || 0;
-      const advMassProd = skills.find(s => s.skill_id === SKILL_ID_ADVANCED_MASS_PRODUCTION)?.active_skill_level || 0;
+      const { massProd, advMassProd } = skills.reduce((acc, s) => {
+        if (s.skill_id === SKILL_ID_MASS_PRODUCTION) acc.massProd = s.active_skill_level;
+        if (s.skill_id === SKILL_ID_ADVANCED_MASS_PRODUCTION) acc.advMassProd = s.active_skill_level;
+        return acc;
+      }, { massProd: 0, advMassProd: 0 });
       const maxJobs = 1 + massProd + advMassProd;
 
       const manufacturingJobs = industryResult.data.filter(job => job.activity_id === 1);

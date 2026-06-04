@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { logger } from '../utils/logger';
 import { removeCharacter as removeAuthCharacter } from '../utils/AuthRepository';
 
-import { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
+import type { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
 
 export type StatusLight = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
