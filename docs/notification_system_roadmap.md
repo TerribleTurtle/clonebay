@@ -1,6 +1,6 @@
 # Phase 2: Comprehensive Notification System Roadmap
 
-This document outlines the long-term vision and architecture for Phase 2 of the `eve-dash` Character Notifications integration. While Phase 1 strictly handles data extraction, Phase 2 will implement the UI, local state management, and Traffic Light thresholds for critical game events.
+This document outlines the long-term vision and architecture for Phase 2 of the `clonebay` Character Notifications integration. While Phase 1 strictly handles data extraction, Phase 2 will implement the UI, local state management, and Traffic Light thresholds for critical game events.
 
 ## 1. Vision & Core Objective
 Eliminate the need to log into each character to check for existential threats (War Declarations, Upwell Structure attacks/reinforcements, Corporation bill failures). The worst-case notification must bubble up to the global Traffic Light dashboard.
@@ -20,7 +20,7 @@ Notifications will be parsed and evaluated via pure math functions in `src/utils
   - No unread critical alerts. Structures healthy, no active wars.
 
 ## 3. Read/Unread State Management (Zero-Backend)
-Because `eve-dash` is a 100% Client-Side Static SPA, ESI does not track whether a user has "read" a notification.
+Because `clonebay` is a 100% Client-Side Static SPA, ESI does not track whether a user has "read" a notification.
 - **Local State Tracking:** We will use a new IndexedDB repository (`NotificationStateRepository`) to map the ESI `notification_id` to a local boolean (`isRead`).
 - **Separation of Concerns:** Raw ESI payloads (synced via `NotificationRepository` in Phase 1) remain immutable. User mutations (read state) are kept isolated to prevent data corruption during ESI syncs.
 - **Muting:** A "Mark All as Read" action will update the local IDB state, instantly muting the notification so it no longer contributes to the Red/Yellow Traffic Light threshold.

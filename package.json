@@ -1,5 +1,5 @@
 {
-  "name": "eve-dash",
+  "name": "clonebay",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "deps:check": "depcruise src",
     "prepare": "husky",
     "playground": "npx tsx scripts/playground.ts",
-    "deploy:prod": "npm run build && node scripts/fix-windows-build.mjs && npx wrangler pages deploy out --project-name eve-dash"
+    "deploy:prod": "npm run build && node scripts/fix-windows-build.mjs && npx wrangler pages deploy out --project-name clonebay"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.8",

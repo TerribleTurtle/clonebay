@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/auth/callback', '/settings', '/debug'],
     },
-    sitemap: 'https://eve-dash.example.com/sitemap.xml',
+    sitemap: 'https://clonebay.app/sitemap.xml',
   };
 }

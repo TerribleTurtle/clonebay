@@ -26,7 +26,7 @@ export const useSettingsStore = create<SettingsState>()(
       resetToDefaults: () => set(DEFAULT_SETTINGS),
     }),
     {
-      name: 'eve-dash-settings',
+      name: 'clonebay-settings',
     }
   )
 );

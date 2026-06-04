@@ -14,7 +14,7 @@ export const GlobalHeader: React.FC = () => {
           <Link href="/" className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="w-4 h-4 bg-status-cyan shadow-glow-cyan rotate-45 group-hover:rotate-90 transition-transform duration-300"></div>
             <h1 className="font-mono font-bold tracking-widest text-zinc-50 uppercase text-lg flex items-center gap-1">
-              EVE-DASH <span className="text-zinc-500 font-normal">||</span> Command Center
+              CLONE BAY <span className="text-zinc-500 font-normal">||</span> Command Center
             </h1>
           </Link>
         </div>

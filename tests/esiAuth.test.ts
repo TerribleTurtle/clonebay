@@ -4,7 +4,7 @@ import { buildEsiAuthUrl, ESI_SCOPES } from '../src/auth/esiAuth';
 describe('esiAuth', () => {
   describe('buildEsiAuthUrl', () => {
     it('should generate a valid ESI OAuth URL with exact required scope parameters', () => {
-      const redirectUri = 'https://eve-dash.pages.dev/auth/callback';
+      const redirectUri = 'https://clonebay.app/auth/callback';
       const clientId = 'test-client-id';
       const state = 'test-state';
       const codeChallenge = 'test-challenge';

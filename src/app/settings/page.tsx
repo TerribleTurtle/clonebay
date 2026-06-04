@@ -116,7 +116,7 @@ export default function SettingsPage() {
         {/* Data Management */}
         <section className="space-y-4 pt-4">
           <h2 className="text-xl font-bold tracking-widest uppercase text-status-red border-b border-zinc-800 pb-2">Data Management</h2>
-          <p className="text-sm text-zinc-400">Because EVE-Dash has no backend, all your SSO tokens and cache live exclusively in this browser. You can obliterate them here.</p>
+          <p className="text-sm text-zinc-400">Because Clone Bay has no backend, all your SSO tokens and cache live exclusively in this browser. You can obliterate them here.</p>
           
           <div className="bg-eve-panel border border-status-red/50 p-4">
             <Button 

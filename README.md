@@ -21,7 +21,7 @@ A "Single Pane of Glass" read-only dashboard that monitors the passive and async
 - **APIs:** EVE Swagger Interface (ESI)
 
 ## Zero-Backend Architecture & Privacy
-EVE-Dash operates on a strict zero-backend philosophy. Your EVE SSO tokens are encrypted and stored exclusively in your browser's IndexedDB. All API requests are made directly from your browser to CCP's official servers. No central servers, databases, or tracking scripts are used.
+Clone Bay operates on a strict zero-backend philosophy. Your EVE SSO tokens are encrypted and stored exclusively in your browser's IndexedDB. All API requests are made directly from your browser to CCP's official servers. No central servers, databases, or tracking scripts are used.
 
 Allowed external connections via Content-Security-Policy (CSP):
 - `login.eveonline.com`: EVE SSO authentication and token refresh.
@@ -35,7 +35,7 @@ Allowed external connections via Content-Security-Policy (CSP):
    npm install
    ```
 2. Set up your EVE Developer application at [developers.eveonline.com](https://developers.eveonline.com/).
-   - When creating your application, ensure you add the following **Callback URL**: `https://eve-dash.pages.dev/auth/callback`
+   - When creating your application, ensure you add the following **Callback URL**: `https://clonebay.app/auth/callback`
    - You must request the following **OAuth Scopes**:
      - `esi-skills.read_skillqueue.v1`
      - `esi-skills.read_skills.v1`

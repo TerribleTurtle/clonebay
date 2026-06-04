@@ -15,7 +15,7 @@ The objective is to implement two highly visible features that build user trust 
   - **PKCE OAuth 2.0**: Why there is no `client_secret` and how tokens are acquired safely.
   - **Local Storage Only**: How `idb-keyval` stores the tokens securely in IndexedDB.
   - **Provable Static Hosting**: Mention that the app is an exported static site (`output: 'export'`) with no backend.
-  - **The F12 Challenge**: Step-by-step instructions for opening the Network tab in Chrome/Firefox/Edge to audit network traffic and confirm that `eve-dash` does not phone home.
+  - **The F12 Challenge**: Step-by-step instructions for opening the Network tab in Chrome/Firefox/Edge to audit network traffic and confirm that `clonebay` does not phone home.
 
 ### 2. The Wipe Button
 

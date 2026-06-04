@@ -1,6 +1,6 @@
 # Zero-Backend Cloudflare Worker Architecture
 
-This document details the architectural plan for the off-site, zero-backend execution environment for Eve-Dash background tasks (e.g., Discord webhook notifications, periodic threshold monitoring). 
+This document details the architectural plan for the off-site, zero-backend execution environment for Clone Bay background tasks (e.g., Discord webhook notifications, periodic threshold monitoring). 
 
 ## 1. The Core Philosophy: "Trust, but Verify" OpSec
 By forcing users to deploy their own background worker, we maintain a strict Zero-Knowledge OpSec policy. The user effectively becomes their own backend hosting provider for this specific feature.
@@ -10,8 +10,8 @@ By forcing users to deploy their own background worker, we maintain a strict Zer
 ## 2. Cost to the User: 100% Free
 Users will never be asked for a credit card and will never hit a billing wall. Cloudflare’s Free Tier for Workers is built for massive enterprise applications and is incredibly generous:
 - **Cloudflare's Free Limit:** 100,000 requests per day.
-- **Eve-Dash Worker Usage:** If the cron job runs every 15 minutes, that is 4 times an hour, or **96 requests per day**.
-- **The Math:** The Eve-Dash background script will use **0.096%** of their daily free limit. It is completely, absolutely free forever.
+- **Clone Bay Worker Usage:** If the cron job runs every 15 minutes, that is 4 times an hour, or **96 requests per day**.
+- **The Math:** The Clone Bay background script will use **0.096%** of their daily free limit. It is completely, absolutely free forever.
 
 ## 3. The Deployment Mechanism & User UX (Path B: Invisible Auto-Updater)
 We will use Cloudflare's "Deploy to Workers" integration to allow 1-click provisioning. We are opting for the **"Invisible Auto-Updater"** UX path. It requires ~5 minutes of initial setup, but ensures the user's worker silently inherits every future update automatically without them ever touching code again.
@@ -19,8 +19,8 @@ We will use Cloudflare's "Deploy to Workers" integration to allow 1-click provis
 **The Exact Step-by-Step User Journey:**
 
 ### Step 1: The Deploy & Variables (2 minutes)
-1. **The Button:** The user clicks the deployment badge in Eve-Dash:
-   `[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/YOURUSERNAME/eve-dash-worker-template)`
+1. **The Button:** The user clicks the deployment badge in Clone Bay:
+   `[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/YOURUSERNAME/clonebay-worker-template)`
 2. **Cloudflare Handoff:** They log into Cloudflare and click **Authorize GitHub**. Cloudflare automatically forks the template repository into their personal GitHub account and deploys the worker.
 3. **The Variables:** They navigate to their new Cloudflare Dashboard -> `Settings` -> `Variables` and paste their `ESI_REFRESH_TOKEN` and `DISCORD_WEBHOOK_URL`. *(The worker is now fully functional).*
 
@@ -63,7 +63,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git remote add upstream https://github.com/YOURUSERNAME/eve-dash-worker-template.git
+          git remote add upstream https://github.com/YOURUSERNAME/clonebay-worker-template.git
           git fetch upstream
           git merge upstream/main --no-edit --allow-unrelated-histories
           git push origin main
@@ -88,4 +88,4 @@ jobs:
 
 **Error Handling (Fail Loudly):**
 Because the worker is stateless and cannot automatically update its own Cloudflare environment variables, it must fail loudly on token death. If the worker encounters an invalid Refresh Token (HTTP 400 `invalid_token` from `/v2/oauth/token`), it will immediately send a Discord Webhook message:
-> *"🚨 Eve-Dash Worker Authentication Failed! Your ESI Refresh Token has expired or was revoked. Please open Eve-Dash, generate a new token, and update your Cloudflare Variables."*
+> *"🚨 Clone Bay Worker Authentication Failed! Your ESI Refresh Token has expired or was revoked. Please open Clone Bay, generate a new token, and update your Cloudflare Variables."*

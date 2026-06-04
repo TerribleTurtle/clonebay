@@ -159,7 +159,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
         }),
     }),
     {
-      name: 'eve-dashboard-storage',
+      name: 'clonebay-storage',
       partialize: (state) => ({
         ...state,
         characters: Object.fromEntries(

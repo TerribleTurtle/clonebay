@@ -5,7 +5,7 @@ import { GlobalHeader } from '../../src/components/GlobalHeader';
 describe('GlobalHeader', () => {
   it('renders title and navigation links', () => {
     render(<GlobalHeader />);
-    expect(screen.getByRole('heading', { name: /EVE-DASH \|\| Command Center/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /CLONE BAY \|\| Command Center/i })).toBeInTheDocument();
     
     expect(screen.getByRole('link', { name: /\[ SETTINGS \]/i })).toHaveAttribute('href', '/settings');
     expect(screen.getByRole('link', { name: /\[ TRUST & LEGAL \]/i })).toHaveAttribute('href', '/trust');
