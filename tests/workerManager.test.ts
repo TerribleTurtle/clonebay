@@ -50,7 +50,9 @@ describe('WorkerManager', () => {
     const worker = manager.worker as MockWorker;
     
     // Simulate crash
-    worker.onerror?.(new ErrorEvent('error'));
+    expect(() => {
+      worker.onerror?.(new ErrorEvent('error'));
+    }).toThrow();
     
     expect(logger.error).toHaveBeenCalledWith('WorkerManager: Worker crashed', expect.any(ErrorEvent));
     
@@ -62,7 +64,9 @@ describe('WorkerManager', () => {
     expect(worker2).not.toBe(worker);
     
     // Crash again
-    worker2.onerror?.(new ErrorEvent('error'));
+    expect(() => {
+      worker2.onerror?.(new ErrorEvent('error'));
+    }).toThrow();
     
     // Advance by backoff 2 (max 3000)
     vi.advanceTimersByTime(3000);
@@ -83,7 +87,9 @@ describe('WorkerManager', () => {
     vi.advanceTimersByTime(30000);
     
     // Advance time to trigger PONG timeout
-    vi.advanceTimersByTime(5000);
+    expect(() => {
+      vi.advanceTimersByTime(5000);
+    }).toThrow('WorkerManager: Missed PONG, terminating worker');
     
     expect(logger.error).toHaveBeenCalledWith('WorkerManager: Missed PONG, terminating worker');
     expect(terminateSpy).toHaveBeenCalled();

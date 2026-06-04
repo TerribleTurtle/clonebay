@@ -106,6 +106,7 @@ export class WorkerManager {
       this.worker.onerror = (error) => {
         logger.error('WorkerManager: Worker crashed', error);
         this.scheduleRestart();
+        throw error;
       };
 
       // Start the worker logic
@@ -156,6 +157,7 @@ export class WorkerManager {
     this.pongTimeout = setTimeout(() => {
       logger.error('WorkerManager: Missed PONG, terminating worker');
       this.scheduleRestart();
+      throw new Error('WorkerManager: Missed PONG, terminating worker');
     }, this.PONG_TIMEOUT_MS);
   }
 
