@@ -7,6 +7,7 @@ import { processIndustry } from "./processors/industryProcessor";
 import { processPi } from "./processors/piProcessor";
 import { processMetrics } from "./processors/metricsProcessor";
 import { processStructures } from "./processors/structureProcessor";
+import { processNotifications } from "./processors/notificationProcessor";
 import { LiveEsiService } from "../services/esi/LiveEsiService";
 import { MockEsiService } from "../services/esi/MockEsiService";
 import type { IEsiService } from "../services/esi/IEsiService";
@@ -275,6 +276,12 @@ async function pollData(esiService: IEsiService): Promise<void> {
             await saveCharacterNotifications(
               charId,
               notificationsResponse.data,
+            );
+            await processNotifications(
+              charId,
+              notificationsResponse.data,
+              esiService,
+              (msg) => self.postMessage(msg)
             );
           }
         })

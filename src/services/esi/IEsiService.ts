@@ -20,7 +20,8 @@ import type {
   EsiWalletJournalEntry,
   EsiAttributes,
   EsiMailHeader,
-  EsiResolvedName
+  EsiResolvedName,
+  EsiWar
 } from '../../schemas/esi';
 
 export interface IEsiService {
@@ -46,4 +47,5 @@ export interface IEsiService {
   getAttributes(charId: string, accessToken: string): Promise<EsiResponse<EsiAttributes> | null>;
   getMail(charId: string, accessToken: string): Promise<EsiResponse<EsiMailHeader[]> | null>;
   resolveNames(ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null>;
+  getWar(warId: number): Promise<EsiResponse<EsiWar> | null>;
 }

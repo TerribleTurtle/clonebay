@@ -54,23 +54,26 @@ export interface CharacterStatusBoardProps {
     pi: IndicatorStatus;
     indy: IndicatorStatus;
     mail: IndicatorStatus;
+    war?: IndicatorStatus;
   };
   alerts?: {
     skill?: string[] | undefined;
     pi?: string[] | undefined;
     indy?: string[] | undefined;
     mail?: string[] | undefined;
+    war?: string[] | undefined;
   } | undefined;
   visibility?: {
     trackSkills: boolean;
     trackPi: boolean;
     trackIndy: boolean;
     trackMail: boolean;
+    trackWar?: boolean;
   } | undefined;
 }
 
 export function CharacterStatusBoard({ statuses, alerts, visibility }: CharacterStatusBoardProps) {
-  const defaultVis = { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true };
+  const defaultVis = { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true, trackWar: true };
   const vis = visibility || defaultVis;
 
   const indicators = [
@@ -78,6 +81,7 @@ export function CharacterStatusBoard({ statuses, alerts, visibility }: Character
     ...(vis.trackPi ? [{ key: "pi", label: "PI", status: statuses.pi, contextAlerts: alerts?.pi }] : []),
     ...(vis.trackIndy ? [{ key: "indy", label: "INDY", status: statuses.indy, contextAlerts: alerts?.indy }] : []),
     ...(vis.trackMail ? [{ key: "mail", label: "MAIL", status: statuses.mail, contextAlerts: alerts?.mail }] : []),
+    ...(vis.trackWar && statuses.war ? [{ key: "war", label: "WAR", status: statuses.war, contextAlerts: alerts?.war }] : []),
   ];
 
   return (

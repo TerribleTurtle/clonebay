@@ -47,7 +47,10 @@ import {
   EsiWalletJournalEntry,
   EsiAttributes,
   EsiMailHeader,
-  EsiResolvedName
+  EsiResolvedNameSchema,
+  EsiResolvedName,
+  EsiWarSchema,
+  type EsiWar
 } from '../../schemas/esi';
 
 export class MockEsiService implements IEsiService {
@@ -127,7 +130,7 @@ export class MockEsiService implements IEsiService {
         notification_id: 100000001,
         sender_id: 1000123,
         sender_type: 'character',
-        text: 'War declared!',
+        text: 'againstID: 1000123\ncost: 0\ndeclaredByID: 986665792\ndelayHours: 24\nhostileState: 0\nwarID: 1941\n',
         timestamp: new Date().toISOString(),
         type: 'WarDeclared',
         is_read: false
@@ -212,8 +215,19 @@ export class MockEsiService implements IEsiService {
     return Promise.resolve(null);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  resolveNames(_ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null> {
+  resolveNames(ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null> {
+    // eslint-disable-next-line no-magic-numbers
+    if (ids.includes(986665792)) return this.mockResponse([{ category: 'corporation', id: 986665792, name: 'Goonswarm Federation' }], z.array(EsiResolvedNameSchema));
+    return Promise.resolve(null);
+  }
+
+  getWar(warId: number): Promise<EsiResponse<EsiWar> | null> {
+    // eslint-disable-next-line no-magic-numbers
+    if (warId === 1941) {
+      // eslint-disable-next-line no-magic-numbers
+      const mockWar: EsiWar = { id: 1941, declared: new Date(Date.now() - 48 * 3600000).toISOString(), started: new Date(Date.now() - 24 * 3600000).toISOString(), mutual: false, open_for_allies: false, aggressor: { corporation_id: 986665792, isk_destroyed: 0, ships_killed: 0 }, defender: { corporation_id: 1000123, isk_destroyed: 0, ships_killed: 0 } };
+      return this.mockResponse(mockWar, EsiWarSchema);
+    }
     return Promise.resolve(null);
   }
 }

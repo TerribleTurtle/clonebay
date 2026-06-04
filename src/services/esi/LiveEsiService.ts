@@ -50,7 +50,9 @@ import {
   EsiMailHeaderSchema,
   type EsiMailHeader,
   EsiResolvedNameSchema,
-  type EsiResolvedName
+  type EsiResolvedName,
+  EsiWarSchema,
+  type EsiWar
 } from '../../schemas/esi';
 import { logger } from '../../utils/logger';
 
@@ -271,5 +273,9 @@ export class LiveEsiService implements IEsiService {
 
   resolveNames(ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null> {
     return this.safeFetch(`https://esi.evetech.net/latest/universe/names/`, '', '', z.array(EsiResolvedNameSchema), 'resolved names', 'POST', ids);
+  }
+
+  getWar(warId: number): Promise<EsiResponse<EsiWar> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/wars/${warId}/`, '', '', EsiWarSchema, 'war');
   }
 }

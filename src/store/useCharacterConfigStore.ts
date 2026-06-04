@@ -6,6 +6,7 @@ export interface CharacterVisibility {
   trackPi: boolean;
   trackIndy: boolean;
   trackMail: boolean;
+  trackWar?: boolean;
 }
 
 export interface CharacterOverrides {
@@ -31,6 +32,7 @@ const getDefaultConfig = (): CharacterConfig => ({
     trackPi: true,
     trackIndy: true,
     trackMail: true,
+    trackWar: true,
   },
   overrides: {}
 });

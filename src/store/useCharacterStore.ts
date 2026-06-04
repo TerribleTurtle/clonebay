@@ -14,7 +14,8 @@ export const DEFAULT_OFFLINE_STATUS = {
   mailStatus: 'Offline',
   cloneStatus: 'Offline',
   locationStatus: 'Offline',
-  structureStatus: 'Offline'
+  structureStatus: 'Offline',
+  warStatus: 'Offline'
 } as const;
 
 export interface CharacterStatus {
@@ -39,6 +40,7 @@ export interface CharacterStatus {
   cloneStatus: StatusLight;
   locationStatus: StatusLight;
   structureStatus: StatusLight;
+  warStatus: StatusLight;
   structures?: EsiCorporationStructure[];
   clones?: EsiClones;
   fatigue?: EsiFatigue;
@@ -53,6 +55,7 @@ export interface CharacterStatus {
   clonesContext?: { locationName: string; implants: string[] }[];
   ordersContext?: { topOrders: string[] };
   mailContext?: { unreadSubjects: string[] };
+  warContext?: { alerts: string[] };
 }
 
 /**

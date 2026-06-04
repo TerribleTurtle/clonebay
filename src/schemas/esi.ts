@@ -11,3 +11,4 @@ export * from './esi/market';
 export * from './esi/notifications';
 export * from './esi/walletJournal';
 export * from './esi/universe';
+export * from './esi/wars';

@@ -189,6 +189,7 @@ export function CharacterSettingsDialog({
                     { key: 'trackPi' as const, label: 'PI_TRACKING' },
                     { key: 'trackIndy' as const, label: 'INDY_TRACKING' },
                     { key: 'trackMail' as const, label: 'MAIL_TRACKING' },
+                    { key: 'trackWar' as const, label: 'WAR_TRACKING' },
                   ].map(({ key, label }) => (
                     <label
                       key={key}

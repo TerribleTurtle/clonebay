@@ -35,6 +35,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
     trackPi: true,
     trackIndy: true,
     trackMail: true,
+    trackWar: true,
   };
   
   const handleRemove = async () => {
@@ -148,13 +149,15 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
             skill: mapStatus(status.skills),
             pi: mapStatus(status.pi),
             indy: mapStatus(status.industry),
-            mail: mapStatus(status.mailStatus)
+            mail: mapStatus(status.mailStatus),
+            war: mapStatus(status.warStatus)
           }}
           alerts={{
             skill: status.skillsContext?.queue,
             pi: status.piContext?.alerts,
             indy: status.indyContext?.alerts,
-            mail: status.mailContext?.unreadSubjects
+            mail: status.mailContext?.unreadSubjects,
+            war: status.warContext?.alerts
           }}
         />
         <CharacterSettingsDialog 

@@ -26,7 +26,8 @@ describe('useCharacterStore', () => {
       mailStatus: 'Offline',
       cloneStatus: 'Offline',
       locationStatus: 'Offline',
-      structureStatus: 'Offline'
+      structureStatus: 'Offline',
+      warStatus: 'Offline'
     });
   });
 
@@ -45,7 +46,8 @@ describe('useCharacterStore', () => {
       mailStatus: 'Offline',
       cloneStatus: 'Offline',
       locationStatus: 'Offline',
-      structureStatus: 'Offline'
+      structureStatus: 'Offline',
+      warStatus: 'Offline'
     });
   });
 });
