@@ -1,10 +1,10 @@
-import { HttpClient, HttpInterceptor, HttpRequest } from './http/httpClient';
+import { HttpClient, HttpInterceptor, HttpRequest } from '../../utils/http/httpClient';
 import { getCachedEsiData, setCachedEsiData } from './esiCache';
-import { logger } from './logger';
+import { logger } from '../../utils/logger';
 import { z } from 'zod';
-import { enqueueRequest, dequeueRequest } from './esiQueue';
+import { enqueueRequest, dequeueRequest } from '../../utils/esiQueue';
 import { checkDailyDowntime, getAdjustedNow, isPaused, updateClockDrift, checkAndApplyRateLimitError, sleep } from './esiRateLimit';
-import { refreshAccessToken } from './esiAuth';
+import { refreshAccessToken } from '../../auth/esiAuth';
 
 const DEFAULT_RETRIES = 3;
 const HTTP_STATUS_OK = 200;
@@ -31,7 +31,7 @@ export interface EsiResponse<T> {
 }
 
 export { getAdjustedNow, checkDailyDowntime, resetGlobalPauseForTests } from './esiRateLimit';
-export { resetQueueForTests } from './esiQueue';
+export { resetQueueForTests } from '../../utils/esiQueue';
 
 export const esiDowntimeInterceptor: HttpInterceptor = async (req, next) => {
   if (checkDailyDowntime()) {
@@ -123,7 +123,7 @@ export const esiAuthInterceptor: HttpInterceptor = async (req, next) => {
 export const esiRetryInterceptor: HttpInterceptor = async (req, next) => {
   const maxRetries = req.context.retries ?? DEFAULT_RETRIES;
   
-  const attempt = async (retriesLeft: number): Promise<import('./http/httpClient').HttpResponse<unknown>> => {
+  const attempt = async (retriesLeft: number): Promise<import('../../utils/http/httpClient').HttpResponse<unknown>> => {
     const response = await next(req);
     
     if (response.status === HTTP_STATUS_TOO_MANY_REQUESTS || response.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR) {
@@ -152,7 +152,7 @@ export const esiValidationInterceptor: HttpInterceptor = async (req, next) => {
   
   if (response.status === HTTP_STATUS_OK && response.data && req.context.schema) {
     try {
-      response.data = req.context.schema.parse(response.data);
+      response.data = await req.context.schema.parseAsync(response.data);
     } catch (e) {
       logger.error(`Failed to parse ESI response for ${req.url}:`, e);
       throw e;

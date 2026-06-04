@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
-import { WorkerManager } from '../src/utils/WorkerManager';
+import { WorkerManager } from '../src/workers/WorkerManager';
 import { logger } from '../src/utils/logger';
 
 vi.mock('../src/utils/logger', () => ({

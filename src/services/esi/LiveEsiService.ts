@@ -1,5 +1,5 @@
 import type { IEsiService } from './IEsiService';
-import { fetchEsi, type EsiResponse } from '../../utils/esiClient';
+import { fetchEsi, type EsiResponse } from './esiClient';
 import { z } from 'zod';
 import {
   EsiSkillQueueSchema,

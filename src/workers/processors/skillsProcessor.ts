@@ -1,6 +1,6 @@
 import { calculateSkillQueueStatus } from '../../utils/thresholds';
 import type { EsiSkillQueue } from '../../schemas/esi';
-import type { EsiResponse } from '../../utils/esiClient';
+import type { EsiResponse } from '../../services/esi/esiClient';
 import { logger } from '../../utils/logger';
 
 export function processSkills(

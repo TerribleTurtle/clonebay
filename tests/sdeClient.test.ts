@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchSdeType } from '../src/utils/sdeClient';
+import { fetchSdeType } from '../src/services/esi/sdeClient';
 import { get, set } from 'idb-keyval';
 import { HttpResponse, http } from 'msw';
 import { server } from './setup';

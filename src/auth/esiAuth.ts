@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getAuthDictionary, addOrUpdateCharacter } from './AuthRepository';
-import { logger } from './logger';
+import { logger } from '../utils/logger';
 
 export const EsiTokenRefreshResponseSchema = z.object({
   access_token: z.string(),
@@ -43,7 +43,7 @@ export async function refreshAccessToken(characterId: string): Promise<string> {
         }
         if (refreshResponse.ok) {
           const rawData = await refreshResponse.json();
-          const refreshData = EsiTokenRefreshResponseSchema.parse(rawData);
+          const refreshData = await EsiTokenRefreshResponseSchema.parseAsync(rawData);
           
           auth.accessToken = refreshData.access_token;
           if (refreshData.refresh_token) {

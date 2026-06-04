@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { setPkceState, setCodeVerifier } from "@/utils/AuthRepository";
+import { setPkceState, setCodeVerifier } from "@/auth/AuthRepository";
 
-import { generateRandomString, generateCodeChallenge } from "@/utils/pkce";
+import { generateRandomString, generateCodeChallenge } from "@/auth/pkce";
 import { logger } from "@/utils/logger";
 
 import { useSettingsStore } from "@/store/useSettingsStore";

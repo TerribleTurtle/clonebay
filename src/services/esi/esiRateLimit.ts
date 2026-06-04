@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from '../../utils/logger';
 
 export const DOWNTIME_HOUR_UTC = 11;
 export const DOWNTIME_DURATION_MINUTES = 15;
@@ -11,7 +11,7 @@ let pauseUntil = 0;
 let clockDriftOffset = 0;
 
 export function getAdjustedNow(): number {
-  /* eslint-disable-next-line no-restricted-syntax */
+
   return Date.now() + clockDriftOffset;
 }
 
@@ -19,7 +19,7 @@ export function updateClockDrift(serverDateHeader: string | null): void {
   if (serverDateHeader) {
      
     const serverTime = new Date(serverDateHeader).getTime();
-    /* eslint-disable-next-line no-restricted-syntax */
+
     const localTime = Date.now();
     clockDriftOffset = serverTime - localTime;
   }

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import { clearAuthDictionary } from '../utils/AuthRepository';
+import { clearAuthDictionary } from '../auth/AuthRepository';
 import { clearAllStorage } from '../store/useSettingsStore';
 import { logger } from '../utils/logger';
 

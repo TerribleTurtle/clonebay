@@ -1,8 +1,8 @@
-import { fetchSdeSystem } from '../../utils/sdeClient';
+import { fetchSdeSystem } from '../../services/esi/sdeClient';
 import { logger } from '../../utils/logger';
 import { mockFleet } from '../../utils/mockFleet';
 import type { EsiSkillQueue, EsiCharacterSkillsResponse, EsiWallet, EsiLocation, EsiShip, EsiClones, EsiFatigue, EsiTransaction, EsiMailLabels, EsiContract, EsiMarketOrder } from '../../schemas/esi';
-import type { EsiResponse } from '../../utils/esiClient';
+import type { EsiResponse } from '../../services/esi/esiClient';
 import { calculateWalletStatus, calculateMailStatus, calculateCloneStatus, calculateLocationStatus } from '../../utils/thresholds';
 
 export interface EsiMetricsContext {

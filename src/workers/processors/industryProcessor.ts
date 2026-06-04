@@ -1,6 +1,6 @@
 import { calculateIndustryStatus } from '../../utils/thresholds';
 import type { EsiIndustryJob, EsiCharacterSkillsResponse } from '../../schemas/esi';
-import type { EsiResponse } from '../../utils/esiClient';
+import type { EsiResponse } from '../../services/esi/esiClient';
 import { logger } from '../../utils/logger';
 
 const SKILL_ID_MASS_PRODUCTION = 3388;

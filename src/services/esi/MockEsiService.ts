@@ -1,5 +1,5 @@
 import type { IEsiService } from './IEsiService';
-import type { EsiResponse } from '../../utils/esiClient';
+import type { EsiResponse } from './esiClient';
 import { mockFleet } from '../../utils/mockFleet';
 import { z } from 'zod';
 import {

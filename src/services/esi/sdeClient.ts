@@ -1,7 +1,7 @@
 import { get, set } from 'idb-keyval';
 import { z } from 'zod';
-import { EsiSdeTypeSchema, EsiSdeSystemSchema, type EsiSdeType } from '../schemas/esi';
-import { logger } from './logger';
+import { EsiSdeTypeSchema, EsiSdeSystemSchema, type EsiSdeType } from '../../schemas/esi';
+import { logger } from '../../utils/logger';
 
 export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   const cacheKey = `sde_type_${typeId}`;
@@ -9,7 +9,7 @@ export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   // Check IndexedDB first
   const cachedData = await get<EsiSdeType>(cacheKey);
   if (cachedData) {
-    return EsiSdeTypeSchema.parse(cachedData);
+    return EsiSdeTypeSchema.parseAsync(cachedData);
   }
 
   // Fetch from ESI if not cached
@@ -26,7 +26,7 @@ export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   }
 
   const rawData = await response.json();
-  const result = EsiSdeTypeSchema.parse(rawData);
+  const result = await EsiSdeTypeSchema.parseAsync(rawData);
 
   // Permanently cache the result
   await set(cacheKey, result);
@@ -40,7 +40,7 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
   // Check IndexedDB first
   const cachedData = await get<string>(cacheKey);
   if (cachedData) {
-    return z.string().parse(cachedData);
+    return z.string().parseAsync(cachedData);
   }
 
   // Fetch from ESI if not cached
@@ -57,7 +57,7 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
   }
 
   const rawData = await response.json();
-  const data = EsiSdeSystemSchema.parse(rawData);
+  const data = await EsiSdeSystemSchema.parseAsync(rawData);
   const name = data.name;
 
   // Permanently cache the result

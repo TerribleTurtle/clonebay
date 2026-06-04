@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { logger } from '../utils/logger';
-import { removeCharacter as removeAuthCharacter } from '../utils/AuthRepository';
+import { removeCharacter as removeAuthCharacter } from '../auth/AuthRepository';
 
 import type { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
 

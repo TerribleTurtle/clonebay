@@ -1,4 +1,4 @@
-import type { EsiResponse } from '../../utils/esiClient';
+import type { EsiResponse } from './esiClient';
 import type {
   EsiSkillQueue,
   EsiIndustryJob,

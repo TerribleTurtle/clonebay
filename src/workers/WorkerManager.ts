@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from '../utils/logger';
 
 type WorkerMessageHandler = (event: MessageEvent) => void;
 
@@ -177,7 +177,7 @@ export class WorkerManager {
     // Jitter Math: We add up to 1 second of random jitter to the exponential backoff.
     // This prevents the "thundering herd" problem where multiple instances (e.g. multiboxers)
     // all restart and hammer the ESI API at the exact same moment.
-    /* eslint-disable-next-line no-restricted-syntax */
+
     let jitter = Math.random() * 1000; // eslint-disable-line no-magic-numbers
     if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
       const array = new Uint32Array(1);

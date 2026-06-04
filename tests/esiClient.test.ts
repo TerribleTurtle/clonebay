@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { http, HttpResponse } from 'msw';
-import { fetchEsi, checkDailyDowntime, resetGlobalPauseForTests, getAdjustedNow } from '../src/utils/esiClient';
-import { getAuthDictionary } from '../src/utils/AuthRepository';
+import { fetchEsi, checkDailyDowntime, resetGlobalPauseForTests, getAdjustedNow } from '../src/services/esi/esiClient';
+import { getAuthDictionary } from '../src/auth/AuthRepository';
 import { server } from './setup';
 
 const MOCK_YEAR = 2023;
@@ -10,12 +10,12 @@ const DOWNTIME_HOUR = 11;
 const DOWNTIME_MINUTE = 5;
 const NON_DOWNTIME_HOUR = 12;
 
-vi.mock('../src/utils/esiCache', () => ({
+vi.mock('../src/services/esi/esiCache', () => ({
   getCachedEsiData: vi.fn().mockResolvedValue(null),
   setCachedEsiData: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('../src/utils/AuthRepository', () => ({
+vi.mock('../src/auth/AuthRepository', () => ({
   getAuthDictionary: vi.fn().mockResolvedValue({}),
   addOrUpdateCharacter: vi.fn().mockResolvedValue(undefined),
 }));
@@ -27,11 +27,11 @@ describe('ESI Client', () => {
     vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', 'test-client-id');
     
     // Restore default mock behaviors since mockReset clears them
-    const esiCache = await import('../src/utils/esiCache');
+    const esiCache = await import('../src/services/esi/esiCache');
     vi.mocked(esiCache.getCachedEsiData).mockResolvedValue(null);
     vi.mocked(esiCache.setCachedEsiData).mockResolvedValue(undefined);
     
-    const authRepo = await import('../src/utils/AuthRepository');
+    const authRepo = await import('../src/auth/AuthRepository');
     vi.mocked(authRepo.getAuthDictionary).mockResolvedValue({});
     vi.mocked(authRepo.addOrUpdateCharacter).mockResolvedValue(undefined);
   });
@@ -205,7 +205,7 @@ describe('ESI Client', () => {
     const date = new Date(Date.UTC(MOCK_YEAR, 1, 1, NON_DOWNTIME_HOUR, 0, 0));
     vi.setSystemTime(date);
 
-    const mockEsiCache = await import('../src/utils/esiCache');
+    const mockEsiCache = await import('../src/services/esi/esiCache');
     vi.mocked(mockEsiCache.getCachedEsiData).mockResolvedValueOnce({
       data: [{ cached: true }],
       eTag: '"my-etag"',
@@ -264,7 +264,7 @@ describe('ESI Client', () => {
     vi.setSystemTime(date);
 
     // Cache returns null, simulating empty cache
-    const mockEsiCache = await import('../src/utils/esiCache');
+    const mockEsiCache = await import('../src/services/esi/esiCache');
     vi.mocked(mockEsiCache.getCachedEsiData).mockResolvedValueOnce(null);
 
     server.use(

@@ -1,5 +1,5 @@
 import { get, set } from 'idb-keyval';
-import { logger } from './logger';
+import { logger } from '../../utils/logger';
 
 const DEFAULT_CACHE_MINUTES = 5;
 const SECONDS_PER_MINUTE = 60;
@@ -37,6 +37,7 @@ export async function setCachedEsiData<T>(
   try {
     let expires = nowMs + DEFAULT_CACHE_MINUTES * SECONDS_PER_MINUTE * MS_PER_SECOND; // default 5 mins
     if (expiresHeader !== null) {
+      // eslint-disable-next-line no-restricted-syntax
       const parsed = Date.parse(expiresHeader);
       if (!Number.isNaN(parsed)) {
         expires = parsed;

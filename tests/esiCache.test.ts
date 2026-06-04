@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getCachedEsiData, setCachedEsiData } from '../src/utils/esiCache';
+import { getCachedEsiData, setCachedEsiData } from '../src/services/esi/esiCache';
 import { clear } from 'idb-keyval';
 
 describe('esiCache', () => {

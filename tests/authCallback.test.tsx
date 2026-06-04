@@ -12,8 +12,8 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => mockSearchParams
 }));
 
-vi.mock('../src/utils/AuthRepository', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/utils/AuthRepository')>();
+vi.mock('../src/auth/AuthRepository', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/auth/AuthRepository')>();
   return {
     ...actual,
     addOrUpdateCharacter: vi.fn()
@@ -78,7 +78,7 @@ describe('Auth Callback', () => {
       expect(mockPush).toHaveBeenCalledWith('/');
     });
 
-    const { addOrUpdateCharacter } = await import('../src/utils/AuthRepository');
+    const { addOrUpdateCharacter } = await import('../src/auth/AuthRepository');
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('123456789', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
@@ -121,7 +121,7 @@ describe('Auth Callback', () => {
       expect(mockPush).toHaveBeenCalledWith('/');
     });
 
-    const { addOrUpdateCharacter } = await import('../src/utils/AuthRepository');
+    const { addOrUpdateCharacter } = await import('../src/auth/AuthRepository');
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('9999', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',

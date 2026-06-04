@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useCharacterStore, CharacterStatus } from '../store/useCharacterStore';
 import { useLogStore } from '../store/useLogStore';
-import { WorkerManager } from '../utils/WorkerManager';
+import { WorkerManager } from '../workers/WorkerManager';
 import { logger } from '../utils/logger';
 
 export const useEsiWorkerManager = () => {

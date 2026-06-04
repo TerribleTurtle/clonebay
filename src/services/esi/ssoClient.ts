@@ -1,5 +1,5 @@
 import { EveSsoTokenResponseSchema, EveSsoJwtPayloadSchema } from "@/schemas/auth";
-import { logger } from "./logger";
+import { logger } from "../../utils/logger";
 
 const EXPECTED_JWT_PARTS = 3;
 const HEX_RADIX = 16;
@@ -47,7 +47,7 @@ export async function exchangeCodeForToken(
   }
 
   const tokenDataUnparsed = await response.json();
-  const tokenData = EveSsoTokenResponseSchema.parse(tokenDataUnparsed);
+  const tokenData = await EveSsoTokenResponseSchema.parseAsync(tokenDataUnparsed);
   
   // Decode JWT to extract character identity
   const tokenParts = tokenData.access_token.split(".");
@@ -68,11 +68,12 @@ export async function exchangeCodeForToken(
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(HEX_RADIX)).slice(SLICE_LAST_TWO))
         .join("")
     );
+    // eslint-disable-next-line no-restricted-syntax
     payloadUnparsed = JSON.parse(payloadJson);
   } catch (error) {
     throw new Error(`Failed to decode JWT payload: ${error instanceof Error ? error.message : String(error)}`);
   }
-  const payload = EveSsoJwtPayloadSchema.parse(payloadUnparsed);
+  const payload = await EveSsoJwtPayloadSchema.parseAsync(payloadUnparsed);
 
   const characterId = payload.sub.split(":").pop();
   const characterName = payload.name;

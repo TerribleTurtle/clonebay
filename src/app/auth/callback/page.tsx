@@ -2,9 +2,9 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addOrUpdateCharacter, getPkceState, getCodeVerifier, clearPkceData } from "@/utils/AuthRepository";
+import { addOrUpdateCharacter, getPkceState, getCodeVerifier, clearPkceData } from "@/auth/AuthRepository";
 
-import { exchangeCodeForToken } from "@/utils/ssoClient";
+import { exchangeCodeForToken } from "@/services/esi/ssoClient";
 import { logger } from "@/utils/logger";
 
 class SsoError extends Error {
