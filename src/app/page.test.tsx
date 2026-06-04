@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { expect, test, vi } from 'vitest'
+import '@testing-library/jest-dom'
 import Home from './page'
 
 vi.mock('next/navigation', () => ({
@@ -8,5 +9,5 @@ vi.mock('next/navigation', () => ({
 
 test('renders the Dashboard', () => {
   render(<Home />)
-  expect(screen.getByText(/NO CLONES CONNECTED/i)).toBeDefined()
+  expect(screen.getByText(/NO CLONES CONNECTED/i)).toBeInTheDocument()
 })
