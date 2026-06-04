@@ -55,7 +55,7 @@ export const Dashboard: React.FC = () => {
             type="button" 
             variant="success"
             onClick={() => router.push('/auth/login')}
-            className="px-4 py-1 text-xs tracking-wider min-h-0"
+            className="w-full md:w-auto px-4 py-3 md:py-1 text-sm md:text-xs tracking-wider min-h-[44px]"
           >
             Add Clone
           </Button>
@@ -64,7 +64,7 @@ export const Dashboard: React.FC = () => {
           type="button" 
           variant="default"
           onClick={toggleMockMode}
-          className="px-4 py-1 text-xs tracking-wider min-h-0"
+          className="w-full md:w-auto px-4 py-3 md:py-1 text-sm md:text-xs tracking-wider min-h-[44px]"
         >
           Mock Mode: {isMockMode ? 'ON' : 'OFF'}
         </Button>

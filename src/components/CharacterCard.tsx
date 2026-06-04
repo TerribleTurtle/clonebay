@@ -70,7 +70,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
         <button 
           type="button"
           onClick={() => setIsSettingsOpen(true)}
-          className="text-zinc-600 hover:text-amber-500 font-mono text-xs cursor-pointer p-1 leading-none transition-colors"
+          className="text-zinc-600 hover:text-amber-500 active:text-amber-500 font-mono text-xs sm:text-xs text-sm cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center leading-none transition-colors"
           title="Settings"
         >
           [⚙]
@@ -78,7 +78,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
         <button 
           type="button"
           onClick={handleRemove}
-          className="text-zinc-600 hover:text-status-red font-mono text-xs cursor-pointer p-1 leading-none transition-colors"
+          className="text-zinc-600 hover:text-status-red active:text-status-red font-mono text-xs sm:text-xs text-sm cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center leading-none transition-colors"
           title="Remove Character"
         >
           [X]

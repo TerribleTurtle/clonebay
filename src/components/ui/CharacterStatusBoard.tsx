@@ -38,7 +38,7 @@ const LEDIndicator = forwardRef  <HTMLDivElement, StatusIndicatorProps>(
         ref={ref}
         {...props}
         onClick={onClick}
-        className={`flex flex-col items-center justify-center w-12 h-12 bg-eve-panel border cursor-pointer transition-all duration-200 rounded-none uppercase text-[10px] font-mono tracking-widest ${statusClasses[status]}`}
+        className={`flex flex-col items-center justify-center w-12 h-12 bg-eve-panel border cursor-pointer transition-all duration-200 rounded-none uppercase text-[10px] font-mono tracking-widest active:scale-95 ${statusClasses[status]}`}
       >
         <span className="mb-1 leading-none">{label}</span>
         <div className={`w-1.5 h-1.5 rounded-none ${ledDotClasses[status]}`} />

@@ -67,14 +67,14 @@ export function CharacterSettingsDialog({
         </div>
 
         {/* Body */}
-        <div className="flex h-[500px]">
+        <div className="flex flex-col sm:flex-row h-[600px] sm:h-[500px]">
           {/* Sidebar Tabs */}
-          <div className="w-48 space-y-1 border-r border-zinc-800 bg-zinc-900/50 p-2">
+          <div className="flex sm:flex-col w-full sm:w-48 space-x-1 sm:space-x-0 sm:space-y-1 overflow-x-auto border-b sm:border-b-0 sm:border-r border-zinc-800 bg-zinc-900/50 p-2 shrink-0">
             {(['General', 'Thresholds', 'Visibility'] as Tab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`block w-full border-l-2 px-3 py-2 text-left text-sm uppercase tracking-wider transition-colors ${
+                className={`flex-none sm:w-full border-b-2 sm:border-b-0 sm:border-l-2 px-3 py-2 text-center sm:text-left text-sm uppercase tracking-wider transition-colors ${
                   activeTab === tab
                     ? 'border-amber-500 bg-amber-500/10 text-amber-500'
                     : 'border-transparent text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200'
@@ -140,29 +140,29 @@ export function CharacterSettingsDialog({
                     </label>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <label className="text-sm text-yellow-500">Yellow Warning</label>
                       <input
                         type="number"
                         disabled={isIskInherit}
                         value={displayYellow}
                         onChange={(e) => configStore.setOverride(Number(characterId), 'walletYellow', Number(e.target.value))}
-                        className={`w-48 border bg-zinc-950 px-3 py-1 text-right outline-none transition-colors ${
+                        className={`w-full sm:w-48 border bg-zinc-950 px-3 py-2 sm:py-1 text-right outline-none transition-colors ${
                           isIskInherit
                             ? 'cursor-not-allowed border-zinc-800 text-zinc-600'
                             : 'border-cyan-900/50 text-cyan-50 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.2)] focus:ring-1 focus:ring-cyan-400'
                         }`}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <label className="text-sm text-red-500">Red Alert</label>
                       <input
                         type="number"
                         disabled={isIskInherit}
                         value={displayRed}
                         onChange={(e) => configStore.setOverride(Number(characterId), 'walletRed', Number(e.target.value))}
-                        className={`w-48 border bg-zinc-950 px-3 py-1 text-right outline-none transition-colors ${
+                        className={`w-full sm:w-48 border bg-zinc-950 px-3 py-2 sm:py-1 text-right outline-none transition-colors ${
                           isIskInherit
                             ? 'cursor-not-allowed border-zinc-800 text-zinc-600'
                             : 'border-cyan-900/50 text-cyan-50 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.2)] focus:ring-1 focus:ring-cyan-400'
@@ -226,7 +226,7 @@ export function CharacterSettingsDialog({
         <div className="flex justify-end border-t border-zinc-800 bg-zinc-900 p-4">
           <button
             onClick={onClose}
-            className="bg-zinc-800 px-6 py-2 text-sm uppercase tracking-widest text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+            className="w-full sm:w-auto bg-zinc-800 px-6 py-3 sm:py-2 text-sm uppercase tracking-widest text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-zinc-900 min-h-[44px]"
           >
             Close
           </button>

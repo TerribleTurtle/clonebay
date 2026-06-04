@@ -39,7 +39,7 @@ export function CharacterMetrics({
         {/* Clones Metric */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-col items-center justify-center py-2 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer">
+            <div className="flex flex-col items-center justify-center py-2 min-h-[44px] active:scale-95 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Clones</span>
               <span className="text-zinc-100 font-semibold">
                 {clonesCount} <span className="text-zinc-500 font-normal">/ {maxClones}</span>
@@ -77,7 +77,7 @@ export function CharacterMetrics({
         {/* Fatigue Metric */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-col items-center justify-center py-2 bg-zinc-950 hover:bg-zinc-900 hover:text-amber-400 transition-colors cursor-pointer">
+            <div className="flex flex-col items-center justify-center py-2 min-h-[44px] active:scale-95 bg-zinc-950 hover:bg-zinc-900 hover:text-amber-400 transition-colors cursor-pointer">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Fatigue</span>
               <span className={`font-semibold ${fatigueTimer !== '00:00:00' ? 'text-amber-400' : 'text-zinc-100'}`}>
                 {fatigueTimer}
@@ -99,7 +99,7 @@ export function CharacterMetrics({
         {/* Ship Metric */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-col items-center justify-center py-2 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer px-1">
+            <div className="flex flex-col items-center justify-center py-2 min-h-[44px] active:scale-95 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer px-1">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Ship</span>
               <span className="text-zinc-100 font-semibold truncate w-full text-center">{activeShip}</span>
             </div>
@@ -119,7 +119,7 @@ export function CharacterMetrics({
         {/* Orders Metric */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-col items-center justify-center py-2 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer">
+            <div className="flex flex-col items-center justify-center py-2 min-h-[44px] active:scale-95 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Orders</span>
               <span className="text-zinc-100 font-semibold">{activeOrders}</span>
             </div>
@@ -142,7 +142,7 @@ export function CharacterMetrics({
         {/* Mail Metric */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-col items-center justify-center py-2 bg-zinc-950 hover:bg-zinc-900 hover:text-cyan-400 transition-colors cursor-pointer">
+            <div className="flex flex-col items-center justify-center py-2 min-h-[44px] active:scale-95 bg-zinc-950 hover:bg-zinc-900 hover:text-cyan-400 transition-colors cursor-pointer">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Mail</span>
               <span className={`font-semibold ${unreadMail > 0 ? 'text-cyan-400' : 'text-zinc-100'}`}>
                 {unreadMail}
