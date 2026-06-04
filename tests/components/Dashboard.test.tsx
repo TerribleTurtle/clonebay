@@ -30,13 +30,14 @@ vi.mock('../../src/store/useCharacterStore', () => {
     return selector(storeState);
   });
   
-  (useCharacterStore as any).getState = () => storeState;
+  (useCharacterStore as any /* eslint-disable-line @typescript-eslint/no-explicit-any */).getState = () => storeState;
   
   return { useCharacterStore };
 });
 
 describe('Dashboard', () => {
   let mockToggleMockMode: ReturnType<typeof vi.fn>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let useCharacterStoreMock: any;
 
   beforeEach(async () => {
@@ -50,11 +51,11 @@ describe('Dashboard', () => {
       toggleMockMode: mockToggleMockMode,
     };
 
-    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any) => {
+    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       try {
         const result = selector(storeState);
         return result;
-      } catch (e) {
+      } catch {
         return Object.keys(storeState.characters);
       }
     });
@@ -76,7 +77,7 @@ describe('Dashboard', () => {
       toggleMockMode: mockToggleMockMode,
     };
     
-    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any) => {
+    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       if (typeof selector === 'function') {
         const str = selector.toString();
         if (str.includes('Object.keys')) return Object.keys(storeState.characters);
@@ -97,7 +98,7 @@ describe('Dashboard', () => {
       toggleMockMode: mockToggleMockMode,
     };
     
-    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any) => {
+    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       if (typeof selector === 'function' && selector.toString().includes('Object.keys')) {
         return Object.keys(storeState.characters);
       }
@@ -111,3 +112,5 @@ describe('Dashboard', () => {
     expect(mockToggleMockMode).toHaveBeenCalledWith(false);
   });
 });
+
+

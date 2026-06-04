@@ -118,3 +118,4 @@ describe('WorkerManager', () => {
     expect(terminateSpy).not.toHaveBeenCalled();
   });
 });
+

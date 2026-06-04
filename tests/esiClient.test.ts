@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { http, HttpResponse } from 'msw';
@@ -281,3 +282,5 @@ describe('ESI Client', () => {
     })).rejects.toThrow('ESI request failed with status 304: Not Modified');
   });
 });
+
+

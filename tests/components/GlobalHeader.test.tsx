@@ -12,3 +12,5 @@ describe('GlobalHeader', () => {
     expect(screen.getByRole('link', { name: /\[ DEBUG TERMINAL \]/i })).toHaveAttribute('href', '/debug');
   });
 });
+
+

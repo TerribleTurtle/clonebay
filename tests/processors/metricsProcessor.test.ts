@@ -6,6 +6,7 @@ vi.mock('../../src/services/esi/sdeClient', () => ({
 }));
 
 describe('metricsProcessor', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
 
   beforeEach(() => {
@@ -57,7 +58,7 @@ describe('metricsProcessor', () => {
       walletResult: {
         status: 'Green',
         cached: false,
-        get data(): any { throw new Error('Forced Error Inside Try'); }
+        get data(): any /* eslint-disable-line @typescript-eslint/no-explicit-any */ { throw new Error('Forced Error Inside Try'); }
       },
       locationResult: undefined,
       shipResult: undefined,
@@ -86,3 +87,5 @@ describe('metricsProcessor', () => {
     });
   });
 });
+
+

@@ -24,6 +24,7 @@ vi.mock('../../src/store/useCharacterStore', () => {
 
 describe('CharacterRow', () => {
   let mockRemoveAndReload: ReturnType<typeof vi.fn>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let useCharacterStoreMock: any;
 
   beforeEach(async () => {
@@ -59,7 +60,7 @@ describe('CharacterRow', () => {
       removeAndReload: mockRemoveAndReload,
     };
 
-    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any) => {
+    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       return selector(storeState);
     });
   });
@@ -90,3 +91,5 @@ describe('CharacterRow', () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+

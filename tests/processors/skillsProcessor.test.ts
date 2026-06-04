@@ -1,10 +1,11 @@
-﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { z } from 'zod';
 import { processSkills } from '../../src/workers/processors/skillsProcessor';
 import { EsiSkillQueueSchema, type EsiSkillQueue } from '../../src/schemas/esi';
 import mockSkillQueueRaw from '../fixtures/mockSkillQueue.json';
 
 describe('skillsProcessor', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
 
   beforeEach(() => {
@@ -123,3 +124,5 @@ describe('skillsProcessor', () => {
     });
   });
 });
+
+

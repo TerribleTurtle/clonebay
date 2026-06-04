@@ -19,3 +19,5 @@ describe('Live ESI Contract Validation', () => {
     expect(data.group_id).toBe(1365);
   });
 });
+
+

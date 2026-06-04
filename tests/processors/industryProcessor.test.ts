@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { z } from 'zod';
 import { processIndustry } from '../../src/workers/processors/industryProcessor';
 import { EsiIndustryJobSchema, type EsiIndustryJob, EsiCharacterSkillsResponseSchema } from '../../src/schemas/esi';
@@ -6,6 +6,7 @@ import mockIndustryJobsRaw from '../fixtures/mockIndustryJobs.json';
 import characterSkillsRaw from '../fixtures/character_skills.json';
 
 describe('industryProcessor', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
 
   beforeEach(() => {
@@ -117,3 +118,5 @@ describe('industryProcessor', () => {
     });
   });
 });
+
+

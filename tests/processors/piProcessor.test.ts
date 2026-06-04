@@ -5,7 +5,9 @@ import mockPlanetsRaw from '../fixtures/mockPlanets.json';
 import { PI_SDE_DATA } from '../../src/utils/piSdeData';
 
 describe('piProcessor', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockEsiService: any;
 
   beforeEach(() => {
@@ -144,3 +146,5 @@ describe('piProcessor', () => {
     });
   });
 });
+
+

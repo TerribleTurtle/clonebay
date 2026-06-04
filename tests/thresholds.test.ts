@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
 import {
@@ -280,3 +281,5 @@ describe('Threshold Calculations', () => {
     });
   });
 });
+
+

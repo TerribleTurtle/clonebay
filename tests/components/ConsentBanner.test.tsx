@@ -13,7 +13,7 @@ describe('ConsentBanner', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockSetConsentStatus = vi.fn();
-    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       const state = {
         consentStatus: 'unknown',
         setConsentStatus: mockSetConsentStatus,
@@ -28,7 +28,7 @@ describe('ConsentBanner', () => {
   });
 
   it('does not render when consentStatus is granted', () => {
-    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       return selector({ consentStatus: 'granted', setConsentStatus: mockSetConsentStatus });
     });
     const { container } = render(<ConsentBanner />);
@@ -36,7 +36,7 @@ describe('ConsentBanner', () => {
   });
 
   it('does not render when consentStatus is denied', () => {
-    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any) => {
+    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
       return selector({ consentStatus: 'denied', setConsentStatus: mockSetConsentStatus });
     });
     const { container } = render(<ConsentBanner />);
@@ -55,3 +55,5 @@ describe('ConsentBanner', () => {
     expect(mockSetConsentStatus).toHaveBeenCalledWith('denied');
   });
 });
+
+
