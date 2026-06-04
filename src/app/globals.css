@@ -6,10 +6,20 @@
     --background: 0 0% 1%;
     --foreground: 0 0% 100%;
 
+    /* EVE Palette */
+    --color-void-black: 2 6 23;
+    --color-cryo: 34 211 238;
+    --color-bio: 52 211 153;
+    --color-tactical: 251 191 36;
+    --color-critical: 244 63 94;
+
     /* EVE NeoCom Theme */
     --eve-bg: 0 0% 1%;
     --eve-panel: 240 10% 4%;
     --eve-border: 240 4% 16%;
+    --eve-void: 240 10% 2%;
+    --eve-tactical: 240 8% 12%;
+    --eve-cryo: 185 100% 50%;
     
     /* Traffic Light Status */
     --status-green: 115 100% 45%;
@@ -31,7 +41,7 @@
   }
 
   body {
-    background-color: hsl(var(--eve-bg));
+    background-color: rgb(var(--color-void-black));
     color: hsl(var(--foreground));
     /* The typography and alignment rules are enforced by layout.tsx and eslint */
   }

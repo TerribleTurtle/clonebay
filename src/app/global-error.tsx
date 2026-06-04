@@ -39,11 +39,11 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html 
+    <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${rajdhani.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-eve-bg text-zinc-50">
+      <body className="min-h-full flex flex-col bg-eve-void text-zinc-50">
         <main className="flex-1 w-full flex items-center justify-center p-4">
           <SystemErrorUI error={error} reset={reset} />
         </main>

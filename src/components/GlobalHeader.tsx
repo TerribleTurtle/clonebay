@@ -12,9 +12,9 @@ export const GlobalHeader: React.FC = () => {
         {/* Left Side: Logo / Brand */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950" onClick={() => setIsMobileMenuOpen(false)}>
-            <div className="w-4 h-4 bg-status-cyan shadow-glow-cyan rotate-45 group-hover:rotate-90 transition-transform duration-300"></div>
+            <div className="w-4 h-4 bg-status-cyan shadow-[0_0_8px_rgba(34,211,238,0.4)] rotate-45 group-hover:rotate-90 transition-transform duration-300"></div>
             <h1 className="font-mono font-bold tracking-widest text-zinc-50 uppercase text-lg flex items-center gap-1">
-              CLONE BAY <span className="text-zinc-500 font-normal">||</span> Command Center
+              CLONE BAY <span className="text-eve-cryo font-normal">||</span> Command Center
             </h1>
           </Link>
         </div>
@@ -50,7 +50,7 @@ export const GlobalHeader: React.FC = () => {
 
       {/* Mobile Full-Screen Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/90 backdrop-blur-md flex flex-col items-center justify-center space-y-8 md:hidden font-mono text-sm font-bold tracking-widest uppercase">
+        <div className="fixed inset-0 z-50 bg-eve-void/90 backdrop-blur-md flex flex-col items-center justify-center space-y-8 md:hidden font-mono text-sm font-bold tracking-widest uppercase">
           <button
             className="absolute top-4 right-4 sm:right-6 w-11 h-11 flex items-center justify-center text-zinc-400 hover:text-zinc-50 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
             onClick={() => setIsMobileMenuOpen(false)}

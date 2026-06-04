@@ -64,7 +64,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
   const unreadMail = status.mail?.total_unread_count !== undefined ? status.mail.total_unread_count : 0;
 
   return (
-    <div className="bg-zinc-950 rounded-none border border-zinc-800 hover:border-status-cyan/50 transition-colors flex flex-col h-full min-h-[220px] relative">
+    <div className="bg-eve-void rounded-none border border-eve-border hover:border-status-cyan hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] transition-all flex flex-col h-full min-h-[220px] relative" role="article" aria-label={`Character Card for ${displayName}`}>
       {/* Absolute Header Buttons */}
       <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
         <button 
@@ -86,7 +86,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
       </div>
 
       {/* Top Header Section */}
-      <div className="flex gap-4 p-4 pb-2">
+      <div className="flex flex-col sm:flex-row gap-4 p-4 pb-2">
         <CharacterPortrait characterId={Number(characterId)} characterName={displayName} />
         
         <div className="flex-1 flex flex-col justify-center min-w-0 pt-1">
@@ -97,11 +97,11 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="text-xs text-zinc-500 font-mono tracking-wider truncate mb-2 cursor-help w-fit hover:text-zinc-300 transition-colors">
+                <div className="text-xs text-eve-cryo font-mono tracking-wider truncate mb-2 cursor-help w-fit hover:text-status-cyan transition-colors" aria-label={`Location: ${locationText}`}>
                   [{locationText}]
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="top" className="bg-zinc-950 border-zinc-800 text-zinc-300 font-mono text-xs rounded-none">
+              <TooltipContent side="top" className="bg-eve-tactical border-eve-border text-zinc-300 font-mono text-xs rounded-none shadow-[0_0_8px_rgba(34,211,238,0.2)]">
                 {status.stationName ? (
                   <p>{status.stationName}</p>
                 ) : status.structureId ? (
@@ -113,12 +113,12 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
             </Tooltip>
           </TooltipProvider>
 
-          <div className="flex flex-col gap-1 text-xs font-mono">
+          <div className="flex flex-col gap-1 text-xs font-mono tabular-nums" role="status" aria-live="polite">
             <span className="text-zinc-400 flex items-center gap-1">
-              ISK: <span className="text-status-yellow font-bold">{isk}</span>
+              ISK: <span className="text-status-yellow font-bold tabular-nums" aria-label={`ISK: ${isk}`}>{isk}</span>
             </span>
             <span className="text-zinc-400 flex items-center gap-1">
-              Total SP: <span className="text-status-green font-bold">{totalSp}</span>
+              Total SP: <span className="text-status-green font-bold tabular-nums" aria-label={`Total SP: ${totalSp}`}>{totalSp}</span>
             </span>
           </div>
         </div>

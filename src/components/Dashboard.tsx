@@ -39,7 +39,7 @@ export const Dashboard: React.FC = () => {
 
   if (!mounted) {
     return (
-      <div className="flex-1 flex items-center justify-center font-mono" aria-live="polite">
+      <div className="flex-1 flex items-center justify-center font-mono tabular-nums" aria-live="polite" role="status">
         <div className="text-status-yellow font-bold uppercase tracking-widest animate-pulse">
           Initializing Neural Link...
         </div>
@@ -48,8 +48,8 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col font-mono text-zinc-300">
-      <div className="flex justify-end items-center mb-4 border-b border-eve-border pb-2 gap-2">
+    <div className="flex-1 flex flex-col font-mono text-eve-cryo tabular-nums">
+      <div className="flex flex-col md:flex-row justify-end items-center mb-4 border-b border-eve-border pb-2 gap-2">
         {!isMockMode && (
           <Button 
             type="button" 
@@ -71,11 +71,11 @@ export const Dashboard: React.FC = () => {
       </div>
       
       {characterIds.length === 0 ? (
-        <div className="border border-eve-border bg-eve-panel p-6 text-center text-zinc-500">
+        <div className="border border-eve-border bg-eve-void p-6 text-center text-zinc-500 rounded-none shadow-[0_0_8px_rgba(34,211,238,0.1)] hover:shadow-[0_0_12px_rgba(34,211,238,0.2)] transition-shadow" role="status" aria-live="polite" aria-label="No clones connected">
           NO CLONES CONNECTED. AWAITING NEURAL LINK.
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-4" role="status" aria-live="polite" aria-label="Connected clones">
           {characterIds.map((id) => (
             <CharacterCard 
               key={id} 

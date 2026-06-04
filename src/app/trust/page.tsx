@@ -1,84 +1,175 @@
-'use client';
+"use client";
 
-import { useDataWipe } from '../../hooks/useDataWipe';
+import { useDataWipe } from "../../hooks/useDataWipe";
 
 export default function TrustPage() {
   const { handleWipeData } = useDataWipe();
 
   return (
-    <div className="w-full flex-1">
+    <div className="w-full flex-1 font-mono text-zinc-300 bg-eve-void p-4 md:p-8">
       <div className="flex flex-col mb-8 border-b border-eve-border pb-4">
-        <h1 className="text-3xl font-bold tracking-widest uppercase text-amber-500">Trust & Legal Protocol</h1>
+        <h1 className="text-3xl font-bold tracking-widest uppercase text-eve-cryo drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
+          Trust & Legal Protocol
+        </h1>
+        <p className="text-zinc-500 mt-2 text-sm uppercase tracking-wider">
+          OpSec Clearance: Public
+        </p>
       </div>
 
-      <div className="space-y-8 font-mono text-sm text-zinc-300">
-        <section>
-          <h2 className="text-xl font-bold text-emerald-400 mb-2 uppercase tracking-wide">Zero-Backend Architecture</h2>
-          <p className="mb-4">
-            Clone Bay operates on a strict Zero-Trust philosophy. There are no central servers, databases, or tracking scripts storing your data.
+      <div className="space-y-12 text-sm text-zinc-300 max-w-4xl">
+        <section className="bg-eve-tactical border border-eve-border p-6 md:p-8 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative">
+          <div className="absolute top-0 left-0 w-2 h-full bg-status-green/80" />
+          <h2 className="text-xl font-bold text-status-green mb-4 uppercase tracking-wider flex items-center gap-3">
+            <span className="w-2 h-2 bg-status-green animate-pulse" />
+            Zero-Backend Architecture
+          </h2>
+          <p className="mb-6 text-zinc-400">
+            Clone Bay operates on a strict Zero-Trust philosophy. There are no
+            central servers, databases, or tracking scripts storing your data.
           </p>
-          <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-            <li><strong>No Secrets:</strong> We use the EVE SSO PKCE (Proof Key for Code Exchange) flow. This means no <code>client_secret</code> is ever required or stored.</li>
-            <li><strong>Browser Only:</strong> Your Access and Refresh tokens are encrypted and stored exclusively in your browser&apos;s IndexedDB.</li>
-            <li><strong>Direct Fetch:</strong> All requests to the EVE Swagger Interface (ESI) are made directly from your browser&apos;s Web Workers. Our servers never touch your data.</li>
+          <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <li className="bg-eve-void border border-eve-border/50 p-4">
+              <strong className="block text-eve-cryo mb-2 uppercase tracking-wide">
+                No Secrets
+              </strong>
+              <span className="text-zinc-400 text-xs">
+                We use the EVE SSO PKCE flow. No <code>client_secret</code> is
+                ever required or stored.
+              </span>
+            </li>
+            <li className="bg-eve-void border border-eve-border/50 p-4">
+              <strong className="block text-eve-cryo mb-2 uppercase tracking-wide">
+                Browser Only
+              </strong>
+              <span className="text-zinc-400 text-xs">
+                Your Access and Refresh tokens are encrypted and stored
+                exclusively in IndexedDB.
+              </span>
+            </li>
+            <li className="bg-eve-void border border-eve-border/50 p-4">
+              <strong className="block text-eve-cryo mb-2 uppercase tracking-wide">
+                Direct Fetch
+              </strong>
+              <span className="text-zinc-400 text-xs">
+                All ESI requests are made directly from your browser. Our
+                servers never touch data.
+              </span>
+            </li>
           </ul>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold text-emerald-400 mb-2 uppercase tracking-wide">How to Verify (Trust, but Verify)</h2>
-          <p className="mb-4">
-            Do not blindly trust web applications with your EVE SSO. You can verify our zero-backend claims yourself:
+        <section className="bg-eve-tactical border border-eve-border p-6 md:p-8 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative">
+          <div className="absolute top-0 left-0 w-2 h-full bg-status-yellow/80" />
+          <h2 className="text-xl font-bold text-status-yellow mb-4 uppercase tracking-wider flex items-center gap-3">
+            <span className="w-2 h-2 bg-status-yellow animate-pulse" />
+            How to Verify (Trust, but Verify)
+          </h2>
+          <p className="mb-6 text-zinc-400">
+            Do not blindly trust web applications with your EVE SSO. You can
+            verify our zero-backend claims yourself:
           </p>
-          <ol className="list-decimal pl-5 space-y-2 text-zinc-400">
-            <li>
-              <strong>Network Tab:</strong> Open your browser&apos;s Developer Tools (F12) &gt; Network. Watch the traffic. The only traffic you will see hitting our domain (`clonebay.app`) are requests to download the static HTML, Javascript, and CSS files required to run the dashboard. <strong>No user data, tokens, or EVE characters are ever sent to our servers.</strong> All your actual game data is fetched directly from the official CCP servers:
-              <div className="bg-eve-bg p-4 border border-eve-border/30 mt-4 font-mono text-[10px] text-zinc-500">
-                <span className="text-zinc-400">Security Verification:</span> All cryptographic keys are isolated within the &quot;eve_auth_tokens&quot; IndexedDB namespace and are explicitly destroyed on explicit &quot;Wipe&quot; command or browser storage clearance.
+          <ol className="space-y-6 text-zinc-400">
+            <li className="border-l border-eve-border pl-4">
+              <strong className="text-eve-cryo uppercase">
+                1. Network Tab
+              </strong>
+              <p className="mt-2 text-xs">
+                Open Developer Tools (F12) &gt; Network. The only traffic
+                hitting our domain (`clonebay.app`) are static files. All game
+                data is fetched directly from official CCP servers:
+              </p>
+              <div className="bg-eve-void p-4 border border-eve-border mt-3 text-[11px] text-zinc-500 font-mono">
+                <span className="text-status-cyan uppercase mb-2 block">
+                  Connection Matrix:
+                </span>
+                <ul className="space-y-2">
+                  <li>
+                    <span className="text-zinc-300">login.eveonline.com</span>:
+                    EVE SSO authentication
+                  </li>
+                  <li>
+                    <span className="text-zinc-300">esi.evetech.net</span>: EVE
+                    Swagger Interface (game data)
+                  </li>
+                  <li>
+                    <span className="text-zinc-300">images.evetech.net</span>:
+                    Character portraits
+                  </li>
+                </ul>
               </div>
-              <ul className="list-disc pl-5 mt-2 space-y-1 text-zinc-500">
-                <li><code>login.eveonline.com</code>: Used strictly for the initial EVE SSO (Single Sign-On) authentication and secure token refresh.</li>
-                <li><code>esi.evetech.net</code>: The EVE Swagger Interface, used to fetch your live character data (skill queues, industry jobs, wallet, etc.).</li>
-                <li><code>images.evetech.net</code>: The official EVE image server, used exclusively to fetch character portraits.</li>
-              </ul>
             </li>
-            <li><strong>Application Tab:</strong> Go to Developer Tools &gt; Application &gt; IndexedDB. You will see <code>clonebay-storage</code> containing your tokens. They live exclusively here.</li>
-            <li><strong>Open Source:</strong> Review the source code yourself. The entire pipeline, from token generation to UI rendering, is publicly verifiable.</li>
-            <li>
-              <strong>Content Security Policy (CSP):</strong> We don&apos;t just promise not to steal your data; we mathematically bind your browser to prevent it. If you look at the <code>&lt;head&gt;</code> of this page&apos;s HTML, you will see a strict CSP meta tag:
-              <div className="bg-eve-bg p-4 border border-eve-border/30 mt-4 font-mono text-[10px] text-zinc-500 overflow-x-auto whitespace-pre-wrap">
-                default-src &apos;self&apos;; connect-src &apos;self&apos; https://esi.evetech.net https://login.eveonline.com; ...
+            <li className="border-l border-eve-border pl-4">
+              <strong className="text-eve-cryo uppercase">
+                2. Content Security Policy (CSP)
+              </strong>
+              <p className="mt-2 text-xs">
+                We mathematically bind your browser to prevent data theft. Our
+                strict CSP physically blocks network requests to unapproved
+                domains.
+              </p>
+              <div className="bg-eve-void p-4 border border-eve-border mt-3 text-[11px] text-zinc-500 font-mono overflow-x-auto whitespace-pre-wrap">
+                default-src &apos;self&apos;; connect-src &apos;self&apos;
+                https://esi.evetech.net https://login.eveonline.com; ...
               </div>
-              <p className="mt-2 text-zinc-400">This policy explicitly tells Chrome/Firefox/Safari to physically block any outgoing network request that isn&apos;t hitting an official EVE server. Even if our code was hacked, the browser itself would block the data theft.</p>
+            </li>
+            <li className="border-l border-eve-border pl-4">
+              <strong className="text-eve-cryo uppercase">
+                3. Application Tab & Open Source
+              </strong>
+              <p className="mt-2 text-xs">
+                Check Developer Tools &gt; Application &gt; IndexedDB to see
+                tokens. The entire pipeline is open source and publicly
+                verifiable.
+              </p>
             </li>
           </ol>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold text-emerald-400 mb-2 uppercase tracking-wide">Privacy & Storage Policy</h2>
-          <p className="mb-4">
-            We only process the data required to render the dashboard (Skill Queues, PI, Industry, Wallet). This information is fetched directly from <code>esi.evetech.net</code> and cached strictly in your browser.
-          </p>
-          <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-            <li><strong>Zero Tracking:</strong> We do not use Google Analytics, Sentry, or any other telemetry software.</li>
-            <li><strong>No &quot;Cookie Consent&quot; Banner:</strong> Under the GDPR and ePrivacy Directive, explicit cookie banners are only required when storing non-essential data. Because Clone Bay uses your browser&apos;s local storage <strong>exclusively</strong> as a strictly necessary database to hold your EVE SSO tokens—without which the dashboard literally cannot function—we are legally exempt from requiring an annoying pop-up banner. We do not track you, so there is nothing to opt out of.</li>
-          </ul>
+        <section className="bg-eve-tactical border border-eve-border p-6 md:p-8 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+          <h2 className="text-xl font-bold text-eve-cryo mb-4 uppercase tracking-wider">
+            Privacy & Legal
+          </h2>
+          <div className="space-y-4">
+            <div className="bg-eve-void border border-eve-border/50 p-4">
+              <strong className="block text-status-cyan mb-2 uppercase">
+                Zero Tracking Policy
+              </strong>
+              <p className="text-xs text-zinc-400">
+                No Google Analytics, Sentry, or telemetry. No cookie banners
+                required as local storage is used exclusively as a strictly
+                necessary database.
+              </p>
+            </div>
+            <div className="bg-eve-void border border-eve-border/50 p-4 border-l-4 border-l-zinc-700">
+              <p className="text-[10px] text-zinc-500 italic uppercase">
+                EVE Online and the EVE logo are the registered trademarks of CCP
+                hf. CCP hf. has granted permission to Clone Bay to use EVE
+                Online and all associated logos for promotional and information
+                purposes but does not endorse, and is not affiliated with, Clone
+                Bay.
+              </p>
+            </div>
+          </div>
         </section>
 
-        <section>
-          <h2 className="text-xl font-bold text-emerald-400 mb-2 uppercase tracking-wide">Legal & Copyright</h2>
-          <p className="mb-4 text-zinc-400 border-l-4 border-zinc-700 pl-4 py-1 italic">
-            EVE Online and the EVE logo are the registered trademarks of CCP hf. All rights are reserved worldwide. All other trademarks are the property of their respective owners. EVE Online, the EVE logo, EVE and all associated logos and designs are the intellectual property of CCP hf. All artwork, screenshots, characters, vehicles, storylines, world facts or other recognizable features of the intellectual property relating to these trademarks are likewise the intellectual property of CCP hf. CCP hf. has granted permission to Clone Bay to use EVE Online and all associated logos and designs for promotional and information purposes on its website but does not endorse, and is not in any way affiliated with, Clone Bay. CCP is in no way responsible for the content on or functioning of this website, nor can it be liable for any damage arising from the use of this website.
-          </p>
-        </section>
-
-        <section className="mt-12 pt-8 border-t border-red-900/50">
-          <h2 className="text-xl font-bold text-red-500 mb-2 uppercase tracking-wide">The Kill-Switch</h2>
-          <p className="mb-4 text-zinc-400">
-            If you are ever compromised, playing on a public terminal, or just want to revoke access locally, use this button. It will immediately permanently delete all IndexedDB and LocalStorage data associated with Clone Bay on this browser.
+        <section className="mt-12 p-6 md:p-8 border border-status-red/50 bg-status-red/5 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-2 h-full bg-status-red" />
+          <h2 className="text-xl font-bold text-status-red mb-2 uppercase tracking-wide flex items-center gap-3">
+            <span className="w-3 h-3 bg-status-red border border-status-red/50 animate-pulse" />
+            The Kill-Switch
+          </h2>
+          <p className="mb-6 text-zinc-400 text-sm">
+            If compromised or on a public terminal, use this to immediately
+            permanently delete all IndexedDB and LocalStorage data associated
+            with Clone Bay on this browser.
           </p>
           <button
-            onClick={() => handleWipeData('Are you sure? This will permanently wipe all stored EVE SSO tokens and character states from your browser.')}
-            className="px-6 py-3 bg-red-950/30 border border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300 transition-colors uppercase tracking-widest text-sm font-bold"
+            onClick={() =>
+              handleWipeData(
+                "Are you sure? This will permanently wipe all stored EVE SSO tokens and character states from your browser.",
+              )
+            }
+            className="w-full md:w-auto px-8 py-4 bg-transparent border border-status-red text-status-red hover:bg-status-red/20 transition-all uppercase tracking-[0.2em] font-bold text-sm shadow-[0_0_15px_rgba(255,0,0,0.2)] hover:shadow-[0_0_25px_rgba(255,0,0,0.4)] focus:outline-none focus:ring-1 focus:ring-status-red"
           >
             Execute Terminal Wipe
           </button>
