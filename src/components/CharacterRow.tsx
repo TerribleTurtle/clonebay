@@ -70,16 +70,16 @@ export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ character
         </div>
         <div className="flex gap-4 text-xs font-mono mt-1">
           <span className="text-zinc-400">
-            Transactions: <span className="text-zinc-200 font-bold">{status.transactions ? status.transactions.length : '???'}</span>
+            Transactions: <span className="text-zinc-200 font-bold">{status.transactions ? (Array.isArray(status.transactions) ? status.transactions.length : status.transactions.count) : '???'}</span>
           </span>
           <span className="text-zinc-400">
             Unread Mail: <span className="text-zinc-200 font-bold">{status.mail?.total_unread_count !== undefined ? status.mail.total_unread_count : '???'}</span>
           </span>
           <span className="text-zinc-400">
-            Contracts: <span className="text-zinc-200 font-bold">{status.contracts ? status.contracts.length : '???'}</span>
+            Contracts: <span className="text-zinc-200 font-bold">{status.contracts ? (Array.isArray(status.contracts) ? status.contracts.length : status.contracts.count) : '???'}</span>
           </span>
           <span className="text-zinc-400">
-            Market Orders: <span className="text-zinc-200 font-bold">{status.marketOrders ? status.marketOrders.length : '???'}</span>
+            Market Orders: <span className="text-zinc-200 font-bold">{status.marketOrders ? (Array.isArray(status.marketOrders) ? status.marketOrders.length : status.marketOrders.count) : '???'}</span>
           </span>
         </div>
         <div className="flex gap-4 text-xs font-mono mt-1">

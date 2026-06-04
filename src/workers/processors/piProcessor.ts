@@ -1,10 +1,11 @@
 import { calculatePiStatus, type PiPinState } from '../../utils/thresholds';
-import { type EsiPlanet, type EsiSdeType } from '../../schemas/esi';
+import { type EsiPlanet } from '../../schemas/esi';
 import type { EsiResponse } from '../../utils/esiClient';
-import { fetchSdeType } from '../../utils/sdeClient';
+
 import { logger } from '../../utils/logger';
 
 import { IEsiService } from '../../services/esi/IEsiService';
+import { PI_SDE_DATA } from '../../utils/piSdeData';
 
 const PI_GROUP_COMMAND_CENTER = 1043;
 const PI_GROUP_SPACEPORT = 1048;
@@ -25,34 +26,13 @@ export async function processPi(
       });
       
       const layouts = await Promise.all(layoutPromises);
-      const typeIdsToFetch = new Set<number>();
-      for (const layoutRes of layouts) {
-        if (!layoutRes || !layoutRes.data || !layoutRes.data.pins) continue;
-        for (const pin of layoutRes.data.pins) {
-          typeIdsToFetch.add(pin.type_id);
-          if (pin.contents) {
-            for (const item of pin.contents) {
-              typeIdsToFetch.add(item.type_id);
-            }
-          }
-        }
-      }
-
-      const sdePromises = Array.from(typeIdsToFetch).map(id => 
-        fetchSdeType(id).then(data => ({ id, data }))
-      );
-      const sdeResults = await Promise.all(sdePromises);
-      const sdeMap = new Map<number, EsiSdeType>();
-      for (const res of sdeResults) {
-        sdeMap.set(res.id, res.data);
-      }
 
       const allPins: PiPinState[] = [];
       for (const layoutRes of layouts) {
         if (!layoutRes || !layoutRes.data || !layoutRes.data.pins) continue;
         
         for (const pin of layoutRes.data.pins) {
-          const sdeData = sdeMap.get(pin.type_id);
+          const sdeData = PI_SDE_DATA[pin.type_id];
           if (!sdeData) continue;
 
           const groupId = sdeData.group_id;
@@ -67,7 +47,7 @@ export async function processPi(
             storageUsed = 0;
             if (pin.contents) {
               for (const item of pin.contents) {
-                const itemSde = sdeMap.get(item.type_id);
+                const itemSde = PI_SDE_DATA[item.type_id];
                 const volume = itemSde?.volume || 0;
                 storageUsed += item.amount * volume;
               }

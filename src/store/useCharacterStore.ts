@@ -27,10 +27,10 @@ export interface CharacterStatus {
   locationStatus: StatusLight;
   clones?: EsiClones;
   fatigue?: EsiFatigue;
-  transactions?: EsiTransaction[];
+  transactions?: { count: number } | EsiTransaction[];
   mail?: EsiMailLabels;
-  contracts?: EsiContract[];
-  marketOrders?: EsiMarketOrder[];
+  contracts?: { count: number } | EsiContract[];
+  marketOrders?: { count: number } | EsiMarketOrder[];
 }
 
 /**

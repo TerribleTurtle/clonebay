@@ -67,10 +67,10 @@ export async function processMetrics(
 
     const clones = clonesResult?.data;
     const fatigue = fatigueResult?.data;
-    const transactions = transactionsResult?.data;
+    const transactions = transactionsResult?.data ? { count: transactionsResult.data.length } : undefined;
     const mail = mailLabelsResult?.data;
-    const contracts = contractsResult?.data;
-    const marketOrders = marketOrdersResult?.data;
+    const contracts = contractsResult?.data ? { count: contractsResult.data.length } : undefined;
+    const marketOrders = marketOrdersResult?.data ? { count: marketOrdersResult.data.length } : undefined;
 
     const now = Date.now();
     const walletStatus = calculateWalletStatus(isk);

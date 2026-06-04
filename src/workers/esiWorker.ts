@@ -78,11 +78,11 @@ async function pollData(): Promise<void> {
   const characterIds = isMockMode ? mockFleet.map(c => c.characterId) : Object.keys(authTokens || {});
   const esiService = isMockMode ? new MockEsiService() : new LiveEsiService();
   
-  for (const charId of characterIds) {
+  const characterPromises = characterIds.map(async (charId) => {
     try {
       const tokenInfo = authTokens ? authTokens[charId] : undefined;
       if (!isMockMode && tokenInfo === undefined) {
-          continue;
+          return;
       }
       const accessToken = tokenInfo?.accessToken || 'mock_token';
 
@@ -138,7 +138,9 @@ async function pollData(): Promise<void> {
     } catch (err) {
       logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);
     }
-  }
+  });
+
+  await Promise.allSettled(characterPromises);
   
   self.postMessage({ type: 'POLL_COMPLETE', timestamp: Date.now() });
 }
