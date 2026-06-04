@@ -26,8 +26,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://eve-dash.example.com"),
   title: "EVE-Dash | Unified Multibox Command Center",
   description: "Eliminate alt-tab fatigue. A zero-backend, secure, and open-source dashboard for monitoring EVE Online skill queues, industry jobs, and planetary interaction across your entire fleet.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "EVE-Dash | Unified Multibox Command Center",
     description: "Eliminate alt-tab fatigue with this zero-backend EVE Online dashboard.",
@@ -35,11 +39,20 @@ export const metadata: Metadata = {
     siteName: "EVE-Dash",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "EVE-Dash Command Center Preview",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "EVE-Dash | Unified Multibox Command Center",
     description: "Eliminate alt-tab fatigue with this zero-backend EVE Online dashboard.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -61,6 +74,20 @@ export default function RootLayout({
         <meta
           httpEquiv="Content-Security-Policy"
           content="default-src 'self'; connect-src 'self' https://esi.evetech.net https://login.eveonline.com; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "EVE-Dash",
+              "description": "Unified Multibox Command Center for EVE Online.",
+              "applicationCategory": "GameUtility",
+              "operatingSystem": "All",
+              "url": "https://eve-dash.example.com"
+            })
+          }}
         />
       </head>
       <body className="min-h-full flex flex-col bg-eve-bg text-zinc-50">

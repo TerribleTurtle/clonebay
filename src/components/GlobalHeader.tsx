@@ -11,9 +11,9 @@ export const GlobalHeader: React.FC = () => {
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-4 h-4 bg-status-cyan shadow-glow-cyan rotate-45 group-hover:rotate-90 transition-transform duration-300"></div>
-            <span className="font-mono font-bold tracking-widest text-zinc-50 uppercase text-lg">
+            <h1 className="font-mono font-bold tracking-widest text-zinc-50 uppercase text-lg flex items-center gap-1">
               EVE-DASH <span className="text-zinc-500 font-normal">||</span> Command Center
-            </span>
+            </h1>
           </Link>
         </div>
 
