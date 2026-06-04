@@ -7,6 +7,16 @@ import type { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMa
 
 export type StatusLight = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
+export const DEFAULT_OFFLINE_STATUS = {
+  skills: 'Offline',
+  industry: 'Offline',
+  pi: 'Offline',
+  walletStatus: 'Offline',
+  mailStatus: 'Offline',
+  cloneStatus: 'Offline',
+  locationStatus: 'Offline'
+} as const;
+
 export interface CharacterStatus {
   name?: string;
   isk?: number;
@@ -169,13 +179,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
           for (const id of Object.keys(state.characters)) {
             offlineChars[id] = { 
               ...state.characters[id],
-              skills: 'Offline', 
-              industry: 'Offline', 
-              pi: 'Offline',
-              walletStatus: 'Offline',
-              mailStatus: 'Offline',
-              cloneStatus: 'Offline',
-              locationStatus: 'Offline'
+              ...DEFAULT_OFFLINE_STATUS
             };
           }
           return { characters: offlineChars };
@@ -184,22 +188,14 @@ export const useCharacterStore = create<CharacterStoreState>()(
         set((state) => {
           const nextChars = { ...state.characters };
           for (const [id, payload] of Object.entries(updates)) {
-            const existing = nextChars[id] ?? { skills: 'Offline', industry: 'Offline', pi: 'Offline', walletStatus: 'Offline', mailStatus: 'Offline', cloneStatus: 'Offline', locationStatus: 'Offline' };
+            const existing = nextChars[id] ?? { ...DEFAULT_OFFLINE_STATUS };
             nextChars[id] = { ...existing, ...payload };
           }
           return { characters: nextChars };
         }),
       updateCharacterStatus: (id, payload) =>
         set((state) => {
-          const existing = state.characters[id] ?? {
-            skills: 'Offline',
-            industry: 'Offline',
-            pi: 'Offline',
-            walletStatus: 'Offline',
-            mailStatus: 'Offline',
-            cloneStatus: 'Offline',
-            locationStatus: 'Offline'
-          };
+          const existing = state.characters[id] ?? { ...DEFAULT_OFFLINE_STATUS };
           
           return {
             characters: {

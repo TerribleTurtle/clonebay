@@ -1,24 +1,10 @@
 'use client';
 
-import { clearAuthDictionary } from '../../utils/AuthRepository';
-import { clearAllStorage } from '../../store/useSettingsStore';
-import { useRouter } from 'next/navigation';
-import { logger } from '../../utils/logger';
+import { useDataWipe } from '../../hooks/useDataWipe';
 
 export default function TrustPage() {
-  const router = useRouter();
-  const handleWipe = async () => {
-    if (confirm('Are you sure? This will permanently wipe all stored EVE SSO tokens and character states from your browser.')) {
-      try {
-        await clearAuthDictionary();
-        clearAllStorage();
-        router.push('/');
-      } catch (err) {
-        logger.error("Failed to wipe local data", err);
-        alert("CRITICAL ERROR: Failed to wipe data. Tokens may still exist.");
-      }
-    }
-  };
+  const { handleWipeData } = useDataWipe();
+
 
   return (
     <div className="w-full flex-1">
@@ -57,7 +43,7 @@ export default function TrustPage() {
             If you are ever compromised, playing on a public terminal, or just want to revoke access locally, use this button. It will immediately permanently delete all IndexedDB and LocalStorage data associated with EVE-Dash on this browser.
           </p>
           <button
-            onClick={handleWipe}
+            onClick={() => handleWipeData('Are you sure? This will permanently wipe all stored EVE SSO tokens and character states from your browser.')}
             className="px-6 py-3 bg-red-950/30 border border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300 transition-colors uppercase tracking-widest text-sm font-bold"
           >
             Execute Terminal Wipe

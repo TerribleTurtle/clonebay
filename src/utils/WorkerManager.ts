@@ -116,6 +116,7 @@ export class WorkerManager {
     } catch (error) {
       logger.error('WorkerManager: Failed to initialize worker', error);
       this.scheduleRestart();
+      throw error;
     }
   }
 

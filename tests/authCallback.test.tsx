@@ -82,7 +82,7 @@ describe('Auth Callback', () => {
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('123456789', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
-      expiresAt: expect.any(Number),
+
       characterName: 'Test Character'
     });
   });
@@ -125,7 +125,7 @@ describe('Auth Callback', () => {
     expect(addOrUpdateCharacter).toHaveBeenCalledWith('9999', {
       accessToken: fakeJwt,
       refreshToken: 'fake-refresh',
-      expiresAt: expect.any(Number),
+
       characterName: 'Jön Dœ 🚀'
     });
   });

@@ -6,15 +6,14 @@ import { useCharacterStore, StatusLight } from '../store/useCharacterStore';
 interface CharacterRowProps {
   characterId: string;
 }
-const getStatusColor = (s: string) => {
-  switch (s) {
-    case 'Green': return 'text-emerald-400 bg-emerald-950/30 border-emerald-800';
-    case 'Yellow': return 'text-amber-400 bg-amber-950/30 border-amber-800';
-    case 'Red': return 'text-red-400 bg-red-950/30 border-red-800';
-    case 'Offline': return 'text-zinc-500 bg-zinc-900/50 border-zinc-800';
-    default: return 'text-zinc-500 bg-zinc-900/50 border-zinc-800';
-  }
+const StatusTheme: Record<StatusLight, string> = {
+  Green: 'text-emerald-400 bg-emerald-950/30 border-emerald-800',
+  Yellow: 'text-amber-400 bg-amber-950/30 border-amber-800',
+  Red: 'text-red-400 bg-red-950/30 border-red-800',
+  Offline: 'text-zinc-500 bg-zinc-900/50 border-zinc-800',
 };
+
+const getStatusColor = (s: StatusLight) => StatusTheme[s] || StatusTheme.Offline;
 
 const StatusPill: React.FC<{ label: string; status: StatusLight }> = ({ label, status }) => (
   <div className={`flex-1 sm:flex-none border px-3 py-1 text-xs uppercase tracking-widest text-center min-w-[100px] ${getStatusColor(status)}`}>

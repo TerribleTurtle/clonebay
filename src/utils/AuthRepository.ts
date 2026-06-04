@@ -10,7 +10,6 @@ export class StorageError extends Error {
 export interface CharacterAuth {
   accessToken: string;
   refreshToken: string;
-  expiresAt: number;
   characterName: string;
 }
 

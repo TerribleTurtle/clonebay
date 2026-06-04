@@ -7,6 +7,7 @@ import { processPi } from './processors/piProcessor';
 import { processMetrics } from './processors/metricsProcessor';
 import { LiveEsiService } from '../services/esi/LiveEsiService';
 import { MockEsiService } from '../services/esi/MockEsiService';
+import type { IEsiService } from '../services/esi/IEsiService';
 
 const POLLING_INTERVAL_SECONDS = 60;
 const MS_PER_SECOND = 1000;
@@ -48,18 +49,16 @@ self.onmessage = async (event: MessageEvent) => {
 
 async function pollLoop() {
   if (!isPolling) return;
-  try {
-    await pollData();
-   
-  } catch (error) {
-    logger.error("ESI Worker: Unhandled error in pollData cycle:", error);
-  }
+  const esiService: IEsiService = activeMockMode ? new MockEsiService() : new LiveEsiService();
+  
+  await pollData(esiService);
+  
   if (isPolling) {
     pollingTimeout = self.setTimeout(pollLoop, POLLING_INTERVAL_SECONDS * MS_PER_SECOND);
   }
 }
 
-async function pollData(): Promise<void> {
+async function pollData(esiService: IEsiService): Promise<void> {
   const isMockMode = activeMockMode;
   let authTokens;
   try {
@@ -76,7 +75,6 @@ async function pollData(): Promise<void> {
   }
 
   const characterIds = isMockMode ? mockFleet.map(c => c.characterId) : Object.keys(authTokens || {});
-  const esiService = isMockMode ? new MockEsiService() : new LiveEsiService();
   
   const characterPromises = characterIds.map(async (charId) => {
     try {
@@ -105,8 +103,28 @@ async function pollData(): Promise<void> {
       // separate 'ESI_METRICS_UPDATE' events (which would cause rapid UI thrashing/re-rendering),
       // we await all necessary data and process it together. This minimizes state fragmentation,
       // guarantees a coherent snapshot of the character's status, and reduces React re-renders.
-      const metricsProcessing = Promise.all([charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise, marketOrdersPromise]).then(async ([charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult]) => {
-        await processMetrics(charId, tokenInfo?.characterName, charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult, isMockMode, (msg) => self.postMessage(msg));
+      const metricsProcessing = Promise.all([
+        charSkillsPromise, walletPromise, locationPromise, shipPromise, skillsPromise, clonesPromise, fatiguePromise, transactionsPromise, mailLabelsPromise, contractsPromise, marketOrdersPromise
+      ]).then(async ([
+        charSkillsResult, walletResult, locationResult, shipResult, skillsResult, clonesResult, fatigueResult, transactionsResult, mailLabelsResult, contractsResult, marketOrdersResult
+      ]) => {
+        await processMetrics({
+          charId,
+          charName: tokenInfo?.characterName,
+          charSkillsResult,
+          walletResult,
+          locationResult,
+          shipResult,
+          skillsResult,
+          clonesResult,
+          fatigueResult,
+          transactionsResult,
+          mailLabelsResult,
+          contractsResult,
+          marketOrdersResult,
+          isMockMode,
+          postMessage: (msg) => self.postMessage(msg)
+        });
       }).catch(err => {
         logger.error(`ESI Worker: Error processing metrics for ${charId}`, err);
         self.postMessage({ type: 'ESI_METRICS_UPDATE', payload: { characterId: charId, walletStatus: 'Red', locationStatus: 'Red', mailStatus: 'Red', cloneStatus: 'Red' } });
@@ -137,6 +155,10 @@ async function pollData(): Promise<void> {
      
     } catch (err) {
       logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);
+      self.postMessage({ type: 'ESI_METRICS_UPDATE', payload: { characterId: charId, walletStatus: 'Red', locationStatus: 'Red', mailStatus: 'Red', cloneStatus: 'Red' } });
+      self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'skills', status: 'Red', data: null } });
+      self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'industry', status: 'Red', data: null } });
+      self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'pi', status: 'Red', data: null } });
     }
   });
 

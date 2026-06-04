@@ -5,23 +5,42 @@ import type { EsiSkillQueue, EsiCharacterSkillsResponse, EsiWallet, EsiLocation,
 import type { EsiResponse } from '../../utils/esiClient';
 import { calculateWalletStatus, calculateMailStatus, calculateCloneStatus, calculateLocationStatus } from '../../utils/thresholds';
 
-export async function processMetrics(
-  charId: string,
-  charName: string | undefined,
-  charSkillsResult: EsiResponse<EsiCharacterSkillsResponse> | null | undefined,
-  walletResult: EsiResponse<EsiWallet> | null | undefined,
-  locationResult: EsiResponse<EsiLocation> | null | undefined,
-  shipResult: EsiResponse<EsiShip> | null | undefined,
-  skillsResult: EsiResponse<EsiSkillQueue[]> | null | undefined,
-  clonesResult: EsiResponse<EsiClones> | null | undefined,
-  fatigueResult: EsiResponse<EsiFatigue> | null | undefined,
-  transactionsResult: EsiResponse<EsiTransaction[]> | null | undefined,
-  mailLabelsResult: EsiResponse<EsiMailLabels> | null | undefined,
-  contractsResult: EsiResponse<EsiContract[]> | null | undefined,
-  marketOrdersResult: EsiResponse<EsiMarketOrder[]> | null | undefined,
-  isMockMode: boolean,
-  postMessage: (msg: unknown) => void
-) {
+export interface EsiMetricsContext {
+  charId: string;
+  charName: string | undefined;
+  charSkillsResult: EsiResponse<EsiCharacterSkillsResponse> | null | undefined;
+  walletResult: EsiResponse<EsiWallet> | null | undefined;
+  locationResult: EsiResponse<EsiLocation> | null | undefined;
+  shipResult: EsiResponse<EsiShip> | null | undefined;
+  skillsResult: EsiResponse<EsiSkillQueue[]> | null | undefined;
+  clonesResult: EsiResponse<EsiClones> | null | undefined;
+  fatigueResult: EsiResponse<EsiFatigue> | null | undefined;
+  transactionsResult: EsiResponse<EsiTransaction[]> | null | undefined;
+  mailLabelsResult: EsiResponse<EsiMailLabels> | null | undefined;
+  contractsResult: EsiResponse<EsiContract[]> | null | undefined;
+  marketOrdersResult: EsiResponse<EsiMarketOrder[]> | null | undefined;
+  isMockMode: boolean;
+  postMessage: (msg: unknown) => void;
+}
+
+export async function processMetrics(context: EsiMetricsContext) {
+  const {
+    charId,
+    charName,
+    charSkillsResult,
+    walletResult,
+    locationResult,
+    shipResult,
+    skillsResult,
+    clonesResult,
+    fatigueResult,
+    transactionsResult,
+    mailLabelsResult,
+    contractsResult,
+    marketOrdersResult,
+    isMockMode,
+    postMessage
+  } = context;
   try {
     const mockChar = isMockMode ? mockFleet.find(c => c.characterId === charId) : null;
     

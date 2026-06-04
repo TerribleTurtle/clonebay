@@ -1,15 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { clearAuthDictionary } from '../../utils/AuthRepository';
-import { clearAllStorage } from '../../store/useSettingsStore';
-import { useRouter } from 'next/navigation';
 import { useSettingsStore } from '../../store/useSettingsStore';
-import { logger } from '../../utils/logger';
+import { useDataWipe } from '../../hooks/useDataWipe';
 
 export default function SettingsPage() {
   const settings = useSettingsStore();
-  const router = useRouter();
+  const { handleWipeData } = useDataWipe();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -17,18 +14,7 @@ export default function SettingsPage() {
     setMounted(true);
   }, []);
 
-  const handleWipeData = async () => {
-    if (window.confirm("WARNING: This will wipe all SSO tokens and ESI cache. You will need to log back in. Continue?")) {
-      try {
-        await clearAuthDictionary();
-        clearAllStorage();
-        router.push("/");
-      } catch (err) {
-        logger.error("Failed to wipe local data", err);
-        window.alert("CRITICAL ERROR: Failed to wipe data. Tokens may still exist.");
-      }
-    }
-  };
+
 
   if (!mounted) {
     return null; // Prevent hydration mismatch
@@ -88,7 +74,7 @@ export default function SettingsPage() {
           
           <div className="bg-eve-panel border border-status-red/50 p-4">
             <button 
-              onClick={handleWipeData}
+              onClick={() => handleWipeData("WARNING: This will wipe all SSO tokens and ESI cache. You will need to log back in. Continue?")}
               className="w-full py-3 border border-status-red bg-status-red/20 text-status-red uppercase tracking-widest font-bold hover:bg-status-red hover:text-zinc-950 transition-colors"
             >
               Initiate Total Local Data Wipe

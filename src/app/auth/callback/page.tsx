@@ -64,22 +64,18 @@ function CallbackLogic() {
         // eslint-disable-next-line no-restricted-properties
         const redirectUri = `${window.location.origin}/auth/callback`;
 
-        const { accessToken, refreshToken, expiresIn, characterId, characterName } = await exchangeCodeForToken(
+        const { accessToken, refreshToken, characterId, characterName } = await exchangeCodeForToken(
           code,
           codeVerifier,
           clientId,
           redirectUri
         );
 
-        const MS_PER_SECOND = 1000;
-        const SAFETY_BUFFER_SEC = 60;
-        const safeExpiresIn = Math.max(0, expiresIn - SAFETY_BUFFER_SEC);
 
         // Store in IndexedDB dictionary
         await addOrUpdateCharacter(characterId, {
           accessToken,
           refreshToken,
-          expiresAt: Date.now() + safeExpiresIn * MS_PER_SECOND,
           characterName,
         });
 
