@@ -33,7 +33,7 @@ const config: Config = {
           void: "rgb(var(--color-void-black) / <alpha-value>)",
           cryo: "rgb(var(--color-cryo) / <alpha-value>)",
           bio: "rgb(var(--color-bio) / <alpha-value>)",
-          tactical: "rgb(var(--color-tactical) / <alpha-value>)",
+          tactical: "hsl(var(--eve-tactical) / <alpha-value>)",
           critical: "rgb(var(--color-critical) / <alpha-value>)",
           bg: "hsl(var(--eve-bg))",
           panel: "hsl(var(--eve-panel))",
