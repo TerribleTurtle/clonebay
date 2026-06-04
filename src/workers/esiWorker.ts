@@ -9,6 +9,7 @@ import { LiveEsiService } from '../services/esi/LiveEsiService';
 import { MockEsiService } from '../services/esi/MockEsiService';
 import type { IEsiService } from '../services/esi/IEsiService';
 import { saveCharacterNotifications } from '../repositories/NotificationRepository';
+import { saveCharacterWalletJournal } from '../repositories/WalletJournalRepository';
 
 const POLLING_INTERVAL_SECONDS = 60;
 const MS_PER_SECOND = 1000;
@@ -163,7 +164,18 @@ async function pollData(esiService: IEsiService): Promise<void> {
           // Headless tracking: do not post a Red UI status.
         });
 
-      await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing, notificationsProcessing]);
+      const walletJournalProcessing = esiService.getWalletJournal(charId, accessToken)
+        .then(async (journalResponse) => {
+          if (journalResponse && journalResponse.data) {
+            await saveCharacterWalletJournal(charId, journalResponse.data);
+          }
+        })
+        .catch(err => {
+          logger.error(`ESI Worker: Error fetching/saving wallet journal for ${charId}`, err);
+          // Headless tracking: do not post a Red UI status.
+        });
+
+      await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing, notificationsProcessing, walletJournalProcessing]);
      
     } catch (err) {
       logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);

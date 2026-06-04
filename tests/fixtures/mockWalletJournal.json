@@ -1,0 +1,32 @@
+[
+  {
+    "id": 100000001,
+    "date": "2026-06-03T12:00:00Z",
+    "ref_type": "bounty_prizes",
+    "amount": 15000000.5,
+    "balance": 1015000000.5,
+    "description": "Bounty prizes",
+    "reason": "15000000.50 ISK bounty payout",
+    "tax": 500000,
+    "tax_receiver_id": 1000123
+  },
+  {
+    "id": 100000002,
+    "date": "2026-06-03T11:00:00Z",
+    "ref_type": "ess_escrow_transfer",
+    "amount": 45000000,
+    "balance": 1000000000,
+    "description": "ESS Payout",
+    "reason": "Main Bank Payout"
+  },
+  {
+    "id": 100000003,
+    "date": "2026-06-03T10:00:00Z",
+    "ref_type": "player_trading",
+    "amount": -5000000,
+    "balance": 955000000,
+    "description": "Trade with player",
+    "first_party_id": 12345678,
+    "second_party_id": 87654321
+  }
+]

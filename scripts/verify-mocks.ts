@@ -14,7 +14,8 @@ import {
   EsiContractSchema,
   EsiPlanetLayoutSchema,
   EsiSdeTypeSchema,
-  EsiNotificationSchema
+  EsiNotificationSchema,
+  EsiWalletJournalEntrySchema
 } from '../src/schemas/esi';
 
 async function verifyMock(filename: string, schema: z.ZodTypeAny) {
@@ -50,6 +51,7 @@ async function main() {
   await verifyMock('character_planet.json', EsiPlanetLayoutSchema);
   await verifyMock('universe_type.json', EsiSdeTypeSchema);
   await verifyMock('mockNotifications.json', z.array(EsiNotificationSchema));
+  await verifyMock('mockWalletJournal.json', z.array(EsiWalletJournalEntrySchema));
   
   console.log('\nAll mock data is 100% compliant with Zod schemas!');
 }

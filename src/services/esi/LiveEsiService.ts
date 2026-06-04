@@ -17,6 +17,7 @@ import {
   EsiContractSchema,
   EsiMarketOrdersArraySchema,
   EsiNotificationSchema,
+  EsiWalletJournalEntrySchema,
   EsiSkillQueue,
   EsiIndustryJob,
   EsiPlanet,
@@ -31,7 +32,8 @@ import {
   EsiMailLabels,
   EsiContract,
   EsiMarketOrder,
-  EsiNotification
+  EsiNotification,
+  EsiWalletJournalEntry
 } from '../../schemas/esi';
 import { logger } from '../../utils/logger';
 
@@ -213,5 +215,16 @@ export class LiveEsiService implements IEsiService {
    */
   getCharacterNotifications(charId: string, accessToken: string): Promise<EsiResponse<EsiNotification[]> | null> {
     return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/notifications/`, accessToken, charId, z.array(EsiNotificationSchema), 'notifications');
+  }
+
+  /**
+   * Fetches the character's wallet journal.
+   * 
+   * @param {string} charId - The character's unique ID.
+   * @param {string} accessToken - The ESI OAuth access token.
+   * @returns {Promise<EsiResponse<EsiWalletJournalEntry[]> | null>} The parsed wallet journal response or null on error.
+   */
+  getWalletJournal(charId: string, accessToken: string): Promise<EsiResponse<EsiWalletJournalEntry[]> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/wallet/journal/`, accessToken, charId, z.array(EsiWalletJournalEntrySchema), 'wallet journal');
   }
 }

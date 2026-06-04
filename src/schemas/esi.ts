@@ -9,3 +9,4 @@ export * from './esi/mail';
 export * from './esi/contracts';
 export * from './esi/market';
 export * from './esi/notifications';
+export * from './esi/walletJournal';

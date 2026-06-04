@@ -18,6 +18,7 @@ import {
   EsiContractSchema,
   EsiMarketOrdersArraySchema,
   EsiNotificationSchema,
+  EsiWalletJournalEntrySchema,
   EsiSkillQueue,
   EsiIndustryJob,
   EsiPlanet,
@@ -32,7 +33,8 @@ import {
   EsiMailLabels,
   EsiContract,
   EsiMarketOrder,
-  EsiNotification
+  EsiNotification,
+  EsiWalletJournalEntry
 } from '../../schemas/esi';
 
 export class MockEsiService implements IEsiService {
@@ -129,5 +131,44 @@ export class MockEsiService implements IEsiService {
       }
     ];
     return this.mockResponse(mockNotifications, z.array(EsiNotificationSchema));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getWalletJournal(_charId: string): Promise<EsiResponse<EsiWalletJournalEntry[]> | null> {
+    const mockJournal: EsiWalletJournalEntry[] = [
+      {
+        id: 100000001,
+        date: new Date().toISOString(),
+        ref_type: 'bounty_prizes',
+        amount: 15000000.50,
+        balance: 1015000000.50,
+        description: 'Bounty prizes',
+        reason: '15000000.50 ISK bounty payout',
+        tax: 500000.0,
+        tax_receiver_id: 1000123
+      },
+      {
+        id: 100000002,
+        // eslint-disable-next-line no-magic-numbers
+        date: new Date(Date.now() - 3600000).toISOString(),
+        ref_type: 'ess_escrow_transfer',
+        amount: 45000000.00,
+        balance: 1000000000.00,
+        description: 'ESS Payout',
+        reason: 'Main Bank Payout'
+      },
+      {
+        id: 100000003,
+        // eslint-disable-next-line no-magic-numbers
+        date: new Date(Date.now() - 7200000).toISOString(),
+        ref_type: 'player_trading',
+        amount: -5000000.00,
+        balance: 955000000.00,
+        description: 'Trade with player',
+        first_party_id: 12345678,
+        second_party_id: 87654321
+      }
+    ];
+    return this.mockResponse(mockJournal, z.array(EsiWalletJournalEntrySchema));
   }
 }
