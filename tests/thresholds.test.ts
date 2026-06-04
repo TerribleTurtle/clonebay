@@ -123,13 +123,13 @@ describe('Threshold Calculations', () => {
   });
 
   describe('calculatePiStatus', () => {
-    it('should return Green when pins are empty', () => {
-      expect(calculatePiStatus([], NOW)).toBe('Green');
+    it('should return Offline when pins are empty', () => {
+      expect(calculatePiStatus([], NOW).status).toBe('Offline');
     });
 
     it('should return Red when unrouted materials are present', () => {
       const pins: PiPinState[] = [{ planetId: 1, isExtractor: false, isStorage: false, hasUnroutedMaterials: true }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Red');
     });
 
     it('should return Red when storage is 100% full', () => {
@@ -141,7 +141,7 @@ describe('Threshold Calculations', () => {
         storageUsed: 1000,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Red');
     });
 
     it('should return Yellow when storage is > 85% full', () => {
@@ -153,7 +153,7 @@ describe('Threshold Calculations', () => {
         storageUsed: 860, // 86%
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Yellow');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Yellow');
     });
 
     it('should return Green when storage is exactly 85% full', () => {
@@ -165,7 +165,7 @@ describe('Threshold Calculations', () => {
         storageUsed: 850, // 85%
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Green');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Green');
     });
 
     it('should return Red for Zero Capacity Blackhole (capacity 0, used > 0)', () => {
@@ -177,7 +177,7 @@ describe('Threshold Calculations', () => {
         storageUsed: 500,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Red');
     });
 
     it('should return Red when extractor has no expiry time', () => {
@@ -187,7 +187,7 @@ describe('Threshold Calculations', () => {
         isStorage: false,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Red');
     });
 
     it('should return Red when extractor expiry is <= now', () => {
@@ -198,7 +198,7 @@ describe('Threshold Calculations', () => {
         isStorage: false,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Red');
     });
 
     it('should return Red when extractor expiry exactly matches nowMs (Exact Zero Boundary)', () => {
@@ -209,7 +209,7 @@ describe('Threshold Calculations', () => {
         isStorage: false,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Red');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Red');
     });
 
     it('should return Yellow when extractor remaining time is < 12 hours', () => {
@@ -220,7 +220,7 @@ describe('Threshold Calculations', () => {
         isStorage: false,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Yellow');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Yellow');
     });
 
     it('should return Green when extractor remaining time is >= 12 hours', () => {
@@ -231,14 +231,14 @@ describe('Threshold Calculations', () => {
         isStorage: false,
         hasUnroutedMaterials: false
       }];
-      expect(calculatePiStatus(pins, NOW)).toBe('Green');
+      expect(calculatePiStatus(pins, NOW).status).toBe('Green');
     });
   });
 
   describe('calculateIndustryStatus', () => {
     it('should return Red when running fewer jobs than max allowed', () => {
       const jobs = [createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Red');
     });
 
     it('should return Red when a job is ready', () => {
@@ -246,7 +246,7 @@ describe('Threshold Calculations', () => {
         createJob({ status: 'ready' }),
         createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })
       ];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Red');
     });
 
     it('should return Red when a job is paused', () => {
@@ -254,7 +254,7 @@ describe('Threshold Calculations', () => {
         createJob({ status: 'paused' }),
         createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })
       ];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Red');
     });
 
     it('should return Red when an active job is finished (end_date <= now)', () => {
@@ -262,7 +262,7 @@ describe('Threshold Calculations', () => {
         createJob({ status: 'active', end_date: new Date(NOW - MS_PER_SECOND).toISOString() }),
         createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })
       ];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Red');
     });
 
     it('should return Red when an active job end_date exactly matches nowMs (Exact Zero Boundary)', () => {
@@ -270,7 +270,7 @@ describe('Threshold Calculations', () => {
         createJob({ status: 'active', end_date: new Date(NOW).toISOString() }),
         createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })
       ];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Red');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Red');
     });
 
     it('should return Yellow when the earliest job completes in < 12 hours', () => {
@@ -278,7 +278,7 @@ describe('Threshold Calculations', () => {
         createJob({ status: 'active', end_date: new Date(NOW + YELLOW_THRESHOLD_HOURS_MINUS_ONE * HOURS_IN_MS).toISOString() }),
         createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })
       ];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Yellow');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Yellow');
     });
 
     it('should return Green when all jobs complete in >= 12 hours', () => {
@@ -286,7 +286,7 @@ describe('Threshold Calculations', () => {
         createJob({ status: 'active', end_date: new Date(NOW + YELLOW_THRESHOLD_HOURS * HOURS_IN_MS).toISOString() }),
         createJob({ status: 'active', end_date: new Date(NOW + HOURS_IN_DAY * HOURS_IN_MS).toISOString() })
       ];
-      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW)).toBe('Green');
+      expect(calculateIndustryStatus(jobs, MAX_TEST_JOBS, NOW).status).toBe('Green');
     });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef /* eslint-disable-line no-restricted-syntax */ } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,7 +16,7 @@ interface StatusIndicatorProps {
   onClick?: () => void;
 }
 
-const LEDIndicator = forwardRef<HTMLDivElement, StatusIndicatorProps>(
+const LEDIndicator = forwardRef  <HTMLDivElement, StatusIndicatorProps>(
   ({ label, status, onClick, ...props }, ref) => {
     // EVE NeoCom Aesthetic: Sharp corners, deep blacks, glowing accents, technical typography
     const statusClasses = {

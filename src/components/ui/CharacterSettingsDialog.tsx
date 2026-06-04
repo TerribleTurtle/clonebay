@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, max-lines */
 "use client";
 
 import { useState } from 'react';

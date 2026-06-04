@@ -39,6 +39,7 @@ export const useEsiWorkerManager = () => {
           if (payload.dataType === 'skills' && payload.skillsContext) updatePayload.skillsContext = payload.skillsContext;
           if (payload.dataType === 'pi' && payload.piContext) updatePayload.piContext = payload.piContext;
           if (payload.dataType === 'industry' && payload.indyContext) updatePayload.indyContext = payload.indyContext;
+          if (payload.maxClones !== undefined) updatePayload.maxClones = payload.maxClones;
           queueUpdate(payload.characterId, updatePayload);
         } else if (type === 'ESI_METRICS_UPDATE') {
           const { characterId, ...metrics } = payload;

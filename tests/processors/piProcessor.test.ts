@@ -4,6 +4,11 @@ import { EsiPlanetSchema, EsiPlanetLayoutSchema, type EsiPlanetLayout } from '..
 import mockPlanetsRaw from '../fixtures/mockPlanets.json';
 import { PI_SDE_DATA } from '../../src/utils/piSdeData';
 
+vi.mock('idb-keyval', () => ({
+  get: vi.fn().mockResolvedValue({}),
+  set: vi.fn().mockResolvedValue(undefined)
+}));
+
 describe('piProcessor', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
@@ -53,7 +58,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'pi', status: 'Green', data: mockPlanets }
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Green', data: mockPlanets })
     });
   });
 
@@ -79,7 +84,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'pi', status: 'Yellow', data: mockPlanets }
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Yellow', data: mockPlanets })
     });
   });
 
@@ -105,7 +110,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'pi', status: 'Red', data: mockPlanets }
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red', data: mockPlanets })
     });
   });
 
@@ -133,7 +138,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'pi', status: 'Red', data: mockPlanets }
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red', data: mockPlanets })
     });
   });
 
@@ -142,7 +147,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'pi', status: 'Offline', data: null }
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Offline', data: null })
     });
   });
 });

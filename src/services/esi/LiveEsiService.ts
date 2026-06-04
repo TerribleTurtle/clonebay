@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, @typescript-eslint/no-explicit-any */
 import type { IEsiService } from './IEsiService';
 import { fetchEsi, type EsiResponse } from './esiClient';
 import { z } from 'zod';

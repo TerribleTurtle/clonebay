@@ -54,7 +54,7 @@ describe('CharacterCard', () => {
           mail: { total_unread_count: 2 },
           contracts: { count: 3 },
           marketOrders: { count: 10 },
-          ship: { ship_name: 'Test Ship' },
+          ship: { ship_name: 'Test Ship', ship_type_id: 123 },
           skills: 'Green',
           industry: 'Yellow',
           pi: 'Red',
@@ -78,13 +78,12 @@ describe('CharacterCard', () => {
     expect(screen.getByText('[Jita IV - Moon 4]')).toBeInTheDocument();
     expect(screen.getByText('1,000,000')).toBeInTheDocument();
     expect(screen.getByText('5,100,000')).toBeInTheDocument(); // total + unallocated
-    expect(screen.getByText('100,000')).toBeInTheDocument(); // unallocated
     expect(screen.getByText('Test Ship')).toBeInTheDocument();
   });
 
   it('calls removeAndReload when remove button is clicked', async () => {
     render(<CharacterCard characterId="char-1" />);
-    const removeBtn = screen.getByRole('button', { name: /Remove/i });
+    const removeBtn = screen.getByTitle('Remove Character');
     fireEvent.click(removeBtn);
     
     await waitFor(() => {

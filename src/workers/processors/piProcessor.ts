@@ -78,14 +78,21 @@ export async function processPi(
       if (alerts && alerts.length > 0) {
         const nameCache = new NameCacheService();
         const planetIds = Array.from(new Set(alerts.map(a => a.planetId)));
-        const resolvedNames = await nameCache.resolveIdsToNames(planetIds, esiService);
+        
+        const systemIds = planetIds.map(pid => planetsResult.data?.find(p => p.planet_id === pid)?.solar_system_id).filter((id): id is number => id !== undefined);
+        const idsToResolve = Array.from(new Set([...planetIds, ...systemIds]));
+        const resolvedNames = await nameCache.resolveIdsToNames(idsToResolve, esiService);
         
         piContext.alerts = alerts.map(a => {
+          const planetInfo = planetsResult.data?.find(p => p.planet_id === a.planetId);
           const planetName = resolvedNames[a.planetId] || `Planet ${a.planetId}`;
-          return `${planetName}: ${a.message}`;
+          const systemName = planetInfo && resolvedNames[planetInfo.solar_system_id] ? resolvedNames[planetInfo.solar_system_id] : 'Unknown System';
+          const typeName = planetInfo?.planet_type ? ` (${planetInfo.planet_type})` : '';
+          
+          return `${systemName} - ${planetName}${typeName}: ${a.message}`;
         });
       } else {
-        const planetCount = planetsResult.data.length;
+        const planetCount = planetsResult.data?.length || 0;
         if (planetCount === 0) {
           piContext.alerts.push(`No Planetary Interaction networks detected.`);
         } else {

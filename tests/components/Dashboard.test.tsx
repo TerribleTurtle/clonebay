@@ -14,8 +14,8 @@ vi.mock('../../src/components/useEsiWorkerManager', () => ({
   useEsiWorkerManager: vi.fn(),
 }));
 
-vi.mock('../../src/components/CharacterRow', () => ({
-  CharacterRow: ({ characterId }: { characterId: string }) => <div data-testid={`char-row-${characterId}`}>{characterId}</div>,
+vi.mock('../../src/components/CharacterCard', () => ({
+  CharacterCard: ({ characterId }: { characterId: string }) => <div data-testid={`char-row-${characterId}`}>{characterId}</div>,
 }));
 
 vi.mock('../../src/services/CharacterService', () => ({

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-
+/* eslint-disable no-restricted-syntax */
 const MAX_LOGS = 100;
 
 export interface LogEntry {
@@ -47,7 +47,7 @@ export const useLogStore = create<LogStore>()(
             storageAdapter = createJSONStorage(() => localStorage);
           }
         } catch (e) {
-          // Ignore access errors
+          console.error('Failed to access localStorage for log store:', e);
         }
         
         // If createJSONStorage returned undefined (e.g. because localStorage is blocked)

@@ -55,6 +55,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
   const totalSp = status.totalSp !== undefined ? (status.totalSp + (status.unallocatedSp || 0)).toLocaleString() : '---';
 
   const clonesCount = status.clones ? status.clones.jump_clones.length : 0;
+  const maxClones = status.maxClones || 0;
   const fatigueTimer = status.fatigue?.jump_fatigue_expire_date 
     ? new Date(status.fatigue.jump_fatigue_expire_date).toLocaleString() 
     : '00:00:00';
@@ -127,6 +128,7 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
       <div className="flex-1 flex flex-col mt-3 min-w-0">
         <CharacterMetrics 
           clonesCount={clonesCount}
+          maxClones={maxClones}
           clonesContext={status.clonesContext}
           fatigueTimer={fatigueTimer}
           fatigueContext={status.fatigue?.jump_fatigue_expire_date ? { jumpFatigueExpireDate: status.fatigue.jump_fatigue_expire_date } : undefined}

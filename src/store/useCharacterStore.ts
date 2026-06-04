@@ -22,6 +22,7 @@ export interface CharacterStatus {
   isk?: number;
   totalSp?: number;
   unallocatedSp?: number;
+  maxClones?: number;
   locationId?: number;
   locationName?: string;
   stationId?: number;

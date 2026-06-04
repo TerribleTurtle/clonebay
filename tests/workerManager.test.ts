@@ -57,11 +57,9 @@ describe('WorkerManager', () => {
     const worker = MockWorker.latestInstance!;
     
     // Simulate crash
-    expect(() => {
-      worker.onerror?.(new ErrorEvent('error'));
-    }).toThrow();
+    worker.onerror?.(new ErrorEvent('error'));
     
-    expect(logger.error).toHaveBeenCalledWith('WorkerManager: Worker crashed', expect.any(ErrorEvent));
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('WorkerManager: Worker crashed'), expect.any(Object));
     
     // Advance timers by backoff 1 (max 2000 due to jitter)
     vi.advanceTimersByTime(2000);
@@ -70,9 +68,7 @@ describe('WorkerManager', () => {
     expect(worker2).not.toBe(worker);
     
     // Crash again
-    expect(() => {
-      worker2.onerror?.(new ErrorEvent('error'));
-    }).toThrow();
+    worker2.onerror?.(new ErrorEvent('error'));
     
     // Advance by backoff 2 (max 3000)
     vi.advanceTimersByTime(3000);

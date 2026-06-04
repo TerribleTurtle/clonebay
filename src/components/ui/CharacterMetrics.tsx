@@ -7,6 +7,7 @@ import {
 
 export interface CharacterMetricsProps {
   clonesCount?: number | undefined;
+  maxClones?: number | undefined;
   clonesContext?: { locationName: string }[] | undefined;
   fatigueTimer?: string | undefined;
   fatigueContext?: { jumpFatigueExpireDate?: string } | undefined;
@@ -19,15 +20,16 @@ export interface CharacterMetricsProps {
 }
 
 export function CharacterMetrics({
-  clonesCount = 2,
+  clonesCount = 0,
+  maxClones = 0,
   clonesContext,
   fatigueTimer = '00:00:00',
   fatigueContext,
   activeShip = 'Capsule',
   shipContext,
-  activeOrders = 14,
+  activeOrders = 0,
   ordersContext,
-  unreadMail = 3,
+  unreadMail = 0,
   mailContext,
 }: CharacterMetricsProps) {
   return (
@@ -39,15 +41,32 @@ export function CharacterMetrics({
           <TooltipTrigger asChild>
             <div className="flex flex-col items-center justify-center py-2 bg-zinc-950 hover:bg-zinc-900 hover:text-zinc-200 transition-colors cursor-pointer">
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 mb-1">Clones</span>
-              <span className="text-zinc-100 font-semibold">{clonesCount}</span>
+              <span className="text-zinc-100 font-semibold">
+                {clonesCount} <span className="text-zinc-500 font-normal">/ {maxClones}</span>
+              </span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="bg-zinc-950 border-zinc-800 text-zinc-300 font-mono text-xs rounded-none">
             {clonesContext && clonesContext.length > 0 ? (
-              <ul className="list-disc pl-4 space-y-1">
-                {clonesContext.map((clone, idx) => (
-                  <li key={idx} className="break-words max-w-[250px]">{clone.locationName}</li>
-                ))}
+              <ul className="list-disc pl-4 space-y-2">
+                {(() => {
+                  const grouped: Record<string, typeof clonesContext[0] & { count: number }> = {};
+                  clonesContext.forEach(clone => {
+                    const key = clone.locationName;
+                    if (!grouped[key]) grouped[key] = { ...clone, count: 0 };
+                    grouped[key].count++;
+                  });
+                  return Object.values(grouped).map((clone, idx) => (
+                    <li key={idx} className="break-words max-w-[250px]">
+                    <span className="text-zinc-300">
+                      {clone.locationName}
+                    </span>
+                    {clone.count > 1 && (
+                      <span className="text-amber-500 font-bold ml-2">(x{clone.count})</span>
+                    )}
+                  </li>
+                  ));
+                })()}
               </ul>
             ) : (
               <p>Jump clone systems will be listed here.</p>

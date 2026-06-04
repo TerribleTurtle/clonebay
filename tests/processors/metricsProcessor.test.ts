@@ -1,3 +1,4 @@
+import type { IEsiService } from '../../src/services/esi/IEsiService';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { processMetrics, type EsiMetricsContext } from '../../src/workers/processors/metricsProcessor';
 
@@ -34,7 +35,7 @@ describe('metricsProcessor', () => {
       marketOrdersResult: undefined,
       isMockMode: false,
       postMessage: mockPostMessage,
-      esiService: {} as any,
+      esiService: {} as unknown as IEsiService,
       accessToken: 'token'
     };
 
@@ -73,7 +74,7 @@ describe('metricsProcessor', () => {
       marketOrdersResult: undefined,
       isMockMode: false,
       postMessage: mockPostMessage,
-      esiService: {} as any,
+      esiService: {} as unknown as IEsiService,
       accessToken: 'token'
     };
 

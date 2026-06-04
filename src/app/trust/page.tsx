@@ -32,6 +32,9 @@ export default function TrustPage() {
           <ol className="list-decimal pl-5 space-y-2 text-zinc-400">
             <li>
               <strong>Network Tab:</strong> Open your browser&apos;s Developer Tools (F12) &gt; Network. Watch the traffic. You will only see outgoing requests to the following official CCP servers. No traffic is sent back to our domain:
+              <div className="bg-eve-bg p-4 border border-eve-border/30 mt-4 font-mono text-[10px] text-zinc-500">
+                <span className="text-zinc-400">Security Verification:</span> All cryptographic keys are isolated within the &quot;eve_auth_tokens&quot; IndexedDB namespace and are explicitly destroyed on explicit &quot;Wipe&quot; command or browser storage clearance.
+              </div>
               <ul className="list-disc pl-5 mt-2 space-y-1 text-zinc-500">
                 <li><code>login.eveonline.com</code>: Used strictly for the initial EVE SSO (Single Sign-On) authentication and secure token refresh.</li>
                 <li><code>esi.evetech.net</code>: The EVE Swagger Interface, used to fetch your live character data (skill queues, industry jobs, wallet, etc.).</li>
@@ -50,7 +53,7 @@ export default function TrustPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2 text-zinc-400">
             <li><strong>Zero Tracking:</strong> We do not use Google Analytics, Sentry, or any other telemetry software.</li>
-            <li><strong>No "Cookie Consent" Banner:</strong> Under the GDPR and ePrivacy Directive, explicit cookie banners are only required when storing non-essential data. Because EVE-Dash uses your browser&apos;s local storage <strong>exclusively</strong> as a strictly necessary database to hold your EVE SSO tokens—without which the dashboard literally cannot function—we are legally exempt from requiring an annoying pop-up banner. We do not track you, so there is nothing to opt out of.</li>
+            <li><strong>No &quot;Cookie Consent&quot; Banner:</strong> Under the GDPR and ePrivacy Directive, explicit cookie banners are only required when storing non-essential data. Because EVE-Dash uses your browser&apos;s local storage <strong>exclusively</strong> as a strictly necessary database to hold your EVE SSO tokens—without which the dashboard literally cannot function—we are legally exempt from requiring an annoying pop-up banner. We do not track you, so there is nothing to opt out of.</li>
           </ul>
         </section>
 

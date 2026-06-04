@@ -8,7 +8,7 @@ describe('GlobalHeader', () => {
     expect(screen.getByRole('heading', { name: /EVE-DASH \|\| Command Center/i })).toBeInTheDocument();
     
     expect(screen.getByRole('link', { name: /\[ SETTINGS \]/i })).toHaveAttribute('href', '/settings');
-    expect(screen.getByRole('link', { name: /\[ OPSEC & TRUST \]/i })).toHaveAttribute('href', '/trust');
+    expect(screen.getByRole('link', { name: /\[ TRUST & LEGAL \]/i })).toHaveAttribute('href', '/trust');
     expect(screen.getByRole('link', { name: /\[ DEBUG TERMINAL \]/i })).toHaveAttribute('href', '/debug');
   });
 });

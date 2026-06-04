@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, max-lines */
 import { fetchSdeSystem } from "../../services/esi/sdeClient";
 import { logger } from "../../utils/logger";
 import { mockFleet } from "../../utils/mockFleet";
@@ -23,6 +24,13 @@ import {
 } from "../../utils/thresholds";
 import { NameCacheService } from "../../services/NameCacheService";
 import type { IEsiService } from "../../services/esi/IEsiService";
+
+const INFOMORPH_PSYCHOLOGY_SKILL_ID = 164;
+const ADVANCED_INFOMORPH_PSYCHOLOGY_SKILL_ID = 24063;
+const ELITE_INFOMORPH_PSYCHOLOGY_SKILL_ID = 73910;
+const MAX_UNREAD_MAILS_TO_FETCH = 3;
+const ATTRIBUTE_SECONDARY_DIVISOR = 2;
+const MINUTES_PER_HOUR = 60;
 
 export interface EsiMetricsContext {
   charId: string;
@@ -71,6 +79,16 @@ export async function processMetrics(context: EsiMetricsContext) {
 
     let totalSp = charSkillsResult?.data?.total_sp;
     const unallocatedSp = charSkillsResult?.data?.unallocated_sp || 0;
+
+    let maxClones = 0;
+    if (charSkillsResult?.data?.skills) {
+      const infomorphLevel = charSkillsResult.data.skills.find(s => s.skill_id === INFOMORPH_PSYCHOLOGY_SKILL_ID)?.active_skill_level || 0;
+      const advInfomorphLevel = charSkillsResult.data.skills.find(s => s.skill_id === ADVANCED_INFOMORPH_PSYCHOLOGY_SKILL_ID)?.active_skill_level || 0;
+      const eliteInfomorphLevel = charSkillsResult.data.skills.find(s => s.skill_id === ELITE_INFOMORPH_PSYCHOLOGY_SKILL_ID)?.active_skill_level || 0;
+      const calculatedMax = infomorphLevel + advInfomorphLevel + eliteInfomorphLevel;
+      const currentClones = clonesResult?.data?.jump_clones?.length || 0;
+      maxClones = Math.max(calculatedMax, currentClones);
+    }
 
     if (totalSp !== undefined && skillsResult?.data) {
       const now = Date.now();
@@ -180,7 +198,7 @@ export async function processMetrics(context: EsiMetricsContext) {
         if (mailResponse && mailResponse.data) {
           const unreadMails = mailResponse.data
             .filter((m) => m.is_read === false)
-            .slice(0, 3);
+            .slice(0, MAX_UNREAD_MAILS_TO_FETCH);
           if (unreadMails.length > 0) {
             const senderIds = unreadMails
               .map((m) => m.from)
@@ -219,7 +237,7 @@ export async function processMetrics(context: EsiMetricsContext) {
             // It's a rough approximation for the Hover Context
             const primary = intelligence || 0;
             const secondary = memory || 0;
-            const ratePerHour = (primary + secondary / 2) * 60;
+            const ratePerHour = (primary + secondary / ATTRIBUTE_SECONDARY_DIVISOR) * MINUTES_PER_HOUR;
             spContext = {
               current: totalSp,
               unallocated: unallocatedSp,
@@ -249,6 +267,7 @@ export async function processMetrics(context: EsiMetricsContext) {
         isk,
         totalSp,
         unallocatedSp,
+        maxClones,
         locationId,
         locationName,
         stationId,

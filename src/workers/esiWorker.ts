@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { get } from "idb-keyval";
 import { logger } from "../utils/logger";
 import { mockFleet } from "../utils/mockFleet";

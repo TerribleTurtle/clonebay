@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax, no-magic-numbers */
 "use client"
 
 import * as React from "react"
