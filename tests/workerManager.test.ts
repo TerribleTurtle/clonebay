@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { WorkerManager } from '../src/workers/WorkerManager';
 import { logger } from '../src/utils/logger';
 
@@ -17,7 +17,11 @@ class MockWorker {
   onmessage: ((ev: MessageEvent) => unknown) | null = null;
   onerror: ((ev: ErrorEvent) => unknown) | null = null;
   
-  constructor(_stringUrl: string | URL) {}
+  static latestInstance: MockWorker | null = null;
+
+  constructor(_stringUrl: string | URL) {
+    MockWorker.latestInstance = this;
+  }
   
   postMessage(_msg: unknown) {}
   
@@ -33,12 +37,16 @@ beforeAll(() => {
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
-  // @ts-expect-error accessing private field for testing
-  WorkerManager.instance = undefined;
 });
 
 afterEach(() => {
+  const manager = WorkerManager.getInstance();
+  manager.stop();
   vi.useRealTimers();
+});
+
+afterAll(() => {
+  vi.unstubAllGlobals();
 });
 
 describe('WorkerManager', () => {
@@ -46,8 +54,7 @@ describe('WorkerManager', () => {
     const manager = WorkerManager.getInstance();
     manager.start();
     
-    // @ts-expect-error accessing private field for testing
-    const worker = manager.worker as MockWorker;
+    const worker = MockWorker.latestInstance!;
     
     // Simulate crash
     expect(() => {
@@ -59,8 +66,7 @@ describe('WorkerManager', () => {
     // Advance timers by backoff 1 (max 2000 due to jitter)
     vi.advanceTimersByTime(2000);
     
-    // @ts-expect-error accessing private field for testing
-    const worker2 = manager.worker as MockWorker;
+    const worker2 = MockWorker.latestInstance!;
     expect(worker2).not.toBe(worker);
     
     // Crash again
@@ -71,16 +77,14 @@ describe('WorkerManager', () => {
     // Advance by backoff 2 (max 3000)
     vi.advanceTimersByTime(3000);
     
-    // @ts-expect-error accessing private field for testing
-    expect(manager.retryAttempt).toBe(2);
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('(Attempt 2)'));
   });
 
   it('should terminate worker and restart on missed PONG', () => {
     const manager = WorkerManager.getInstance();
     manager.start();
     
-    // @ts-expect-error accessing private field for testing
-    const worker = manager.worker as MockWorker;
+    const worker = MockWorker.latestInstance!;
     const terminateSpy = vi.spyOn(worker, 'terminate');
     
     // Advance time to trigger PING
@@ -99,8 +103,7 @@ describe('WorkerManager', () => {
     const manager = WorkerManager.getInstance();
     manager.start();
     
-    // @ts-expect-error accessing private field for testing
-    const worker = manager.worker as MockWorker;
+    const worker = MockWorker.latestInstance!;
     const terminateSpy = vi.spyOn(worker, 'terminate');
     
     // Advance time to trigger PING

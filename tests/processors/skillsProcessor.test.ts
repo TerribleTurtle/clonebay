@@ -5,7 +5,7 @@ import { EsiSkillQueueSchema, type EsiSkillQueue } from '../../src/schemas/esi';
 import mockSkillQueueRaw from '../fixtures/mockSkillQueue.json';
 
 describe('skillsProcessor', () => {
-  let mockPostMessage: ReturnType<typeof vi.fn>;
+  let mockPostMessage: any;
 
   beforeEach(() => {
     mockPostMessage = vi.fn();
@@ -26,7 +26,7 @@ describe('skillsProcessor', () => {
     ];
     const validQueue = z.array(EsiSkillQueueSchema).parse(mockQueue);
 
-    processSkills('char-1', { status: 'OK', data: validQueue }, mockPostMessage);
+    processSkills('char-1', { status: 'Green', cached: false, data: validQueue }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -48,7 +48,7 @@ describe('skillsProcessor', () => {
     ];
     const validQueue = z.array(EsiSkillQueueSchema).parse(mockQueue);
 
-    processSkills('char-1', { status: 'OK', data: validQueue }, mockPostMessage);
+    processSkills('char-1', { status: 'Green', cached: false, data: validQueue }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -70,7 +70,7 @@ describe('skillsProcessor', () => {
     ];
     const validQueue = z.array(EsiSkillQueueSchema).parse(mockQueue);
 
-    processSkills('char-1', { status: 'OK', data: validQueue }, mockPostMessage);
+    processSkills('char-1', { status: 'Green', cached: false, data: validQueue }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -92,7 +92,7 @@ describe('skillsProcessor', () => {
     ];
     const validQueue = z.array(EsiSkillQueueSchema).parse(mockQueue);
 
-    processSkills('char-1', { status: 'OK', data: validQueue }, mockPostMessage);
+    processSkills('char-1', { status: 'Green', cached: false, data: validQueue }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -101,7 +101,7 @@ describe('skillsProcessor', () => {
   });
 
   it('should post Offline status when ESI is offline', () => {
-    processSkills('char-1', { status: 'Offline', data: null }, mockPostMessage);
+    processSkills('char-1', { status: 'Offline', cached: false, data: null }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -115,7 +115,7 @@ describe('skillsProcessor', () => {
     // Let's force an error by making postMessage throw internally, then we expect logger.error.
     // Or just pass null for data but OK status. processSkills has:
     // if (skillsResult && skillsResult.data) { ... } else if (skillsResult?.status === 'Offline') { ... } else { status: 'Red' }
-    processSkills('char-1', { status: 'Error', data: null }, mockPostMessage);
+    processSkills('char-1', { status: 'Red', cached: false, data: null }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

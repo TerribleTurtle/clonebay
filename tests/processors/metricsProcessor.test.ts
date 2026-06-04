@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { processMetrics, type EsiMetricsContext } from '../../src/workers/processors/metricsProcessor';
 
 vi.mock('../../src/services/esi/sdeClient', () => ({
@@ -6,7 +6,7 @@ vi.mock('../../src/services/esi/sdeClient', () => ({
 }));
 
 describe('metricsProcessor', () => {
-  let mockPostMessage: ReturnType<typeof vi.fn>;
+  let mockPostMessage: any;
 
   beforeEach(() => {
     mockPostMessage = vi.fn();
@@ -21,8 +21,8 @@ describe('metricsProcessor', () => {
       charId: 'char-1',
       charName: 'Test Char',
       charSkillsResult: undefined,
-      walletResult: { status: 'OK', data: 500000000 },
-      locationResult: { status: 'OK', data: { solar_system_id: 30000142, station_id: 60003760 } },
+      walletResult: { status: 'Green', cached: false, data: 500000000 },
+      locationResult: { status: 'Green', cached: false, data: { solar_system_id: 30000142, station_id: 60003760 } },
       shipResult: undefined,
       skillsResult: undefined,
       clonesResult: undefined,
@@ -55,7 +55,8 @@ describe('metricsProcessor', () => {
       charName: 'Test Char',
       charSkillsResult: undefined,
       walletResult: {
-        status: 'OK',
+        status: 'Green',
+        cached: false,
         get data(): any { throw new Error('Forced Error Inside Try'); }
       },
       locationResult: undefined,

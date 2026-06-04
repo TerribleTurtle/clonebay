@@ -6,7 +6,7 @@ import mockIndustryJobsRaw from '../fixtures/mockIndustryJobs.json';
 import characterSkillsRaw from '../fixtures/character_skills.json';
 
 describe('industryProcessor', () => {
-  let mockPostMessage: ReturnType<typeof vi.fn>;
+  let mockPostMessage: any;
 
   beforeEach(() => {
     mockPostMessage = vi.fn();
@@ -32,7 +32,7 @@ describe('industryProcessor', () => {
 
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    processIndustry('char-1', { status: 'OK', data: validJobs }, { status: 'OK', data: charSkills }, mockPostMessage);
+    processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -57,7 +57,7 @@ describe('industryProcessor', () => {
     ];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    processIndustry('char-1', { status: 'OK', data: validJobs }, { status: 'OK', data: charSkills }, mockPostMessage);
+    processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -75,7 +75,7 @@ describe('industryProcessor', () => {
     const mockJobs: EsiIndustryJob[] = [];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    processIndustry('char-1', { status: 'OK', data: validJobs }, { status: 'OK', data: charSkills }, mockPostMessage);
+    processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -100,7 +100,7 @@ describe('industryProcessor', () => {
     ];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    processIndustry('char-1', { status: 'OK', data: validJobs }, { status: 'OK', data: charSkills }, mockPostMessage);
+    processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -109,7 +109,7 @@ describe('industryProcessor', () => {
   });
 
   it('should post Offline status when ESI is offline', () => {
-    processIndustry('char-1', { status: 'Offline', data: null }, null, mockPostMessage);
+    processIndustry('char-1', { status: 'Offline', cached: false, data: null }, null, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

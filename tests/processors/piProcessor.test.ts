@@ -1,12 +1,11 @@
-﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { z } from 'zod';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { processPi } from '../../src/workers/processors/piProcessor';
-import { EsiPlanetSchema, EsiPlanetLayoutSchema, type EsiPlanet, type EsiPlanetLayout } from '../../src/schemas/esi';
+import { EsiPlanetSchema, EsiPlanetLayoutSchema, type EsiPlanetLayout } from '../../src/schemas/esi';
 import mockPlanetsRaw from '../fixtures/mockPlanets.json';
 import { PI_SDE_DATA } from '../../src/utils/piSdeData';
 
 describe('piProcessor', () => {
-  let mockPostMessage: ReturnType<typeof vi.fn>;
+  let mockPostMessage: any;
   let mockEsiService: any;
 
   beforeEach(() => {
@@ -46,9 +45,9 @@ describe('piProcessor', () => {
     };
     const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
 
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'OK', data: validLayout });
+    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'OK', data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -72,9 +71,9 @@ describe('piProcessor', () => {
       ]
     };
     const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'OK', data: validLayout });
+    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'OK', data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -98,9 +97,9 @@ describe('piProcessor', () => {
       ]
     };
     const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'OK', data: validLayout });
+    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'OK', data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -126,9 +125,9 @@ describe('piProcessor', () => {
       ]
     };
     const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'OK', data: validLayout });
+    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'OK', data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -137,7 +136,7 @@ describe('piProcessor', () => {
   });
 
   it('should post Offline status when ESI is offline', async () => {
-    await processPi('char-1', { status: 'Offline', data: null }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Offline', cached: false, data: null }, mockEsiService, 'token', mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

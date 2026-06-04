@@ -66,10 +66,8 @@ describe('esiWorker', () => {
     }
 
     // Since mockSkillQueue has completed skills (or active ones), the exact output depends on math.
-    // Wait for the async worker flow to finish.
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    expect(mockPostMessage).toHaveBeenCalledWith(
+    await vi.waitFor(() => {
+      expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
         payload: expect.objectContaining({
@@ -78,6 +76,7 @@ describe('esiWorker', () => {
         })
       })
     );
+    });
   });
 
   it('clears polling timeout when STOP_POLLING is received', async () => {
@@ -86,7 +85,7 @@ describe('esiWorker', () => {
     if (selfObj && typeof selfObj.onmessage === 'function') {
       // First start polling to set the interval
       await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await vi.waitFor(() => expect(mockSetTimeout).toHaveBeenCalled());
       
       // Now stop polling
       await selfObj.onmessage(new MessageEvent('message', { data: { type: 'STOP_POLLING' } }));
@@ -125,8 +124,7 @@ describe('esiWorker', () => {
       await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 100));
-
+    await vi.waitFor(() => {
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
@@ -140,6 +138,7 @@ describe('esiWorker', () => {
         })
       })
     );
+    });
   });
 
   it('verifies Planetary Interaction logic using real mockPlanets.json payload', async () => {
@@ -175,8 +174,7 @@ describe('esiWorker', () => {
       await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 150));
-
+    await vi.waitFor(() => {
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
@@ -186,5 +184,6 @@ describe('esiWorker', () => {
         })
       })
     );
+    });
   });
 });
