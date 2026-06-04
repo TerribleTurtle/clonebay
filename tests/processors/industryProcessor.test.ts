@@ -13,14 +13,9 @@ vi.mock('idb-keyval', () => ({
 describe('industryProcessor', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockEsiService: any;
 
   beforeEach(() => {
     mockPostMessage = vi.fn();
-    mockEsiService = {
-      postUniverseNames: vi.fn().mockResolvedValue({ data: [] })
-    };
     vi.useFakeTimers();
   });
 
@@ -43,7 +38,7 @@ describe('industryProcessor', () => {
 
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockEsiService, mockPostMessage);
+    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -68,7 +63,7 @@ describe('industryProcessor', () => {
     ];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockEsiService, mockPostMessage);
+    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -86,7 +81,7 @@ describe('industryProcessor', () => {
     const mockJobs: EsiIndustryJob[] = [];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockEsiService, mockPostMessage);
+    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -111,7 +106,7 @@ describe('industryProcessor', () => {
     ];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockEsiService, mockPostMessage);
+    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -120,7 +115,7 @@ describe('industryProcessor', () => {
   });
 
   it('should post Offline status when ESI is offline', async () => {
-    await processIndustry('char-1', { status: 'Offline', cached: false, data: null }, null, mockEsiService, mockPostMessage);
+    await processIndustry('char-1', { status: 'Offline', cached: false, data: null }, null, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

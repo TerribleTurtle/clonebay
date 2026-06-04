@@ -132,7 +132,7 @@ export async function processMetrics(context: EsiMetricsContext) {
     
     if (stationId) {
       const nameCache = new NameCacheService();
-      const resolved = await nameCache.resolveIdsToNames([stationId], esiService).catch(() => ({} as Record<number, string>));
+      const resolved = await nameCache.resolveIdsToNames([stationId]).catch(() => ({} as Record<number, string>));
       stationName = resolved[stationId];
     }
 
@@ -179,7 +179,6 @@ export async function processMetrics(context: EsiMetricsContext) {
 
         const resolvedNames = await nameCache.resolveIdsToNames(
           Array.from(idsToResolve),
-          esiService,
         );
 
         clonesContext = clones.jump_clones.map((c) => ({
@@ -205,7 +204,6 @@ export async function processMetrics(context: EsiMetricsContext) {
               .filter((id) => id !== undefined) as number[];
             const resolvedSenders = await nameCache.resolveIdsToNames(
               senderIds,
-              esiService,
             );
             const unreadSubjects = unreadMails.map((m) => {
               const senderName = m.from

@@ -1,0 +1,7 @@
+name = "eve-dash"
+pages_build_output_dir = "out"
+compatibility_date = "2024-04-05"
+
+[[kv_namespaces]]
+binding = "EVE_SDE_KV"
+id = "f5c99f1b81e34e6b8a138c2894942d61"

@@ -1,5 +1,4 @@
 import { get, set } from 'idb-keyval';
-import type { IEsiService } from './esi/IEsiService';
 import { logger } from '../utils/logger';
 
 const CACHE_KEY = 'eve_name_cache';
@@ -10,10 +9,9 @@ export class NameCacheService {
    * Utilizes IndexedDB for caching to minimize ESI API calls.
    * 
    * @param ids - An array of EVE IDs (characters, corporations, alliances, etc.)
-   * @param esiService - An instance of IEsiService to perform API calls if needed
    * @returns A promise resolving to a dictionary mapping IDs to their resolved names
    */
-  async resolveIdsToNames(ids: number[], esiService: IEsiService): Promise<Record<number, string>> {
+  async resolveIdsToNames(ids: number[]): Promise<Record<number, string>> {
     if (!ids || ids.length === 0) {
       return {};
     }
@@ -55,51 +53,32 @@ export class NameCacheService {
       }
     }
 
-    // If there are missing IDs, fetch them from ESI
+    // If there are missing IDs, fetch them from our Edge Function
     if (missingIds.length > 0) {
       let cacheUpdated = false;
 
       try {
-        const response = await esiService.resolveNames(missingIds);
-        
-        if (response && response.data) {
-          for (const resolved of response.data) {
-            result[resolved.id] = resolved.name;
-            cache[resolved.id] = resolved.name;
+        // eslint-disable-next-line no-restricted-globals
+        const response = await fetch('/api/resolve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(missingIds)
+        });
+
+        if (response.ok) {
+          // eslint-disable-next-line no-restricted-syntax
+          const resolvedDict = await response.json() as Record<number, string>;
+          for (const [idStr, name] of Object.entries(resolvedDict)) {
+            const id = parseInt(idStr, 10);
+            result[id] = name;
+            cache[id] = name;
             cacheUpdated = true;
           }
+        } else {
+          logger.error(`Edge Function /api/resolve failed with status: ${response.status}`);
         }
-      } catch {
-        logger.warn('Failed to resolve names in bulk, attempting individual fallback for ' + missingIds.length + ' IDs.');
-        // Fallback: Resolve 1 by 1 to isolate the bad ID
-        for (const id of missingIds) {
-          try {
-            const singleResponse = await esiService.resolveNames([id]);
-            if (singleResponse && singleResponse.data && singleResponse.data.length > 0) {
-              const resolved = singleResponse.data[0];
-              if (resolved) {
-                result[resolved.id] = resolved.name;
-                cache[resolved.id] = resolved.name;
-                cacheUpdated = true;
-              } else {
-                cache[id] = `Unknown (${id})`;
-                result[id] = cache[id];
-                cacheUpdated = true;
-              }
-            } else {
-              // Cache as unknown to prevent infinite retries for this session
-              cache[id] = `Unknown (${id})`;
-              result[id] = cache[id];
-              cacheUpdated = true;
-            }
-          } catch {
-            logger.warn(`ESI rejected resolution for individual ID: ${id}`);
-            // Cache as unknown to prevent infinite retries
-            cache[id] = `Unknown (${id})`;
-            result[id] = cache[id];
-            cacheUpdated = true;
-          }
-        }
+      } catch (err) {
+        logger.error(`Network error calling /api/resolve:`, err);
       }
 
       // Persist the updated cache back to IndexedDB

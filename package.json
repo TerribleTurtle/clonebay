@@ -13,7 +13,8 @@
     "verify": "npm run type-check && npm run verify-mocks && npm run lint && npm run test:core && npm run deps:check",
     "deps:check": "depcruise src",
     "prepare": "husky",
-    "playground": "npx tsx scripts/playground.ts"
+    "playground": "npx tsx scripts/playground.ts",
+    "deploy:prod": "npm run build && node scripts/fix-windows-build.mjs && npx wrangler pages deploy out --project-name eve-dash"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.8",

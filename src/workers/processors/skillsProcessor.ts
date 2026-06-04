@@ -3,7 +3,6 @@ import type { EsiSkillQueue } from "../../schemas/esi";
 import type { EsiResponse } from "../../services/esi/esiClient";
 import { logger } from "../../utils/logger";
 import { NameCacheService } from "../../services/NameCacheService";
-import type { IEsiService } from "../../services/esi/IEsiService";
 
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_MINUTE = 60;
@@ -32,8 +31,7 @@ function formatDuration(ms: number): string {
 export async function processSkills(
   charId: string,
   skillsResult: EsiResponse<EsiSkillQueue[]> | null,
-  postMessage: (msg: unknown) => void,
-  esiService: IEsiService,
+  postMessage: (msg: unknown) => void
 ) {
   try {
     if (skillsResult && skillsResult.data) {
@@ -50,8 +48,7 @@ export async function processSkills(
           const nameCache = new NameCacheService();
           const skillIds = top3.map((s) => s.skill_id);
           const resolvedNames = await nameCache.resolveIdsToNames(
-            skillIds,
-            esiService,
+            skillIds
           );
 
           const queue = top3.map(

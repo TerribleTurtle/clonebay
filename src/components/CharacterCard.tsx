@@ -51,8 +51,8 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
   const displayName = status.name || characterId;
   const locationText = status.locationName || (status.location?.solar_system_id ? String(status.location.solar_system_id) : 'UNKNOWN SYSTEM');
 
-  const isk = status.isk !== undefined ? status.isk.toLocaleString() : '---';
-  const totalSp = status.totalSp !== undefined ? (status.totalSp + (status.unallocatedSp || 0)).toLocaleString() : '---';
+  const isk = typeof status.isk === 'number' ? status.isk.toLocaleString() : '---';
+  const totalSp = typeof status.totalSp === 'number' ? (status.totalSp + (status.unallocatedSp || 0)).toLocaleString() : '---';
 
   const clonesCount = status.clones ? status.clones.jump_clones.length : 0;
   const maxClones = status.maxClones || 0;

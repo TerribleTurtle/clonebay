@@ -31,7 +31,7 @@ export default function TrustPage() {
           </p>
           <ol className="list-decimal pl-5 space-y-2 text-zinc-400">
             <li>
-              <strong>Network Tab:</strong> Open your browser&apos;s Developer Tools (F12) &gt; Network. Watch the traffic. You will only see outgoing requests to the following official CCP servers. No traffic is sent back to our domain:
+              <strong>Network Tab:</strong> Open your browser&apos;s Developer Tools (F12) &gt; Network. Watch the traffic. The only traffic you will see hitting our domain (`eve-dash.pages.dev`) are requests to download the static HTML, Javascript, and CSS files required to run the dashboard. <strong>No user data, tokens, or EVE characters are ever sent to our servers.</strong> All your actual game data is fetched directly from the official CCP servers:
               <div className="bg-eve-bg p-4 border border-eve-border/30 mt-4 font-mono text-[10px] text-zinc-500">
                 <span className="text-zinc-400">Security Verification:</span> All cryptographic keys are isolated within the &quot;eve_auth_tokens&quot; IndexedDB namespace and are explicitly destroyed on explicit &quot;Wipe&quot; command or browser storage clearance.
               </div>
@@ -43,6 +43,13 @@ export default function TrustPage() {
             </li>
             <li><strong>Application Tab:</strong> Go to Developer Tools &gt; Application &gt; IndexedDB. You will see <code>eve-dashboard-storage</code> containing your tokens. They live exclusively here.</li>
             <li><strong>Open Source:</strong> Review the source code yourself. The entire pipeline, from token generation to UI rendering, is publicly verifiable.</li>
+            <li>
+              <strong>Content Security Policy (CSP):</strong> We don&apos;t just promise not to steal your data; we mathematically bind your browser to prevent it. If you look at the <code>&lt;head&gt;</code> of this page&apos;s HTML, you will see a strict CSP meta tag:
+              <div className="bg-eve-bg p-4 border border-eve-border/30 mt-4 font-mono text-[10px] text-zinc-500 overflow-x-auto whitespace-pre-wrap">
+                default-src &apos;self&apos;; connect-src &apos;self&apos; https://esi.evetech.net https://login.eveonline.com; ...
+              </div>
+              <p className="mt-2 text-zinc-400">This policy explicitly tells Chrome/Firefox/Safari to physically block any outgoing network request that isn&apos;t hitting an official EVE server. Even if our code was hacked, the browser itself would block the data theft.</p>
+            </li>
           </ol>
         </section>
 

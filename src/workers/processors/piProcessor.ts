@@ -81,7 +81,7 @@ export async function processPi(
         
         const systemIds = planetIds.map(pid => planetsResult.data?.find(p => p.planet_id === pid)?.solar_system_id).filter((id): id is number => id !== undefined);
         const idsToResolve = Array.from(new Set([...planetIds, ...systemIds]));
-        const resolvedNames = await nameCache.resolveIdsToNames(idsToResolve, esiService);
+        const resolvedNames = await nameCache.resolveIdsToNames(idsToResolve);
         
         piContext.alerts = alerts.map(a => {
           const planetInfo = planetsResult.data?.find(p => p.planet_id === a.planetId);

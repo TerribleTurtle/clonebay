@@ -198,8 +198,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
           await processSkills(
             charId,
             skillsResult,
-            (msg) => self.postMessage(msg),
-            esiService,
+            (msg) => self.postMessage(msg)
           );
         })
         .catch((err) => {
@@ -227,8 +226,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
             charId,
             industryResult,
             charSkillsResult,
-            esiService,
-            (msg) => self.postMessage(msg),
+            (msg) => self.postMessage(msg)
           );
         })
         .catch((err) => {

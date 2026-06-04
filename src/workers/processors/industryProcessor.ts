@@ -3,7 +3,6 @@ import type { EsiIndustryJob, EsiCharacterSkillsResponse } from '../../schemas/e
 import type { EsiResponse } from '../../services/esi/esiClient';
 import { logger } from '../../utils/logger';
 import { NameCacheService } from '../../services/NameCacheService';
-import type { IEsiService } from '../../services/esi/IEsiService';
 
 const SKILL_ID_MASS_PRODUCTION = 3388;
 const SKILL_ID_ADVANCED_MASS_PRODUCTION = 24630;
@@ -12,7 +11,6 @@ export async function processIndustry(
   charId: string, 
   industryResult: EsiResponse<EsiIndustryJob[]> | null, 
   charSkillsResult: EsiResponse<EsiCharacterSkillsResponse> | null,
-  esiService: IEsiService,
   postMessage: (msg: unknown) => void
 ) {
   try {
@@ -35,7 +33,7 @@ export async function processIndustry(
         const typeIds = alerts.map(a => a.blueprintId).filter(id => id > 0);
         const locationIds = alerts.flatMap(a => [a.facilityId, a.stationId]).filter((id): id is number => id !== undefined && id > 0);
         const uniqueIds = Array.from(new Set([...typeIds, ...locationIds]));
-        const resolvedNames = await nameCache.resolveIdsToNames(uniqueIds, esiService);
+        const resolvedNames = await nameCache.resolveIdsToNames(uniqueIds);
         
         indyContext.alerts = alerts.map(a => {
           if (a.blueprintId === 0) return a.message; // Empty Slot usually has no blueprint

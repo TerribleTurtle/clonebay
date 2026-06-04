@@ -35,7 +35,7 @@ Allowed external connections via Content-Security-Policy (CSP):
    npm install
    ```
 2. Set up your EVE Developer application at [developers.eveonline.com](https://developers.eveonline.com/).
-   - When creating your application, ensure you add the following **Callback URL**: `http://localhost:3006/auth/callback`
+   - When creating your application, ensure you add the following **Callback URL**: `https://eve-dash.pages.dev/auth/callback`
    - You must request the following **OAuth Scopes**:
      - `esi-skills.read_skillqueue.v1`
      - `esi-skills.read_skills.v1`
