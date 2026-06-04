@@ -1,4 +1,6 @@
 import type { EsiResponse } from './esiClient';
+import type { EsiPublicCharacter, EsiCharacterRoles } from '../../schemas/esi/character';
+import type { EsiCorporationStructure } from '../../schemas/esi/corporation';
 import type {
   EsiSkillQueue,
   EsiIndustryJob,
@@ -15,7 +17,10 @@ import type {
   EsiContract,
   EsiMarketOrder,
   EsiNotification,
-  EsiWalletJournalEntry
+  EsiWalletJournalEntry,
+  EsiAttributes,
+  EsiMailHeader,
+  EsiResolvedName
 } from '../../schemas/esi';
 
 export interface IEsiService {
@@ -35,4 +40,10 @@ export interface IEsiService {
   getMarketOrders(charId: string, accessToken: string): Promise<EsiResponse<EsiMarketOrder[]> | null>;
   getCharacterNotifications(charId: string, accessToken: string): Promise<EsiResponse<EsiNotification[]> | null>;
   getWalletJournal(charId: string, accessToken: string): Promise<EsiResponse<EsiWalletJournalEntry[]> | null>;
+  getPublicCharacterInfo(charId: string): Promise<EsiResponse<EsiPublicCharacter> | null>;
+  getCharacterRoles(charId: string, accessToken: string): Promise<EsiResponse<EsiCharacterRoles> | null>;
+  getCorporationStructures(corpId: number, accessToken: string): Promise<EsiResponse<EsiCorporationStructure[]> | null>;
+  getAttributes(charId: string, accessToken: string): Promise<EsiResponse<EsiAttributes> | null>;
+  getMail(charId: string, accessToken: string): Promise<EsiResponse<EsiMailHeader[]> | null>;
+  resolveNames(ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null>;
 }

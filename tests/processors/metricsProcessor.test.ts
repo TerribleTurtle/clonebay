@@ -33,7 +33,9 @@ describe('metricsProcessor', () => {
       contractsResult: undefined,
       marketOrdersResult: undefined,
       isMockMode: false,
-      postMessage: mockPostMessage
+      postMessage: mockPostMessage,
+      esiService: {} as any,
+      accessToken: 'token'
     };
 
     await processMetrics(context);
@@ -70,7 +72,9 @@ describe('metricsProcessor', () => {
       contractsResult: undefined,
       marketOrdersResult: undefined,
       isMockMode: false,
-      postMessage: mockPostMessage
+      postMessage: mockPostMessage,
+      esiService: {} as any,
+      accessToken: 'token'
     };
 
     await processMetrics(context);

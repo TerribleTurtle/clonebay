@@ -1,4 +1,4 @@
-export type DashboardStatus = 'Green' | 'Yellow' | 'Red';
+export type DashboardStatus = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
 export const SECONDS_PER_MINUTE = 60;
 export const MINUTES_PER_HOUR = 60;

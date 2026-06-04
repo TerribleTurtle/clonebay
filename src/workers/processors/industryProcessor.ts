@@ -2,14 +2,17 @@ import { calculateIndustryStatus } from '../../utils/thresholds';
 import type { EsiIndustryJob, EsiCharacterSkillsResponse } from '../../schemas/esi';
 import type { EsiResponse } from '../../services/esi/esiClient';
 import { logger } from '../../utils/logger';
+import { NameCacheService } from '../../services/NameCacheService';
+import type { IEsiService } from '../../services/esi/IEsiService';
 
 const SKILL_ID_MASS_PRODUCTION = 3388;
 const SKILL_ID_ADVANCED_MASS_PRODUCTION = 24630;
 
-export function processIndustry(
+export async function processIndustry(
   charId: string, 
   industryResult: EsiResponse<EsiIndustryJob[]> | null, 
   charSkillsResult: EsiResponse<EsiCharacterSkillsResponse> | null,
+  esiService: IEsiService,
   postMessage: (msg: unknown) => void
 ) {
   try {
@@ -23,11 +26,36 @@ export function processIndustry(
       const maxJobs = 1 + massProd + advMassProd;
 
       const manufacturingJobs = industryResult.data.filter(job => job.activity_id === 1);
-      const status = calculateIndustryStatus(manufacturingJobs, maxJobs, Date.now());
+      const { status, alerts } = calculateIndustryStatus(manufacturingJobs, maxJobs, Date.now());
       
+      const indyContext: { alerts: string[] } = { alerts: [] };
+      if (alerts && alerts.length > 0) {
+        const nameCache = new NameCacheService();
+        // Extract IDs for resolution
+        const typeIds = alerts.map(a => a.blueprintId).filter(id => id > 0);
+        const locationIds = alerts.flatMap(a => [a.facilityId, a.stationId]).filter((id): id is number => id !== undefined && id > 0);
+        const uniqueIds = Array.from(new Set([...typeIds, ...locationIds]));
+        const resolvedNames = await nameCache.resolveIdsToNames(uniqueIds, esiService);
+        
+        indyContext.alerts = alerts.map(a => {
+          if (a.blueprintId === 0) return a.message; // Empty Slot usually has no blueprint
+          
+          const bpName = resolvedNames[a.blueprintId] || `Blueprint ${a.blueprintId}`;
+          const locationId = a.facilityId || a.stationId;
+          const locName = locationId ? (resolvedNames[locationId] || `Location ${locationId}`) : '';
+          
+          if (locName) {
+            return `${locName} - ${bpName}: ${a.message}`;
+          }
+          return `${bpName}: ${a.message}`;
+        });
+      } else {
+        indyContext.alerts.push(`${manufacturingJobs.length} / ${maxJobs} Manufacturing Jobs Active`);
+      }
+
       postMessage({
         type: 'ESI_DATA_UPDATE',
-        payload: { characterId: charId, dataType: 'industry', status, data: industryResult.data }
+        payload: { characterId: charId, dataType: 'industry', status, data: industryResult.data, indyContext }
       });
     } else if (industryResult?.status === 'Offline') {
       postMessage({

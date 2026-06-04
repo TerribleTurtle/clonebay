@@ -2,6 +2,18 @@ import type { IEsiService } from './IEsiService';
 import { fetchEsi, type EsiResponse } from './esiClient';
 import { z } from 'zod';
 import {
+  EsiPublicCharacterSchema,
+  EsiCharacterRolesSchema,
+  EsiAttributesSchema,
+  type EsiPublicCharacter,
+  type EsiCharacterRoles,
+  type EsiAttributes
+} from '../../schemas/esi/character';
+import {
+  EsiCorporationStructureSchema,
+  type EsiCorporationStructure
+} from '../../schemas/esi/corporation';
+import {
   EsiSkillQueueSchema,
   EsiIndustryJobSchema,
   EsiPlanetSchema,
@@ -33,13 +45,21 @@ import {
   EsiContract,
   EsiMarketOrder,
   EsiNotification,
-  EsiWalletJournalEntry
+  EsiWalletJournalEntry,
+  EsiMailHeaderSchema,
+  type EsiMailHeader,
+  EsiResolvedNameSchema,
+  type EsiResolvedName
 } from '../../schemas/esi';
 import { logger } from '../../utils/logger';
 
 export class LiveEsiService implements IEsiService {
-  private safeFetch<T>(url: string, accessToken: string, characterId: string, schema: z.ZodType<T>, name: string): Promise<EsiResponse<T> | null> {
-    return fetchEsi({ url, accessToken, characterId, schema }).catch(error => {
+  private safeFetch<T>(url: string, accessToken: string, characterId: string, schema: z.ZodType<T>, name: string, method?: string, body?: unknown): Promise<EsiResponse<T> | null> {
+    const fetchOptions: any = { url, accessToken, characterId, schema };
+    if (method !== undefined) fetchOptions.method = method;
+    if (body !== undefined) fetchOptions.body = body;
+
+    return fetchEsi<T>(fetchOptions).catch(error => {
       if (error instanceof z.ZodError) {
         logger.error(`ESI Worker: Contract Validation Error fetching ${name} for ${characterId}`, error);
       } else if (error instanceof TypeError) {
@@ -226,5 +246,29 @@ export class LiveEsiService implements IEsiService {
    */
   getWalletJournal(charId: string, accessToken: string): Promise<EsiResponse<EsiWalletJournalEntry[]> | null> {
     return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/wallet/journal/`, accessToken, charId, z.array(EsiWalletJournalEntrySchema), 'wallet journal');
+  }
+
+  getPublicCharacterInfo(charId: string): Promise<EsiResponse<EsiPublicCharacter> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/`, '', charId, EsiPublicCharacterSchema, 'public character info');
+  }
+
+  getCharacterRoles(charId: string, accessToken: string): Promise<EsiResponse<EsiCharacterRoles> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/roles/`, accessToken, charId, EsiCharacterRolesSchema, 'character roles');
+  }
+
+  getCorporationStructures(corpId: number, accessToken: string): Promise<EsiResponse<EsiCorporationStructure[]> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/corporations/${corpId}/structures/`, accessToken, corpId.toString(), z.array(EsiCorporationStructureSchema), 'corporation structures');
+  }
+
+  getAttributes(charId: string, accessToken: string): Promise<EsiResponse<EsiAttributes> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/attributes/`, accessToken, charId, EsiAttributesSchema, 'attributes');
+  }
+
+  getMail(charId: string, accessToken: string): Promise<EsiResponse<EsiMailHeader[]> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/mail/`, accessToken, charId, z.array(EsiMailHeaderSchema), 'mail');
+  }
+
+  resolveNames(ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/universe/names/`, '', '', z.array(EsiResolvedNameSchema), 'resolved names', 'POST', ids);
   }
 }

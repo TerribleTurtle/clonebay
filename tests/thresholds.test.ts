@@ -128,12 +128,13 @@ describe('Threshold Calculations', () => {
     });
 
     it('should return Red when unrouted materials are present', () => {
-      const pins: PiPinState[] = [{ isExtractor: false, isStorage: false, hasUnroutedMaterials: true }];
+      const pins: PiPinState[] = [{ planetId: 1, isExtractor: false, isStorage: false, hasUnroutedMaterials: true }];
       expect(calculatePiStatus(pins, NOW)).toBe('Red');
     });
 
     it('should return Red when storage is 100% full', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: false,
         isStorage: true,
         storageCapacity: 1000,
@@ -145,6 +146,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Yellow when storage is > 85% full', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: false,
         isStorage: true,
         storageCapacity: 1000,
@@ -156,6 +158,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Green when storage is exactly 85% full', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: false,
         isStorage: true,
         storageCapacity: 1000,
@@ -167,6 +170,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Red for Zero Capacity Blackhole (capacity 0, used > 0)', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: false,
         isStorage: true,
         storageCapacity: 0,
@@ -178,6 +182,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Red when extractor has no expiry time', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: true,
         isStorage: false,
         hasUnroutedMaterials: false
@@ -187,6 +192,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Red when extractor expiry is <= now', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: true,
         extractorExpiryTime: new Date(NOW - MS_PER_SECOND).toISOString(),
         isStorage: false,
@@ -197,6 +203,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Red when extractor expiry exactly matches nowMs (Exact Zero Boundary)', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: true,
         extractorExpiryTime: new Date(NOW).toISOString(),
         isStorage: false,
@@ -207,6 +214,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Yellow when extractor remaining time is < 12 hours', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: true,
         extractorExpiryTime: new Date(NOW + YELLOW_THRESHOLD_HOURS_MINUS_ONE * HOURS_IN_MS).toISOString(),
         isStorage: false,
@@ -217,6 +225,7 @@ describe('Threshold Calculations', () => {
 
     it('should return Green when extractor remaining time is >= 12 hours', () => {
       const pins: PiPinState[] = [{
+        planetId: 1,
         isExtractor: true,
         extractorExpiryTime: new Date(NOW + YELLOW_THRESHOLD_HOURS * HOURS_IN_MS).toISOString(),
         isStorage: false,

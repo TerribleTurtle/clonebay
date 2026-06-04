@@ -3,22 +3,50 @@
 import { useEffect, useState } from 'react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useDataWipe } from '../../hooks/useDataWipe';
+import { Button } from '../../components/ui/Button';
+import { configSchema } from '../../lib/schemas/configSchema';
 
 export default function SettingsPage() {
   const settings = useSettingsStore();
   const { handleWipeData } = useDataWipe();
   const [mounted, setMounted] = useState(false);
 
+  const [draftSettings, setDraftSettings] = useState({
+    walletYellowThreshold: 0,
+    walletRedThreshold: 0,
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-  }, []);
-
-
+    setDraftSettings({
+      walletYellowThreshold: settings.walletYellowThreshold,
+      walletRedThreshold: settings.walletRedThreshold,
+    });
+    setErrors({});
+  }, [settings.walletYellowThreshold, settings.walletRedThreshold]);
 
   if (!mounted) {
     return null; // Prevent hydration mismatch
   }
+
+  const handleSave = () => {
+    const result = configSchema.safeParse(draftSettings);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        walletYellowThreshold: fieldErrors['walletYellowThreshold']?.[0] || "",
+        walletRedThreshold: fieldErrors['walletRedThreshold']?.[0] || "",
+      });
+      return;
+    }
+    
+    setErrors({});
+    settings.setWalletYellowThreshold(draftSettings.walletYellowThreshold);
+    settings.setWalletRedThreshold(draftSettings.walletRedThreshold);
+  };
 
   return (
     <div className="w-full flex-1 font-mono text-zinc-300">
@@ -39,10 +67,15 @@ export default function SettingsPage() {
               <input 
                 id="yellow-thresh"
                 type="number" 
-                value={settings.walletYellowThreshold}
-                onChange={(e) => settings.setWalletYellowThreshold(Number(e.target.value))}
-                className="bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-zinc-950"
+                value={draftSettings.walletYellowThreshold}
+                onChange={(e) => setDraftSettings(prev => ({ ...prev, walletYellowThreshold: Number(e.target.value) }))}
+                className={`bg-zinc-900 border px-3 py-2 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-zinc-950 ${
+                  errors['walletYellowThreshold'] ? 'border-status-red' : 'border-zinc-700'
+                }`}
               />
+              {errors['walletYellowThreshold'] && (
+                <p className="text-status-red text-sm mt-1">{errors['walletYellowThreshold']}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -50,19 +83,32 @@ export default function SettingsPage() {
               <input 
                 id="red-thresh"
                 type="number" 
-                value={settings.walletRedThreshold}
-                onChange={(e) => settings.setWalletRedThreshold(Number(e.target.value))}
-                className="bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-zinc-950"
+                value={draftSettings.walletRedThreshold}
+                onChange={(e) => setDraftSettings(prev => ({ ...prev, walletRedThreshold: Number(e.target.value) }))}
+                className={`bg-zinc-900 border px-3 py-2 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-zinc-950 ${
+                  errors['walletRedThreshold'] ? 'border-status-red' : 'border-zinc-700'
+                }`}
               />
+              {errors['walletRedThreshold'] && (
+                <p className="text-status-red text-sm mt-1">{errors['walletRedThreshold']}</p>
+              )}
             </div>
 
-            <div className="pt-2 flex justify-end">
-              <button 
+            <div className="pt-2 flex justify-between items-center">
+              <Button 
+                onClick={handleSave}
+                variant="default"
+                className="mt-4 text-sm font-bold"
+              >
+                Save Settings
+              </Button>
+              <Button 
                 onClick={() => settings.resetToDefaults()}
-                className="text-xs uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors"
+                variant="ghost"
+                className="mt-4 text-xs"
               >
                 Reset to Defaults
-              </button>
+              </Button>
             </div>
           </div>
         </section>
@@ -73,12 +119,13 @@ export default function SettingsPage() {
           <p className="text-sm text-zinc-400">Because EVE-Dash has no backend, all your SSO tokens and cache live exclusively in this browser. You can obliterate them here.</p>
           
           <div className="bg-eve-panel border border-status-red/50 p-4">
-            <button 
+            <Button 
               onClick={() => handleWipeData("WARNING: This will wipe all SSO tokens and ESI cache. You will need to log back in. Continue?")}
-              className="w-full py-3 border border-status-red bg-status-red/20 text-status-red uppercase tracking-widest font-bold hover:bg-status-red hover:text-zinc-950 transition-colors"
+              variant="destructive"
+              className="w-full py-3"
             >
               Initiate Total Local Data Wipe
-            </button>
+            </Button>
           </div>
         </section>
 

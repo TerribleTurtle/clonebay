@@ -2,6 +2,16 @@ import type { IEsiService } from './IEsiService';
 import type { EsiResponse } from './esiClient';
 import { mockFleet } from '../../utils/mockFleet';
 import { z } from 'zod';
+
+import {
+  EsiPublicCharacterSchema,
+  EsiCharacterRolesSchema,
+  type EsiPublicCharacter,
+  type EsiCharacterRoles
+} from '../../schemas/esi/character';
+import {
+  type EsiCorporationStructure
+} from '../../schemas/esi/corporation';
 import {
   EsiSkillQueueSchema,
   EsiIndustryJobSchema,
@@ -34,7 +44,10 @@ import {
   EsiContract,
   EsiMarketOrder,
   EsiNotification,
-  EsiWalletJournalEntry
+  EsiWalletJournalEntry,
+  EsiAttributes,
+  EsiMailHeader,
+  EsiResolvedName
 } from '../../schemas/esi';
 
 export class MockEsiService implements IEsiService {
@@ -170,5 +183,37 @@ export class MockEsiService implements IEsiService {
       }
     ];
     return this.mockResponse(mockJournal, z.array(EsiWalletJournalEntrySchema));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getPublicCharacterInfo(_charId: string): Promise<EsiResponse<EsiPublicCharacter> | null> {
+    const mockChar = { corporation_id: 1000123 };
+    return this.mockResponse(mockChar, EsiPublicCharacterSchema);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getCharacterRoles(_charId: string, _accessToken: string): Promise<EsiResponse<EsiCharacterRoles> | null> {
+    const mockRoles = { roles: [], roles_at_hq: ['Director'], roles_at_base: [], roles_at_other: [] };
+    return this.mockResponse(mockRoles, EsiCharacterRolesSchema);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getCorporationStructures(_corpId: number, _accessToken: string): Promise<EsiResponse<EsiCorporationStructure[]> | null> {
+    return Promise.resolve(null);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getAttributes(_charId: string, _accessToken: string): Promise<EsiResponse<EsiAttributes> | null> {
+    return Promise.resolve(null);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getMail(_charId: string, _accessToken: string): Promise<EsiResponse<EsiMailHeader[]> | null> {
+    return Promise.resolve(null);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  resolveNames(_ids: number[]): Promise<EsiResponse<EsiResolvedName[]> | null> {
+    return Promise.resolve(null);
   }
 }

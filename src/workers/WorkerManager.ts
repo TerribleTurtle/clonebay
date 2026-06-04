@@ -103,10 +103,14 @@ export class WorkerManager {
         });
       };
 
-      this.worker.onerror = (error) => {
-        logger.error('WorkerManager: Worker crashed', error);
+      this.worker.onerror = (errorEvent: ErrorEvent) => {
+        logger.error(`WorkerManager: Worker crashed - ${errorEvent.message || 'Unknown Error'}`, {
+          filename: errorEvent.filename,
+          lineno: errorEvent.lineno,
+          colno: errorEvent.colno
+        });
+        errorEvent.preventDefault?.();
         this.scheduleRestart();
-        throw error;
       };
 
       // Start the worker logic

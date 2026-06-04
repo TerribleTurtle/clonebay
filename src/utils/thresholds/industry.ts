@@ -10,49 +10,68 @@ import { DashboardStatus, YELLOW_THRESHOLD_HOURS, MS_IN_HOUR } from './core';
  * @param jobs - An array of EsiIndustryJob objects representing the character's industry jobs.
  * @param maxJobs - The maximum number of industry jobs the character can run.
  * @param nowMs - The current time in milliseconds since the UNIX epoch.
- * @returns The DashboardStatus ('Green', 'Yellow', or 'Red') for the industry jobs.
+ * @returns The status and associated alerts for the industry jobs.
  */
 export function calculateIndustryStatus(
   jobs: EsiIndustryJob[],
   maxJobs: number,
   nowMs: number
-): DashboardStatus {
+): { status: DashboardStatus; alerts: { facilityId?: number; stationId?: number; blueprintId: number; message: string }[] } {
+  const alerts: { facilityId?: number; stationId?: number; blueprintId: number; message: string }[] = [];
+
   if (!jobs) {
-    return maxJobs > 0 ? 'Red' : 'Green';
+    if (maxJobs > 0) {
+      alerts.push({ blueprintId: 0, message: 'Empty Slot' });
+    }
+    return { status: maxJobs > 0 ? 'Red' : 'Green', alerts };
   }
 
   const relevantJobs = jobs.filter(
     (j) => j.status === 'active' || j.status === 'paused' || j.status === 'ready'
   );
 
+  let status: DashboardStatus = 'Green';
+
   if (relevantJobs.length < maxJobs) {
-    return 'Red';
+    status = 'Red';
+    const emptySlots = maxJobs - relevantJobs.length;
+    for (let i = 0; i < emptySlots; i++) {
+        alerts.push({ blueprintId: 0, message: 'Empty Slot' });
+    }
   }
 
   let minTimeRemaining = Infinity;
 
   for (const job of relevantJobs) {
-    if (job.status === 'ready' || job.status === 'paused') {
-      return 'Red';
-    }
-    
-    if (job.end_date) {
+    const alertBase = {
+      facilityId: job.facility_id,
+      stationId: job.station_id,
+      blueprintId: job.blueprint_type_id // Use type_id to resolve name
+    };
+
+    if (job.status === 'ready') {
+      alerts.push({ ...alertBase, message: 'Job Finished' });
+      status = 'Red';
+    } else if (job.status === 'paused') {
+      alerts.push({ ...alertBase, message: 'Job Paused' });
+      status = 'Red';
+    } else if (job.end_date) {
       const endTime = Date.parse(job.end_date);
       if (endTime <= nowMs) {
-        return 'Red';
-      }
-      
-      const remainingMs = endTime - nowMs;
-      if (remainingMs < minTimeRemaining) {
-        minTimeRemaining = remainingMs;
+        alerts.push({ ...alertBase, message: 'Job Finished' });
+        status = 'Red';
+      } else {
+        const remainingMs = endTime - nowMs;
+        if (remainingMs < minTimeRemaining) {
+          minTimeRemaining = remainingMs;
+        }
+        if (remainingMs < YELLOW_THRESHOLD_HOURS * MS_IN_HOUR) {
+          alerts.push({ ...alertBase, message: 'Job Completing Soon' });
+          if (status === 'Green') status = 'Yellow';
+        }
       }
     }
   }
 
-  if (minTimeRemaining < YELLOW_THRESHOLD_HOURS * MS_IN_HOUR) {
-    return 'Yellow';
-  }
-
-  return 'Green';
+  return { status, alerts };
 }
-

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 const MAX_LOGS = 100;
 
@@ -19,6 +18,12 @@ interface LogStore {
   clearLogs: () => void;
 }
 
+const dummyStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
+
 export const useLogStore = create<LogStore>()(
   persist(
     (set) => ({
@@ -35,6 +40,24 @@ export const useLogStore = create<LogStore>()(
     }),
     {
       name: 'eve-log-store',
+      storage: (() => {
+        let storageAdapter;
+        try {
+          if (typeof localStorage !== 'undefined' && localStorage) {
+            storageAdapter = createJSONStorage(() => localStorage);
+          }
+        } catch (e) {
+          // Ignore access errors
+        }
+        
+        // If createJSONStorage returned undefined (e.g. because localStorage is blocked)
+        // or if we are in an environment without localStorage, fallback to dummyStorage.
+        if (!storageAdapter) {
+          storageAdapter = createJSONStorage(() => dummyStorage);
+        }
+        
+        return storageAdapter;
+      })(),
       partialize: (state) => ({
         ...state,
         logs: state?.logs?.map((log) => ({

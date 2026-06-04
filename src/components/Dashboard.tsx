@@ -6,10 +6,11 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { useCharacterStore } from '../store/useCharacterStore';
 import { logger } from '../utils/logger';
-import { CharacterRow } from './CharacterRow';
+import { CharacterCard } from './CharacterCard';
 import { useEsiWorkerManager } from './useEsiWorkerManager';
 import { SettingsRepository } from '../repositories/SettingsRepository';
 import { CharacterService } from '../services/CharacterService';
+import { Button } from './ui/Button';
 
 export const Dashboard: React.FC = () => {
   const characterIds = useCharacterStore(useShallow((state) => Object.keys(state.characters)));
@@ -50,21 +51,23 @@ export const Dashboard: React.FC = () => {
     <div className="flex-1 flex flex-col font-mono text-zinc-300">
       <div className="flex justify-end items-center mb-4 border-b border-eve-border pb-2 gap-2">
         {!isMockMode && (
-          <button 
+          <Button 
             type="button" 
+            variant="success"
             onClick={() => router.push('/auth/login')}
-            className="border border-status-green bg-emerald-950/30 text-status-green px-4 py-1 hover:bg-emerald-900/50 transition-colors uppercase text-xs tracking-wider"
+            className="px-4 py-1 text-xs tracking-wider min-h-0"
           >
             Add Clone
-          </button>
+          </Button>
         )}
-        <button 
+        <Button 
           type="button" 
+          variant="default"
           onClick={toggleMockMode}
-          className="border border-status-cyan bg-cyan-950/30 text-status-cyan px-4 py-1 hover:bg-cyan-900/50 transition-colors uppercase text-xs tracking-wider"
+          className="px-4 py-1 text-xs tracking-wider min-h-0"
         >
           Mock Mode: {isMockMode ? 'ON' : 'OFF'}
-        </button>
+        </Button>
       </div>
       
       {characterIds.length === 0 ? (
@@ -72,12 +75,11 @@ export const Dashboard: React.FC = () => {
           NO CLONES CONNECTED. AWAITING NEURAL LINK.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
           {characterIds.map((id) => (
-            <CharacterRow 
+            <CharacterCard 
               key={id} 
               characterId={id} 
-               
             />
           ))}
         </div>

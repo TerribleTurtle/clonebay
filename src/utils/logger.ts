@@ -3,7 +3,7 @@ import { useLogStore, LogEntry } from '../store/useLogStore';
 type LogLevel = 'info' | 'warn' | 'error';
 
 function createLog(level: LogLevel, message: string, data?: unknown) {
-  const isWorker = typeof window === 'undefined';
+  const isWorker = typeof document === 'undefined';
   // Sanitize data to avoid DataCloneError in workers
   let safeData = data;
   if (data instanceof Error) {

@@ -41,3 +41,39 @@ export const EsiFatigueSchema = z.object({
   last_update_date: z.string().datetime().optional()
 }).strict();
 export type EsiFatigue = z.infer<typeof EsiFatigueSchema>;
+
+export const EsiPublicCharacterSchema = z.object({
+  alliance_id: z.number().int().positive().optional(),
+  ancestry_id: z.number().int().positive().optional(),
+  birthday: z.string().datetime(),
+  bloodline_id: z.number().int().positive(),
+  corporation_id: z.number().int().positive(),
+  description: z.string().optional(),
+  faction_id: z.number().int().positive().optional(),
+  gender: z.string().optional(),
+  name: z.string(),
+  race_id: z.number().int().positive(),
+  security_status: z.number().optional(),
+  title: z.string().optional()
+}).strict();
+export type EsiPublicCharacter = z.infer<typeof EsiPublicCharacterSchema>;
+
+export const EsiCharacterRolesSchema = z.object({
+  roles: z.array(z.string()).optional(),
+  roles_at_base: z.array(z.string()).optional(),
+  roles_at_hq: z.array(z.string()).optional(),
+  roles_at_other: z.array(z.string()).optional()
+}).strict();
+export type EsiCharacterRoles = z.infer<typeof EsiCharacterRolesSchema>;
+
+export const EsiAttributesSchema = z.object({
+  charisma: z.number().int().min(1),
+  intelligence: z.number().int().min(1),
+  memory: z.number().int().min(1),
+  perception: z.number().int().min(1),
+  willpower: z.number().int().min(1),
+  bonus_remaps: z.number().int().min(0).optional(),
+  last_remap_date: z.string().datetime().optional(),
+  accrued_remap_cooldown_date: z.string().datetime().optional()
+}).strict();
+export type EsiAttributes = z.infer<typeof EsiAttributesSchema>;

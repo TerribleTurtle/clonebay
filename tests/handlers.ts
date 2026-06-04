@@ -101,6 +101,10 @@ export const handlers = [
     return HttpResponse.json(mockNotifications);
   }),
 
+  http.get('https://esi.evetech.net/latest/characters/:characterId/roles/', () => {
+    return HttpResponse.json({ roles: ["Director"] });
+  }),
+
   http.get('https://esi.evetech.net/latest/characters/:characterId/wallet/journal/', () => {
     return HttpResponse.json(mockWalletJournal);
   }),

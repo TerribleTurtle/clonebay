@@ -1,0 +1,24 @@
+[
+  {
+    "corporation_id": 98000001,
+    "fuel_expires": "2026-06-07T04:00:00Z",
+    "name": "Jita - Trade Hub",
+    "next_reinforce_apply": "2026-06-10T18:00:00Z",
+    "next_reinforce_hour": 18,
+    "profile_id": 112233,
+    "reinforce_hour": 18,
+    "services": [
+      {
+        "name": "Clone Bay",
+        "state": "online"
+      }
+    ],
+    "state": "shield_vulnerable",
+    "state_timer_end": "2026-06-08T18:00:00Z",
+    "state_timer_start": "2026-06-06T18:00:00Z",
+    "structure_id": 1000000000001,
+    "system_id": 30000142,
+    "type_id": 35832,
+    "unanchors_at": "2026-06-20T18:00:00Z"
+  }
+]

@@ -6,6 +6,7 @@ import { logger } from '../../utils/logger';
 
 import { IEsiService } from '../../services/esi/IEsiService';
 import { PI_SDE_DATA } from '../../utils/piSdeData';
+import { NameCacheService } from '../../services/NameCacheService';
 
 const PI_GROUP_COMMAND_CENTER = 1043;
 const PI_GROUP_SPACEPORT = 1048;
@@ -28,7 +29,9 @@ export async function processPi(
       const layouts = await Promise.all(layoutPromises);
 
       const allPins: PiPinState[] = [];
-      for (const layoutRes of layouts) {
+      for (let i = 0; i < layouts.length; i++) {
+        const layoutRes = layouts[i];
+        const planetId = planetsResult.data[i]?.planet_id || 0;
         if (!layoutRes || !layoutRes.data || !layoutRes.data.pins) continue;
         
         for (const pin of layoutRes.data.pins) {
@@ -55,6 +58,7 @@ export async function processPi(
           }
 
           const pinState: PiPinState = {
+            planetId: planetId,
             isExtractor,
             isStorage,
             hasUnroutedMaterials: false
@@ -68,10 +72,30 @@ export async function processPi(
         }
       }
 
-      const status = calculatePiStatus(allPins, Date.now());
+      const { status, alerts } = calculatePiStatus(allPins, Date.now());
+      
+      const piContext: { alerts: string[] } = { alerts: [] };
+      if (alerts && alerts.length > 0) {
+        const nameCache = new NameCacheService();
+        const planetIds = Array.from(new Set(alerts.map(a => a.planetId)));
+        const resolvedNames = await nameCache.resolveIdsToNames(planetIds, esiService);
+        
+        piContext.alerts = alerts.map(a => {
+          const planetName = resolvedNames[a.planetId] || `Planet ${a.planetId}`;
+          return `${planetName}: ${a.message}`;
+        });
+      } else {
+        const planetCount = planetsResult.data.length;
+        if (planetCount === 0) {
+          piContext.alerts.push(`No Planetary Interaction networks detected.`);
+        } else {
+          piContext.alerts.push(`${planetCount} Planets Active. All operations running optimally.`);
+        }
+      }
+
       postMessage({
         type: 'ESI_DATA_UPDATE',
-        payload: { characterId: charId, dataType: 'pi', status, data: planetsResult.data }
+        payload: { characterId: charId, dataType: 'pi', status, data: planetsResult.data, piContext }
       });
      
     } catch (error) {

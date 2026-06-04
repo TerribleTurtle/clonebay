@@ -25,7 +25,8 @@ describe('useCharacterStore', () => {
       walletStatus: 'Offline',
       mailStatus: 'Offline',
       cloneStatus: 'Offline',
-      locationStatus: 'Offline'
+      locationStatus: 'Offline',
+      structureStatus: 'Offline'
     });
   });
 
@@ -43,7 +44,8 @@ describe('useCharacterStore', () => {
       walletStatus: 'Offline',
       mailStatus: 'Offline',
       cloneStatus: 'Offline',
-      locationStatus: 'Offline'
+      locationStatus: 'Offline',
+      structureStatus: 'Offline'
     });
   });
 });

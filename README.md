@@ -20,6 +20,14 @@ A "Single Pane of Glass" read-only dashboard that monitors the passive and async
 - **Frontend:** Next.js (App Router), React, Tailwind CSS, shadcn/ui
 - **APIs:** EVE Swagger Interface (ESI)
 
+## Zero-Backend Architecture & Privacy
+EVE-Dash operates on a strict zero-backend philosophy. Your EVE SSO tokens are encrypted and stored exclusively in your browser's IndexedDB. All API requests are made directly from your browser to CCP's official servers. No central servers, databases, or tracking scripts are used.
+
+Allowed external connections via Content-Security-Policy (CSP):
+- `login.eveonline.com`: EVE SSO authentication and token refresh.
+- `esi.evetech.net`: EVE Swagger Interface data fetching.
+- `images.evetech.net`: EVE character portrait rendering.
+
 ## Getting Started
 
 1. Install dependencies:

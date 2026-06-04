@@ -22,6 +22,8 @@ export interface EsiRequestOptions<T> {
   accessToken: string;
   characterId: string;
   schema: z.ZodSchema<T>;
+  method?: string;
+  body?: unknown;
 }
 
 export interface EsiResponse<T> {
@@ -97,9 +99,16 @@ export const esiRateLimitInterceptor: HttpInterceptor = async (req, next) => {
 export const esiAuthInterceptor: HttpInterceptor = async (req, next) => {
   req.headers = {
     ...req.headers,
-    'Authorization': `Bearer ${req.context.accessToken}`,
     'Accept': 'application/json'
   };
+
+  if (req.context.accessToken) {
+    req.headers['Authorization'] = `Bearer ${req.context.accessToken}`;
+  }
+
+  if (req.body !== undefined) {
+    req.headers['Content-Type'] = 'application/json';
+  }
 
   const response = await next(req);
 
@@ -176,6 +185,8 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
   try {
     const req: HttpRequest = {
       url: options.url,
+      ...(options.method !== undefined && { method: options.method }),
+      ...(options.body !== undefined && { body: options.body }),
       context: {
         characterId: options.characterId,
         accessToken: options.accessToken,

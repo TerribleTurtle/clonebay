@@ -8,7 +8,7 @@ import { generateRandomString, generateCodeChallenge } from "@/auth/pkce";
 import { buildEsiAuthUrl } from "@/auth/esiAuth";
 import { logger } from "@/utils/logger";
 
-import { useSettingsStore } from "@/store/useSettingsStore";
+
 
 const STATE_LENGTH = 16;
 const CODE_VERIFIER_LENGTH = 32;
@@ -20,10 +20,7 @@ export default function LoginPage() {
   useEffect(() => {
     async function startLogin() {
       try {
-        const consentStatus = useSettingsStore.getState().consentStatus;
-        if (consentStatus !== "granted") {
-          throw new Error("Storage Protocol Authorization is required to establish a neural link. Please return to the main terminal and authorize storage protocols.");
-        }
+
 
         const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
         if (!clientId) {
@@ -38,8 +35,6 @@ export default function LoginPage() {
 
         setPkceState(state);
         setCodeVerifier(codeVerifier);
-
-        
 
         const authUrl = buildEsiAuthUrl(redirectUri, clientId, state, codeChallenge);
 
@@ -58,7 +53,13 @@ export default function LoginPage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center text-status-red">
         <h1 className="mb-4 text-2xl font-bold uppercase tracking-widest border-b border-status-red pb-2">Login Sequence Aborted</h1>
-        <p className="max-w-md text-center font-mono text-sm">{error}</p>
+        <p className="max-w-md text-center font-mono text-sm mb-6">{error}</p>
+        <button 
+          onClick={() => router.push('/')}
+          className="px-6 py-2 border border-status-red/50 hover:bg-status-red/10 text-status-red uppercase tracking-widest font-mono text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-red focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+        >
+          Return to Terminal
+        </button>
       </div>
     );
   }
@@ -72,4 +73,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

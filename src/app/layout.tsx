@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Rajdhani, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { ConsentBanner } from "../components/ConsentBanner";
+
 import { GlobalHeader } from "../components/GlobalHeader";
 
 const geistSans = Geist({
@@ -73,7 +73,7 @@ export default function RootLayout({
       <head>
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; connect-src 'self' https://esi.evetech.net https://login.eveonline.com; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+          content="default-src 'self'; connect-src 'self' https://esi.evetech.net https://login.eveonline.com; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://images.evetech.net data: blob:;"
         />
         <script
           type="application/ld+json"
@@ -98,7 +98,7 @@ export default function RootLayout({
         <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col">
           {children}
         </main>
-        <ConsentBanner />
+
       </body>
     </html>
   );

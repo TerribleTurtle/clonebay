@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
+import type { EsiCorporationStructure } from '../schemas/esi/corporation';
 
 export type StatusLight = 'Green' | 'Yellow' | 'Red' | 'Offline';
 
@@ -12,7 +13,8 @@ export const DEFAULT_OFFLINE_STATUS = {
   walletStatus: 'Offline',
   mailStatus: 'Offline',
   cloneStatus: 'Offline',
-  locationStatus: 'Offline'
+  locationStatus: 'Offline',
+  structureStatus: 'Offline'
 } as const;
 
 export interface CharacterStatus {
@@ -23,7 +25,9 @@ export interface CharacterStatus {
   locationId?: number;
   locationName?: string;
   stationId?: number;
+  stationName?: string;
   structureId?: number;
+  structureName?: string;
   location?: EsiLocation;
   ship?: EsiShip;
   skills: StatusLight;
@@ -33,12 +37,21 @@ export interface CharacterStatus {
   mailStatus: StatusLight;
   cloneStatus: StatusLight;
   locationStatus: StatusLight;
+  structureStatus: StatusLight;
+  structures?: EsiCorporationStructure[];
   clones?: EsiClones;
   fatigue?: EsiFatigue;
   transactions?: { count: number } | EsiTransaction[];
   mail?: EsiMailLabels;
   contracts?: { count: number } | EsiContract[];
   marketOrders?: { count: number } | EsiMarketOrder[];
+  skillsContext?: { activeSkill: string; timeRemaining: number; queue: string[] };
+  spContext?: { current: number; unallocated: number; ratePerHour: number };
+  piContext?: { alerts: string[] };
+  indyContext?: { alerts: string[] };
+  clonesContext?: { locationName: string; implants: string[] }[];
+  ordersContext?: { topOrders: string[] };
+  mailContext?: { unreadSubjects: string[] };
 }
 
 /**
@@ -150,9 +163,17 @@ export const useCharacterStore = create<CharacterStoreState>()(
         ...state,
         characters: Object.fromEntries(
           Object.entries(state.characters).map(([id, char]) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { transactions, mail, contracts, marketOrders, ...rest } = char;
-            return [id, rest];
+            return [
+              id,
+              {
+                ...rest,
+                transactions: transactions ? { count: Array.isArray(transactions) ? transactions.length : transactions.count } : undefined,
+                mail: mail ? { total_unread_count: mail.total_unread_count } : undefined,
+                contracts: contracts ? { count: Array.isArray(contracts) ? contracts.length : contracts.count } : undefined,
+                marketOrders: marketOrders ? { count: Array.isArray(marketOrders) ? marketOrders.length : marketOrders.count } : undefined,
+              }
+            ];
           })
         ),
       }),
