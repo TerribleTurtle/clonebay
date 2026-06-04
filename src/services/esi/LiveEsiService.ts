@@ -16,6 +16,7 @@ import {
   EsiMailLabelsSchema,
   EsiContractSchema,
   EsiMarketOrdersArraySchema,
+  EsiNotificationSchema,
   EsiSkillQueue,
   EsiIndustryJob,
   EsiPlanet,
@@ -29,7 +30,8 @@ import {
   EsiTransaction,
   EsiMailLabels,
   EsiContract,
-  EsiMarketOrder
+  EsiMarketOrder,
+  EsiNotification
 } from '../../schemas/esi';
 import { logger } from '../../utils/logger';
 
@@ -200,5 +202,16 @@ export class LiveEsiService implements IEsiService {
    */
   getMarketOrders(charId: string, accessToken: string): Promise<EsiResponse<EsiMarketOrder[]> | null> {
     return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/orders/`, accessToken, charId, EsiMarketOrdersArraySchema, 'market orders');
+  }
+
+  /**
+   * Fetches the character's notifications.
+   * 
+   * @param {string} charId - The character's unique ID.
+   * @param {string} accessToken - The ESI OAuth access token.
+   * @returns {Promise<EsiResponse<EsiNotification[]> | null>} The parsed notifications response or null on error.
+   */
+  getCharacterNotifications(charId: string, accessToken: string): Promise<EsiResponse<EsiNotification[]> | null> {
+    return this.safeFetch(`https://esi.evetech.net/latest/characters/${charId}/notifications/`, accessToken, charId, z.array(EsiNotificationSchema), 'notifications');
   }
 }

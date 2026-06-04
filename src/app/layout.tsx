@@ -91,8 +91,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-eve-bg text-zinc-50">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-zinc-950 focus:text-cyan-400 focus:border-cyan-500 focus:border">
+          Skip to main content
+        </a>
         <GlobalHeader />
-        <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col">
+        <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col">
           {children}
         </main>
         <ConsentBanner />

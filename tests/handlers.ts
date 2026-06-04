@@ -4,6 +4,7 @@ import mockIndustryJobs from './fixtures/mockIndustryJobs.json';
 import mockSkillQueue from './fixtures/mockSkillQueue.json';
 import mockSde from './fixtures/mockSde.json';
 import mockOauth from './fixtures/mockOauth.json';
+import mockNotifications from './fixtures/mockNotifications.json';
 
 export const handlers = [
   http.get('https://esi.evetech.net/latest/characters/:characterId/skillqueue/', () => {
@@ -93,6 +94,10 @@ export const handlers = [
         volume_total: 123456
       }
     ]);
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/notifications/', () => {
+    return HttpResponse.json(mockNotifications);
   }),
 
   http.get('https://esi.evetech.net/latest/universe/systems/:systemId/', ({ params }) => {

@@ -2,6 +2,7 @@ import React from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { logger } from '../utils/logger';
 import { useCharacterStore, StatusLight } from '../store/useCharacterStore';
+import { CharacterService } from '../services/CharacterService';
 
 interface CharacterRowProps {
   characterId: string;
@@ -17,17 +18,17 @@ const getStatusColor = (s: StatusLight) => StatusTheme[s] || StatusTheme.Offline
 
 const StatusPill: React.FC<{ label: string; status: StatusLight }> = ({ label, status }) => (
   <div className={`flex-1 sm:flex-none border px-3 py-1 text-xs uppercase tracking-widest text-center min-w-[100px] ${getStatusColor(status)}`}>
-    {label}: {status}
+    <span aria-hidden="true">{label}: {status}</span>
+    <span className="sr-only">{label} Status: {status}</span>
   </div>
 );
 
 export const CharacterRow: React.FC<CharacterRowProps> = React.memo(({ characterId }) => {
   const status = useCharacterStore(useShallow((state) => state.characters[characterId]));
-  const removeAndReload = useCharacterStore((state) => state.removeAndReload);
   
   const handleRemove = async () => {
     try {
-      await removeAndReload(characterId);
+      await CharacterService.removeAndReload(characterId);
     } catch (e) {
       logger.error('[CharacterRow] Failed to remove character ' + characterId + ' from IDB:', e);
       throw e;

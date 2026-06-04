@@ -23,7 +23,8 @@ let mockStore: Record<string, unknown> = {};
 vi.mock('idb-keyval', () => {
   return {
     get: vi.fn(async (key: string) => mockStore[key]),
-    set: vi.fn(async (key: string, val: unknown) => { mockStore[key] = val; })
+    set: vi.fn(async (key: string, val: unknown) => { mockStore[key] = val; }),
+    update: vi.fn(async (key: string, callback: (val: unknown) => unknown) => { mockStore[key] = callback(mockStore[key]); })
   };
 });
 

@@ -17,6 +17,7 @@ import {
   EsiMailLabelsSchema,
   EsiContractSchema,
   EsiMarketOrdersArraySchema,
+  EsiNotificationSchema,
   EsiSkillQueue,
   EsiIndustryJob,
   EsiPlanet,
@@ -30,7 +31,8 @@ import {
   EsiTransaction,
   EsiMailLabels,
   EsiContract,
-  EsiMarketOrder
+  EsiMarketOrder,
+  EsiNotification
 } from '../../schemas/esi';
 
 export class MockEsiService implements IEsiService {
@@ -101,5 +103,31 @@ export class MockEsiService implements IEsiService {
 
   getMarketOrders(charId: string): Promise<EsiResponse<EsiMarketOrder[]> | null> {
     return this.mockResponse(this.getMockChar(charId)?.marketOrders, EsiMarketOrdersArraySchema);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getCharacterNotifications(_charId: string): Promise<EsiResponse<EsiNotification[]> | null> {
+    const mockNotifications = [
+      {
+        notification_id: 100000001,
+        sender_id: 1000123,
+        sender_type: 'character',
+        text: 'War declared!',
+        timestamp: new Date().toISOString(),
+        type: 'WarDeclared',
+        is_read: false
+      },
+      {
+        notification_id: 100000002,
+        sender_id: 1000124,
+        sender_type: 'corporation',
+        text: 'Structure under attack!',
+        // eslint-disable-next-line no-magic-numbers
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        type: 'StructureUnderAttack',
+        is_read: true
+      }
+    ];
+    return this.mockResponse(mockNotifications, z.array(EsiNotificationSchema));
   }
 }

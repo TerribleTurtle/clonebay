@@ -2,6 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CharacterRow } from '../../src/components/CharacterRow';
 
+import { CharacterService } from '../../src/services/CharacterService';
+
 // Mock zustand store and logger
 vi.mock('../../src/utils/logger', () => ({
   logger: {
@@ -9,10 +11,15 @@ vi.mock('../../src/utils/logger', () => ({
   },
 }));
 
+vi.mock('../../src/services/CharacterService', () => ({
+  CharacterService: {
+    removeAndReload: vi.fn(),
+  }
+}));
+
 vi.mock('../../src/store/useCharacterStore', () => {
   const storeState = {
     characters: {},
-    removeAndReload: vi.fn(),
   };
 
   const useCharacterStore = vi.fn((selector) => {
@@ -29,7 +36,7 @@ describe('CharacterRow', () => {
 
   beforeEach(async () => {
     vi.resetAllMocks();
-    mockRemoveAndReload = vi.fn();
+    mockRemoveAndReload = CharacterService.removeAndReload as unknown as ReturnType<typeof vi.fn>;
     
     useCharacterStoreMock = await import('../../src/store/useCharacterStore');
     
@@ -57,7 +64,6 @@ describe('CharacterRow', () => {
           cloneStatus: 'Green'
         }
       },
-      removeAndReload: mockRemoveAndReload,
     };
 
     useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {

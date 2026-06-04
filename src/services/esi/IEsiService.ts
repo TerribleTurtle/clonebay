@@ -13,7 +13,8 @@ import type {
   EsiTransaction,
   EsiMailLabels,
   EsiContract,
-  EsiMarketOrder
+  EsiMarketOrder,
+  EsiNotification
 } from '../../schemas/esi';
 
 export interface IEsiService {
@@ -31,4 +32,5 @@ export interface IEsiService {
   getMailLabels(charId: string, accessToken: string): Promise<EsiResponse<EsiMailLabels> | null>;
   getContracts(charId: string, accessToken: string): Promise<EsiResponse<EsiContract[]> | null>;
   getMarketOrders(charId: string, accessToken: string): Promise<EsiResponse<EsiMarketOrder[]> | null>;
+  getCharacterNotifications(charId: string, accessToken: string): Promise<EsiResponse<EsiNotification[]> | null>;
 }

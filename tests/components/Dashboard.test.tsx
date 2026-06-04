@@ -2,6 +2,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Dashboard } from '../../src/components/Dashboard';
 
+import { CharacterService } from '../../src/services/CharacterService';
+import { SettingsRepository } from '../../src/repositories/SettingsRepository';
+
 // Mocks
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -15,11 +18,21 @@ vi.mock('../../src/components/CharacterRow', () => ({
   CharacterRow: ({ characterId }: { characterId: string }) => <div data-testid={`char-row-${characterId}`}>{characterId}</div>,
 }));
 
+vi.mock('../../src/services/CharacterService', () => ({
+  CharacterService: {
+    toggleMockMode: vi.fn(),
+  }
+}));
+
+vi.mock('../../src/repositories/SettingsRepository', () => ({
+  SettingsRepository: {
+    getMockMode: vi.fn().mockReturnValue(false),
+  }
+}));
+
 vi.mock('../../src/store/useCharacterStore', () => {
   const storeState = {
     characters: {},
-    initMockMode: vi.fn().mockReturnValue(false),
-    toggleMockMode: vi.fn(),
   };
 
   const useCharacterStore = vi.fn((selector) => {
@@ -42,13 +55,12 @@ describe('Dashboard', () => {
 
   beforeEach(async () => {
     vi.resetAllMocks();
-    mockToggleMockMode = vi.fn();
+    (SettingsRepository.getMockMode as unknown as ReturnType<typeof vi.fn>).mockReturnValue(false);
+    mockToggleMockMode = CharacterService.toggleMockMode as unknown as ReturnType<typeof vi.fn>;
     
     useCharacterStoreMock = await import('../../src/store/useCharacterStore');
     const storeState = {
       characters: {},
-      initMockMode: vi.fn().mockReturnValue(false),
-      toggleMockMode: mockToggleMockMode,
     };
 
     useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
@@ -73,8 +85,6 @@ describe('Dashboard', () => {
         'char-1': { name: 'Alice' },
         'char-2': { name: 'Bob' },
       },
-      initMockMode: vi.fn().mockReturnValue(false),
-      toggleMockMode: mockToggleMockMode,
     };
     
     useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
@@ -94,8 +104,6 @@ describe('Dashboard', () => {
   it('toggles mock mode', () => {
     const storeState = {
       characters: {},
-      initMockMode: vi.fn().mockReturnValue(false),
-      toggleMockMode: mockToggleMockMode,
     };
     
     useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {

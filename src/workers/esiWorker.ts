@@ -8,6 +8,7 @@ import { processMetrics } from './processors/metricsProcessor';
 import { LiveEsiService } from '../services/esi/LiveEsiService';
 import { MockEsiService } from '../services/esi/MockEsiService';
 import type { IEsiService } from '../services/esi/IEsiService';
+import { saveCharacterNotifications } from '../repositories/NotificationRepository';
 
 const POLLING_INTERVAL_SECONDS = 60;
 const MS_PER_SECOND = 1000;
@@ -151,7 +152,18 @@ async function pollData(esiService: IEsiService): Promise<void> {
         self.postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'pi', status: 'Red', data: null } });
       });
 
-      await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing]);
+      const notificationsProcessing = esiService.getCharacterNotifications(charId, accessToken)
+        .then(async (notificationsResponse) => {
+          if (notificationsResponse && notificationsResponse.data) {
+            await saveCharacterNotifications(charId, notificationsResponse.data);
+          }
+        })
+        .catch(err => {
+          logger.error(`ESI Worker: Error fetching/saving notifications for ${charId}`, err);
+          // Headless tracking: do not post a Red UI status.
+        });
+
+      await Promise.all([metricsProcessing, skillsProcessing, industryProcessing, piProcessing, notificationsProcessing]);
      
     } catch (err) {
       logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);

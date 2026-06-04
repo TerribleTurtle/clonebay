@@ -74,7 +74,8 @@ export const ESI_SCOPES = [
   "esi-location.read_ship_type.v1",
   "esi-mail.read_mail.v1",
   "esi-contracts.read_character_contracts.v1",
-  "esi-markets.read_character_orders.v1"
+  "esi-markets.read_character_orders.v1",
+  "esi-characters.read_notifications.v1"
 ];
 
 export function buildEsiAuthUrl(redirectUri: string, clientId: string, state: string, codeChallenge: string): string {

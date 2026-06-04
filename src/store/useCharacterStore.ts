@@ -1,7 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { logger } from '../utils/logger';
-import { removeCharacter as removeAuthCharacter } from '../auth/AuthRepository';
 
 import type { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
 
@@ -73,11 +71,11 @@ export interface CharacterStoreState {
   updateMultipleCharacters: (updates: Record<string, Partial<CharacterStatus>>) => void;
   
   /**
-   * Removes a character from the store and underlying auth storage.
+   * Deletes a character's state from the store.
    * 
    * @param id - The character ID to remove.
    */
-  removeCharacter: (id: string) => Promise<void>;
+  deleteCharacterState: (id: string) => void;
   
   /**
    * Sets the timestamp for the last polling operation.
@@ -95,27 +93,6 @@ export interface CharacterStoreState {
    * Clears the entire character state, removing all characters.
    */
   clearAll: () => void;
-  
-  /**
-   * Toggles the mock mode state in localStorage and reloads the application.
-   * 
-   * @param currentMode - The current mock mode state.
-   */
-  toggleMockMode: (currentMode: boolean) => void;
-  
-  /**
-   * Removes a character from the store and forces a full application reload.
-   * 
-   * @param id - The character ID to remove.
-   */
-  removeAndReload: (id: string) => Promise<void>;
-  
-  /**
-   * Initializes and retrieves the mock mode state from localStorage.
-   * 
-   * @returns True if mock mode is active, false otherwise.
-   */
-  initMockMode: () => boolean;
 }
 
 export const useCharacterStore = create<CharacterStoreState>()(
@@ -124,53 +101,12 @@ export const useCharacterStore = create<CharacterStoreState>()(
       characters: {},
       lastPolled: null,
       setLastPolled: (timestamp) => set({ lastPolled: timestamp }),
-      removeCharacter: async (id) => {
-        try {
-          await removeAuthCharacter(id);
-        } catch (error) {
-          logger.error(`Failed to remove token for ${id}:`, error);
-          throw error;
-        }
+      deleteCharacterState: (id) => {
         set((state) => {
           const newCharacters = { ...state.characters };
           delete newCharacters[id];
           return { characters: newCharacters };
         });
-      },
-      removeAndReload: async (id) => {
-        // We'll just call the store's removeCharacter then window.location.reload()
-        try {
-          // Note: using the same logic since we're in the store
-          await removeAuthCharacter(id);
-          set((s) => {
-            const newCharacters = { ...s.characters };
-            delete newCharacters[id];
-            return { characters: newCharacters };
-          });
-          window.location.reload();
-        } catch (error) {
-          logger.error(`Failed to remove character ${id}:`, error);
-          throw error;
-        }
-      },
-      toggleMockMode: (currentMode: boolean) => {
-        try {
-          const newMockMode = !currentMode;
-          localStorage.setItem('eve_mock_mode', String(newMockMode));
-          set({ characters: {} }); // clearAll equivalent
-          window.location.reload();
-        } catch (error) {
-          logger.error("Failed to write eve_mock_mode to localStorage:", error);
-          throw error;
-        }
-      },
-      initMockMode: () => {
-        try {
-          return localStorage.getItem('eve_mock_mode') === 'true';
-        } catch (error) {
-          logger.error("Failed to read eve_mock_mode from localStorage:", error);
-          return false;
-        }
       },
       clearAll: () => set({ characters: {} }),
       setAllOffline: () => 

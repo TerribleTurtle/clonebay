@@ -8,6 +8,8 @@ import { useCharacterStore } from '../store/useCharacterStore';
 import { logger } from '../utils/logger';
 import { CharacterRow } from './CharacterRow';
 import { useEsiWorkerManager } from './useEsiWorkerManager';
+import { SettingsRepository } from '../repositories/SettingsRepository';
+import { CharacterService } from '../services/CharacterService';
 
 export const Dashboard: React.FC = () => {
   const characterIds = useCharacterStore(useShallow((state) => Object.keys(state.characters)));
@@ -17,7 +19,7 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     try {
-      const mockMode = useCharacterStore.getState().initMockMode();
+      const mockMode = SettingsRepository.getMockMode();
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsMockMode(mockMode);
       setMounted(true);
@@ -30,15 +32,13 @@ export const Dashboard: React.FC = () => {
 
   useEsiWorkerManager();
 
-  const toggleMockModeAction = useCharacterStore((state) => state.toggleMockMode);
-
   const toggleMockMode = () => {
-    toggleMockModeAction(isMockMode);
+    CharacterService.toggleMockMode(isMockMode);
   };
 
   if (!mounted) {
     return (
-      <div className="flex-1 flex items-center justify-center font-mono">
+      <div className="flex-1 flex items-center justify-center font-mono" aria-live="polite">
         <div className="text-status-yellow font-bold uppercase tracking-widest animate-pulse">
           Initializing Neural Link...
         </div>

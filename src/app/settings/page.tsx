@@ -41,7 +41,7 @@ export default function SettingsPage() {
                 type="number" 
                 value={settings.walletYellowThreshold}
                 onChange={(e) => settings.setWalletYellowThreshold(Number(e.target.value))}
-                className="bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                className="bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-zinc-950"
               />
             </div>
 
@@ -52,7 +52,7 @@ export default function SettingsPage() {
                 type="number" 
                 value={settings.walletRedThreshold}
                 onChange={(e) => settings.setWalletRedThreshold(Number(e.target.value))}
-                className="bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:border-red-500"
+                className="bg-zinc-900 border border-zinc-700 px-3 py-2 text-zinc-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-zinc-950"
               />
             </div>
 
