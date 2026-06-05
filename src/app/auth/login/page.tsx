@@ -27,8 +27,9 @@ export default function LoginPage() {
           throw new Error("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
         }
 
+        // @ts-expect-error Next.js will statically replace process.env.NEXT_PUBLIC_EVE_CALLBACK_URL
         // eslint-disable-next-line no-restricted-properties
-        const redirectUri = process.env['NEXT_PUBLIC_EVE_CALLBACK_URL'] || `${window.location.origin}/auth/callback`;
+        const redirectUri = process.env.NEXT_PUBLIC_EVE_CALLBACK_URL || `${window.location.origin}/auth/callback`;
         const state = generateRandomString(STATE_LENGTH);
         const codeVerifier = generateRandomString(CODE_VERIFIER_LENGTH);
         const codeChallenge = await generateCodeChallenge(codeVerifier);
