@@ -28,7 +28,7 @@ export default function LoginPage() {
         }
 
         // eslint-disable-next-line no-restricted-properties
-        const redirectUri = `${window.location.origin}/auth/callback`;
+        const redirectUri = process.env['NEXT_PUBLIC_EVE_CALLBACK_URL'] || `${window.location.origin}/auth/callback`;
         const state = generateRandomString(STATE_LENGTH);
         const codeVerifier = generateRandomString(CODE_VERIFIER_LENGTH);
         const codeChallenge = await generateCodeChallenge(codeVerifier);
