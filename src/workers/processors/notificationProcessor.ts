@@ -13,7 +13,7 @@ export async function processNotifications(
   esiService: IEsiService,
   postMessage: (msg: unknown) => void
 ): Promise<void> {
-  let warStatus: 'Green' | 'Yellow' | 'Red' | 'Offline' = 'Offline';
+  let warStatus: 'Green' | 'Yellow' | 'Red' | 'Offline' = 'Green';
   const alerts: string[] = [];
   
   // Filter for war-related notifications in the last 30 days
@@ -122,6 +122,10 @@ export async function processNotifications(
         }
       }
     }
+  }
+
+  if (warStatus === 'Green' && alerts.length === 0) {
+    alerts.push('No Active Wars');
   }
 
   postMessage({
