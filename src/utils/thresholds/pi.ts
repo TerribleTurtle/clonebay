@@ -13,7 +13,7 @@ export interface PiPinState {
 /**
  * Calculates the status of a character's Planetary Interaction (PI).
  * - RED: Extractors stopped, OR Storage 100% full, OR unrouted materials detected.
- * - YELLOW: Extractor cycle ending < 12 hours, OR Storage > 85% full.
+ * - YELLOW: Extraction program ending < 12 hours, OR Storage > 85% full.
  * - GREEN: Extractors active > 12 hours remaining, Storage nominal.
  *
  * @param pins - An array of PiPinState objects representing the character's PI pins.
@@ -67,13 +67,13 @@ export function calculatePiStatus(
       } else {
         const expiry = Date.parse(pin.extractorExpiryTime);
         if (expiry <= nowMs) {
-          alerts.push({ planetId: pin.planetId, message: 'Extractor Cycle Finished' });
+          alerts.push({ planetId: pin.planetId, message: 'Extraction Program Finished' });
           status = 'Red';
         } else {
           hasActiveExtractor = true;
           const remainingMs = expiry - nowMs;
           if (remainingMs < YELLOW_THRESHOLD_HOURS * MS_IN_HOUR) {
-            alerts.push({ planetId: pin.planetId, message: 'Extractor Cycle Ending Soon' });
+            alerts.push({ planetId: pin.planetId, message: 'Extraction Program Ending Soon' });
             if (status === 'Green') status = 'Yellow';
           }
         }

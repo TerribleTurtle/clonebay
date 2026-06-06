@@ -62,7 +62,7 @@ describe('piProcessor', () => {
     });
   });
 
-  it('should post Yellow status when extractor cycle ends < 12 hours', async () => {
+  it('should post Yellow status when extraction program ends < 12 hours', async () => {
     const now = new Date('2026-06-03T10:00:00Z').getTime();
     vi.setSystemTime(now);
 

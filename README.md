@@ -13,7 +13,7 @@ A "Single Pane of Glass" read-only dashboard that monitors the passive and async
 - **Traffic Light Health Dashboard:** Red/Yellow/Green indicators for character status.
 - **Unified Timer Aggregation:** 
   - Skill Queue monitoring (prevents empty queues).
-  - Planetary Interaction (PI) extractor cycles.
+  - Planetary Interaction (PI) extraction programs.
   - Industry job completions.
 
 ## Technology Stack
