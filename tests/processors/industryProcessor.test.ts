@@ -125,6 +125,23 @@ describe('industryProcessor', () => {
       payload: expect.objectContaining({ characterId: 'char-1', dataType: 'industry', status: 'Offline', data: null })
     });
   });
+
+  it('should post Red status when an error is thrown', async () => {
+    // Explicitly throw an error to hit the outer catch block
+    mockNameCache.resolveIdsToNames.mockRejectedValue(new Error('Test error'));
+
+    const baseJob = EsiIndustryJobSchema.parse(mockIndustryJobsRaw[0]);
+    const charSkills = EsiCharacterSkillsResponseSchema.parse(characterSkillsRaw);
+    const mockJobs: EsiIndustryJob[] = [{ ...baseJob }];
+    const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
+
+    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockNameCache, mockPostMessage);
+
+    expect(mockPostMessage).toHaveBeenCalledWith({
+      type: 'ESI_DATA_UPDATE',
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'industry', status: 'Red', data: null })
+    });
+  });
 });
 
 

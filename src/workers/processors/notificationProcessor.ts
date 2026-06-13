@@ -83,6 +83,8 @@ export async function processNotifications(
         }
       } catch (error) {
         logger.error(`ESI Worker: Error fetching war details for warId ${warId}`, error);
+        warStatus = 'Offline';
+        alerts.push(`Failed to fetch details for war ID ${warId}`);
       }
     }
 

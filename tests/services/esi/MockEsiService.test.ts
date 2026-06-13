@@ -12,7 +12,7 @@ describe('MockEsiService', () => {
     
     // Mock the internal data fetcher to return invalid structural data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.spyOn(service as any, 'getMockChar').mockReturnValue({
+    vi.spyOn(service as unknown, 'getMockChar').mockReturnValue({
       skills: [{
         skill_id: "hallucinated_string_instead_of_number", // Invalid type
         skillpoints_in_skill: 1000,
@@ -27,7 +27,7 @@ describe('MockEsiService', () => {
     const service = new MockEsiService();
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.spyOn(service as any, 'getMockChar').mockReturnValue({
+    vi.spyOn(service as unknown, 'getMockChar').mockReturnValue({
       skills: [{
         skill_id: 3327,
         queue_position: 0,
@@ -39,15 +39,23 @@ describe('MockEsiService', () => {
     });
 
     const result = await service.getSkillQueue('some_char_id');
-    expect(result?.data).toBeDefined();
-    expect(result?.status).toBe('Green');
+    expect(result).toBeDefined();
+    expect(result!.status).toBe('Green');
+    expect(result!.data).toEqual([{
+      skill_id: 3327,
+      queue_position: 0,
+      level_start_sp: 0,
+      training_start_sp: 0,
+      level_end_sp: 250,
+      finished_level: 1
+    }]);
   });
 
   it('should return null when character lacks specific mock data', async () => {
     const service = new MockEsiService();
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.spyOn(service as any, 'getMockChar').mockReturnValue({
+    vi.spyOn(service as unknown, 'getMockChar').mockReturnValue({
       skills: undefined // Missing data
     });
 
@@ -55,3 +63,4 @@ describe('MockEsiService', () => {
     expect(result).toBeNull();
   });
 });
+

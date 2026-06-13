@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../src/auth/AuthRepository';
+import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../../src/auth/AuthRepository';
 import { clear } from 'idb-keyval';
 
 describe('AuthRepository', () => {

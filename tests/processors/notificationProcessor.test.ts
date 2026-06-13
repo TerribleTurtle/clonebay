@@ -120,14 +120,18 @@ describe('notificationProcessor', () => {
 
     mockEsiService.getWar.mockRejectedValue(new Error('Network error'));
 
-    // Should not throw, should handle gracefully and post Green since war couldn't be confirmed active
+    // Should not throw, should handle gracefully and post Offline since war couldn't be confirmed active
     await processNotifications('char-1', notifications, mockEsiService, mockPostMessage);
     
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'ESI_DATA_UPDATE',
         payload: expect.objectContaining({
-          status: 'Green'
+          status: 'Offline',
+          data: expect.objectContaining({
+            warStatus: 'Offline',
+            warContext: { alerts: ['Failed to fetch details for war ID 44'] }
+          })
         })
       })
     );

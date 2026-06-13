@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { EsiMarketOrderSchema } from '../src/schemas/esi';
+import { EsiMarketOrderSchema, EsiSkillQueueSchema } from '../src/schemas/esi';
+import { configSchema } from '../src/lib/schemas/configSchema';
 
 describe('ESI Schema Validation', () => {
   describe('EsiMarketOrderSchema', () => {
@@ -61,6 +62,89 @@ describe('ESI Schema Validation', () => {
       };
 
       const result = EsiMarketOrderSchema.safeParse(sellOrderPayload);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('EsiSkillQueueSchema', () => {
+    it('should reject when start_date >= finish_date', () => {
+      const invalid = {
+        queue_position: 0,
+        skill_id: 123,
+        start_date: "2026-06-13T10:00:00Z",
+        finish_date: "2026-06-13T10:00:00Z",
+        level_start_sp: 0,
+        training_start_sp: 0,
+        level_end_sp: 250,
+        finished_level: 1
+      };
+      const result = EsiSkillQueueSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject when SP math is invalid (level_start_sp > training_start_sp)', () => {
+      const invalid = {
+        queue_position: 0,
+        skill_id: 123,
+        level_start_sp: 500,
+        training_start_sp: 250,
+        level_end_sp: 1000,
+        finished_level: 2
+      };
+      const result = EsiSkillQueueSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject when training_start_sp >= level_end_sp', () => {
+      const invalid = {
+        queue_position: 0,
+        skill_id: 123,
+        level_start_sp: 0,
+        training_start_sp: 250,
+        level_end_sp: 250,
+        finished_level: 1
+      };
+      const result = EsiSkillQueueSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject when finished_level === 1 but level_start_sp !== 0', () => {
+      const invalid = {
+        queue_position: 0,
+        skill_id: 123,
+        level_start_sp: 10,
+        training_start_sp: 10,
+        level_end_sp: 250,
+        finished_level: 1
+      };
+      const result = EsiSkillQueueSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('configSchema', () => {
+    it('should reject if walletYellowThreshold <= walletRedThreshold', () => {
+      const invalid = {
+        walletYellowThreshold: 100,
+        walletRedThreshold: 100
+      };
+      const result = configSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+
+      const invalid2 = {
+        walletYellowThreshold: 50,
+        walletRedThreshold: 100
+      };
+      const result2 = configSchema.safeParse(invalid2);
+      expect(result2.success).toBe(false);
+    });
+
+    it('should parse valid config', () => {
+      const valid = {
+        walletYellowThreshold: 200,
+        walletRedThreshold: 100
+      };
+      const result = configSchema.safeParse(valid);
       expect(result.success).toBe(true);
     });
   });

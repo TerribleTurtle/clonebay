@@ -156,6 +156,23 @@ describe('piProcessor', () => {
       payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Offline', data: null })
     });
   });
+
+  it('should post Red status when an error is thrown', async () => {
+    const now = new Date('2026-06-03T10:00:00Z').getTime();
+    vi.setSystemTime(now);
+
+    const mockPlanets = [EsiPlanetSchema.parse(mockPlanetsRaw[0])];
+    
+    // Explicitly reject to hit the catch block
+    mockEsiService.getPlanetLayout.mockRejectedValue(new Error('Test error'));
+
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
+
+    expect(mockPostMessage).toHaveBeenCalledWith({
+      type: 'ESI_DATA_UPDATE',
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red', data: null })
+    });
+  });
 });
 
 

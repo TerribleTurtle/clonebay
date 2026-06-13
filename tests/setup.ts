@@ -19,6 +19,26 @@ import { vi } from 'vitest';
 vi.stubGlobal('fetch', vi.fn(() => { throw new Error('Global fetch called without explicit mock!'); }));
 global.postMessage = vi.fn();
 
+import { useCharacterStore } from '../src/store/useCharacterStore';
+import { useCharacterConfigStore } from '../src/store/useCharacterConfigStore';
+import { useLogStore } from '../src/store/useLogStore';
+import { useSettingsStore } from '../src/store/useSettingsStore';
+
+const initialCharacterState = useCharacterStore.getState();
+const initialCharacterConfigState = useCharacterConfigStore.getState();
+const initialLogState = useLogStore.getState();
+const initialSettingsState = useSettingsStore.getState();
+
+export const resetAllZustandStores = () => {
+  useCharacterStore.setState(initialCharacterState, true);
+  useCharacterConfigStore.setState(initialCharacterConfigState, true);
+  useLogStore.setState(initialLogState, true);
+  useSettingsStore.setState(initialSettingsState, true);
+};
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  resetAllZustandStores();
+});
 afterAll(() => server.close());

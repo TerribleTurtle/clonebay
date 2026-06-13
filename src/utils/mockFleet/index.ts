@@ -1,4 +1,3 @@
- 
 import { MockCharacter } from './types';
 import {
   defaultClones,
@@ -10,14 +9,14 @@ import {
   defaultMarketOrders
 } from './defaults';
 import {
-  greenSkills,
-  greenCharSkills,
-  greenIndustry,
-  greenPlanets,
-  greenLayouts,
-  redSkills,
-  redLayouts,
-  redIndustryCharSkills
+  getGreenSkills,
+  getGreenCharSkills,
+  getGreenIndustry,
+  getGreenPlanets,
+  getGreenLayouts,
+  getRedSkills,
+  getRedLayouts,
+  getRedIndustryCharSkills
 } from './states';
 
 // Re-export type if consumers need it
@@ -31,11 +30,11 @@ export const mockFleet: MockCharacter[] = [
     totalSp: 50000000,
     location: { solar_system_id: 30000142 },
     ship: defaultShip,
-    skills: greenSkills,
-    charSkills: greenCharSkills,
-    industry: greenIndustry,
-    planets: greenPlanets,
-    planetLayouts: greenLayouts,
+    get skills() { return getGreenSkills(); },
+    get charSkills() { return getGreenCharSkills(); },
+    get industry() { return getGreenIndustry(); },
+    get planets() { return getGreenPlanets(); },
+    get planetLayouts() { return getGreenLayouts(); },
     clones: defaultClones,
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
@@ -50,11 +49,11 @@ export const mockFleet: MockCharacter[] = [
     totalSp: 5000000,
     location: { solar_system_id: 30000142 },
     ship: defaultShip,
-    skills: redSkills,
-    charSkills: greenCharSkills,
-    industry: greenIndustry,
-    planets: greenPlanets,
-    planetLayouts: greenLayouts,
+    get skills() { return getRedSkills(); },
+    get charSkills() { return getGreenCharSkills(); },
+    get industry() { return getGreenIndustry(); },
+    get planets() { return getGreenPlanets(); },
+    get planetLayouts() { return getGreenLayouts(); },
     clones: defaultClones,
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
@@ -69,11 +68,11 @@ export const mockFleet: MockCharacter[] = [
     totalSp: 40000000,
     location: { solar_system_id: 30000142 },
     ship: defaultShip,
-    skills: greenSkills,
-    charSkills: greenCharSkills,
-    industry: greenIndustry,
-    planets: greenPlanets,
-    planetLayouts: redLayouts,
+    get skills() { return getGreenSkills(); },
+    get charSkills() { return getGreenCharSkills(); },
+    get industry() { return getGreenIndustry(); },
+    get planets() { return getGreenPlanets(); },
+    get planetLayouts() { return getRedLayouts(); },
     clones: defaultClones,
     fatigue: defaultFatigue,
     transactions: defaultTransactions,
@@ -88,11 +87,11 @@ export const mockFleet: MockCharacter[] = [
     totalSp: 150000000,
     location: { solar_system_id: 30000142 },
     ship: defaultShip,
-    skills: greenSkills,
-    charSkills: redIndustryCharSkills,
-    industry: greenIndustry, // 1 active job, but 6 slots available => RED
-    planets: greenPlanets,
-    planetLayouts: greenLayouts,
+    get skills() { return getGreenSkills(); },
+    get charSkills() { return getRedIndustryCharSkills(); },
+    get industry() { return getGreenIndustry(); }, // 1 active job, but 6 slots available => RED
+    get planets() { return getGreenPlanets(); },
+    get planetLayouts() { return getGreenLayouts(); },
     clones: defaultClones,
     fatigue: defaultFatigue,
     transactions: defaultTransactions,

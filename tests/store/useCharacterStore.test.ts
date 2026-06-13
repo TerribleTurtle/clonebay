@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { useCharacterStore } from '../../src/store/useCharacterStore';
+import { useCharacterStore } from "../../src/store/useCharacterStore";
 
 describe('useCharacterStore', () => {
   beforeEach(() => {

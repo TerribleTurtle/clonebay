@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getWalletJournalDictionary, saveCharacterWalletJournal, getCharacterWalletJournal } from '../WalletJournalRepository';
+import { getWalletJournalDictionary, saveCharacterWalletJournal, getCharacterWalletJournal } from '../../src/repositories/WalletJournalRepository';
 import * as idb from 'idb-keyval';
 
 vi.mock('idb-keyval', () => ({

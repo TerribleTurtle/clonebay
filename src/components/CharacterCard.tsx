@@ -5,7 +5,6 @@ import { CharacterPortrait } from './ui/CharacterPortrait';
 import { CharacterMetrics } from './ui/CharacterMetrics';
 import { CharacterStatusBoard, IndicatorStatus } from './ui/CharacterStatusBoard';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { CharacterService } from '../services/CharacterService';
 import { useState } from 'react';
 import { useCharacterConfigStore } from '../store/useCharacterConfigStore';
 import { CharacterSettingsDialog } from './ui/CharacterSettingsDialog';
@@ -13,6 +12,7 @@ import { logger } from '../utils/logger';
 
 interface CharacterCardProps {
   characterId: string;
+  onRemove?: (id: string) => void;
 }
 
 const mapStatus = (s: StatusLight): IndicatorStatus => {
@@ -25,7 +25,7 @@ const mapStatus = (s: StatusLight): IndicatorStatus => {
   }
 };
 
-export function CharacterCard({ characterId }: CharacterCardProps) {
+export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
   const status = useCharacterStore(useShallow((state) => state.characters[characterId]));
   const charConfig = useCharacterConfigStore((state) => state.configs[Number(characterId)]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -40,7 +40,9 @@ export function CharacterCard({ characterId }: CharacterCardProps) {
   
   const handleRemove = async () => {
     try {
-      await CharacterService.removeAndReload(characterId);
+      if (onRemove) {
+        onRemove(characterId);
+      }
     } catch (e) {
       logger.error('[CharacterCard] Failed to remove character ' + characterId + ' from IDB:', e);
       throw e;

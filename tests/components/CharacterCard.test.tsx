@@ -2,8 +2,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CharacterCard } from '../../src/components/CharacterCard';
 
-import { CharacterService } from '../../src/services/CharacterService';
-
 // Mock zustand store and logger
 vi.mock('../../src/utils/logger', () => ({
   logger: {
@@ -11,20 +9,15 @@ vi.mock('../../src/utils/logger', () => ({
   },
 }));
 
-vi.mock('../../src/services/CharacterService', () => ({
-  CharacterService: {
-    removeAndReload: vi.fn(),
-  }
-}));
+
 
 import { useCharacterStore } from '../../src/store/useCharacterStore';
 
 describe('CharacterCard', () => {
-  let mockRemoveAndReload: ReturnType<typeof vi.fn>;
-
-  beforeEach(async () => {
-    vi.resetAllMocks();
-    mockRemoveAndReload = CharacterService.removeAndReload as unknown as ReturnType<typeof vi.fn>;
+  let mockRemoveAndReload: unknown;
+  
+  beforeEach(() => {
+    mockRemoveAndReload = vi.fn();
     
     localStorage.clear();
     useCharacterStore.setState({ characters: {}, lastPolled: null });
@@ -55,18 +48,31 @@ describe('CharacterCard', () => {
     useCharacterStore.setState({ characters: {}, lastPolled: null });
   });
 
-  it('renders character details correctly', () => {
+  it('renders character details correctly and applies correct styles', () => {
     render(<CharacterCard characterId="char-1" />);
     
-    expect(screen.getByText('Test Pilot')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Test Pilot' })).toBeInTheDocument();
     expect(screen.getByText('[Jita IV - Moon 4]')).toBeInTheDocument();
-    expect(screen.getByText('1,000,000')).toBeInTheDocument();
-    expect(screen.getByText('5,100,000')).toBeInTheDocument(); // total + unallocated
+    
+    // Test that the exact numbers match what's rendered
+    expect(screen.getByLabelText('ISK: 1,000,000')).toBeInTheDocument();
+    expect(screen.getByLabelText('Total SP: 5,100,000')).toBeInTheDocument();
+    
     expect(screen.getByText('Test Ship')).toBeInTheDocument();
+
+    // Verify Red/Yellow styles actually apply
+    const skillLabel = screen.getByText('SKILL');
+    expect(skillLabel.closest('div')).toHaveClass('text-status-green');
+
+    const indyLabel = screen.getByText('INDY');
+    expect(indyLabel.closest('div')).toHaveClass('text-status-yellow');
+
+    const piLabel = screen.getByText('PI');
+    expect(piLabel.closest('div')).toHaveClass('text-status-red');
   });
 
-  it('calls removeAndReload when remove button is clicked', async () => {
-    render(<CharacterCard characterId="char-1" />);
+  it('calls onRemove when remove button is clicked', async () => {
+    render(<CharacterCard characterId="char-1" onRemove={mockRemoveAndReload} />);
     const removeBtn = screen.getByTitle('Remove Character');
     fireEvent.click(removeBtn);
     
@@ -80,3 +86,4 @@ describe('CharacterCard', () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+

@@ -61,8 +61,8 @@ describe('Dashboard', () => {
     useCharacterStore.getState().updateCharacterStatus('char-2', { name: 'Bob' });
 
     render(<Dashboard />);
-    expect(screen.getByText('Alice')).toBeInTheDocument();
-    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Alice' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Bob' })).toBeInTheDocument();
   });
 
   it('toggles mock mode', () => {

@@ -80,6 +80,7 @@ export const Dashboard: React.FC = () => {
             <CharacterCard 
               key={id} 
               characterId={id} 
+              onRemove={(removedId) => CharacterService.removeAndReload(removedId)}
             />
           ))}
         </div>

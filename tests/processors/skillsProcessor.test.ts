@@ -120,12 +120,13 @@ describe('skillsProcessor', () => {
   });
 
   it('should post Red status when an error is thrown', async () => {
-    // Pass malformed data to trigger error, though processSkills catches it.
-    // Wait, processSkills throws if mockPostMessage throws? No, it catches.
-    // Let's force an error by making postMessage throw internally, then we expect logger.error.
-    // Or just pass null for data but OK status. processSkills has:
-    // if (skillsResult && skillsResult.data) { ... } else if (skillsResult?.status === 'Offline') { ... } else { status: 'Red' }
-    await processSkills('char-1', { status: 'Red', cached: false, data: null }, mockNameCache, mockPostMessage);
+    // Explicitly throw an error to hit the outer catch block
+    const badSkillsResult = { status: 'Green', cached: false };
+    Object.defineProperty(badSkillsResult, 'data', {
+      get: () => { throw new Error('Test error'); }
+    });
+
+    await processSkills('char-1', badSkillsResult as unknown, mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -133,5 +134,6 @@ describe('skillsProcessor', () => {
     });
   });
 });
+
 
 
