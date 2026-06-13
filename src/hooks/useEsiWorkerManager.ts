@@ -4,6 +4,8 @@ import { useLogStore } from '../store/useLogStore';
 import { WorkerManager } from '../workers/WorkerManager';
 import { logger } from '../utils/logger';
 
+const BATCH_FLUSH_DELAY_MS = 50;
+
 export const useEsiWorkerManager = () => {
   useEffect(() => {
     let unsubscribe: () => void;
@@ -27,8 +29,7 @@ export const useEsiWorkerManager = () => {
         pendingUpdates[id] = { ...pendingUpdates[id], ...payload };
         
         if (!flushTimeout) {
-          // eslint-disable-next-line no-magic-numbers
-          flushTimeout = setTimeout(flushUpdates, 50);
+          flushTimeout = setTimeout(flushUpdates, BATCH_FLUSH_DELAY_MS);
         }
       };
       

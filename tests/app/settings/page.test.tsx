@@ -10,7 +10,7 @@ vi.mock('../../../src/hooks/useDataWipe', () => ({
 describe('SettingsPage', () => {
   it('calls handleWipeData on Initiate Total Local Data Wipe', () => {
     const mockHandleWipeData = vi.fn();
-    (useDataWipe as unknown).mockReturnValue({ handleWipeData: mockHandleWipeData });
+    (useDataWipe as ReturnType<typeof vi.fn>).mockReturnValue({ handleWipeData: mockHandleWipeData });
 
     render(<SettingsPage />);
     const wipeBtn = screen.getByRole('button', { name: /Initiate Total Local Data Wipe/i });

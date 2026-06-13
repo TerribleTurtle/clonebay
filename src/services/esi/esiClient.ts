@@ -2,7 +2,7 @@ import { HttpClient, HttpInterceptor, HttpRequest } from '../../utils/http/httpC
 import { getCachedEsiData, setCachedEsiData } from './esiCache';
 import { logger } from '../../utils/logger';
 import { z } from 'zod';
-import { enqueueRequest, dequeueRequest } from '../../utils/esiQueue';
+import { esiQueueInterceptor } from '../../utils/esiQueue';
 import { checkDailyDowntime, getAdjustedNow, isPaused, updateClockDrift, checkAndApplyRateLimitError, sleep } from './esiRateLimit';
 import { refreshAccessToken } from '../../auth/esiAuth';
 
@@ -80,14 +80,6 @@ export const esiPauseInterceptor: HttpInterceptor = async (req, next) => {
   return next(req);
 };
 
-export const esiQueueInterceptor: HttpInterceptor = async (req, next) => {
-  await enqueueRequest();
-  try {
-    return await next(req);
-  } finally {
-    dequeueRequest();
-  }
-};
 
 export const esiRateLimitInterceptor: HttpInterceptor = async (req, next) => {
   const response = await next(req);

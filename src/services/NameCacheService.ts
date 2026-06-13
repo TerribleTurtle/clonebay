@@ -1,9 +1,12 @@
 import { get, set } from 'idb-keyval';
 import { logger } from '../utils/logger';
+import { IEsiService } from './esi/IEsiService';
 
 const CACHE_KEY = 'eve_name_cache';
 
 export class NameCacheService {
+  constructor(private esiService: IEsiService) {}
+
   /**
    * Resolves a list of EVE IDs to their names.
    * Utilizes IndexedDB for caching to minimize ESI API calls.
@@ -53,32 +56,26 @@ export class NameCacheService {
       }
     }
 
-    // If there are missing IDs, fetch them from our Edge Function
+    // If there are missing IDs, fetch them from the ESI Service
     if (missingIds.length > 0) {
       let cacheUpdated = false;
 
       try {
-        // eslint-disable-next-line no-restricted-globals
-        const response = await fetch('/api/resolve', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(missingIds)
-        });
+        const response = await this.esiService.resolveNames(missingIds);
 
-        if (response.ok) {
-          // eslint-disable-next-line no-restricted-syntax
-          const resolvedDict = await response.json() as Record<number, string>;
-          for (const [idStr, name] of Object.entries(resolvedDict)) {
-            const id = parseInt(idStr, 10);
+        if (response && response.data) {
+          for (const resolvedName of response.data) {
+            const id = resolvedName.id;
+            const name = resolvedName.name;
             result[id] = name;
             cache[id] = name;
             cacheUpdated = true;
           }
         } else {
-          logger.error(`Edge Function /api/resolve failed with status: ${response.status}`);
+          logger.error(`ESI /universe/names/ request failed or returned null.`);
         }
       } catch (err) {
-        logger.error(`Network error calling /api/resolve:`, err);
+        logger.error(`Error resolving names via ESI:`, err);
       }
 
       // Persist the updated cache back to IndexedDB

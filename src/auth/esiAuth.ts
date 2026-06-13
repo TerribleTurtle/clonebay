@@ -19,49 +19,59 @@ export async function refreshAccessToken(characterId: string): Promise<string> {
   }
 
   if (!refreshPromises[characterId]) {
-    refreshPromises[characterId] = (async () => {
+    const refreshTask = (async () => {
+      const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'] || '';
+      if (!clientId) {
+        throw new Error("NEXT_PUBLIC_EVE_CLIENT_ID is missing in worker context!");
+      }
+      let refreshResponse;
       try {
-        const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'] || '';
-        if (!clientId) {
-          throw new Error("NEXT_PUBLIC_EVE_CLIENT_ID is missing in worker context!");
+        // eslint-disable-next-line no-restricted-globals
+        refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token: auth.refreshToken,
+            client_id: clientId,
+          }),
+        });
+      } catch (error) {
+        logger.error(`Network error refreshing access token for character ${characterId}`, error);
+        throw new Error(`Network error refreshing access token for character ${characterId}: ${error}`);
+      }
+      if (refreshResponse.ok) {
+        const rawData = await refreshResponse.json();
+        const refreshData = await EsiTokenRefreshResponseSchema.parseAsync(rawData);
+        
+        auth.accessToken = refreshData.access_token;
+        if (refreshData.refresh_token) {
+          auth.refreshToken = refreshData.refresh_token;
         }
-        let refreshResponse;
-        try {
-          // eslint-disable-next-line no-restricted-globals
-          refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-              grant_type: 'refresh_token',
-              refresh_token: auth.refreshToken,
-              client_id: clientId,
-            }),
-          });
-        } catch (error) {
-          logger.error(`Network error refreshing access token for character ${characterId}`, error);
-          throw new Error(`Network error refreshing access token for character ${characterId}: ${error}`);
-        }
-        if (refreshResponse.ok) {
-          const rawData = await refreshResponse.json();
-          const refreshData = await EsiTokenRefreshResponseSchema.parseAsync(rawData);
-          
-          auth.accessToken = refreshData.access_token;
-          if (refreshData.refresh_token) {
-            auth.refreshToken = refreshData.refresh_token;
-          }
-          await addOrUpdateCharacter(characterId, auth);
-          return auth.accessToken;
-        } else {
-          throw new Error(`ESI OAuth Refresh failed with status ${refreshResponse.status}`);
-        }
-      } finally {
-        delete refreshPromises[characterId];
+        await addOrUpdateCharacter(characterId, auth);
+        return auth.accessToken;
+      } else {
+        throw new Error(`ESI OAuth Refresh failed with status ${refreshResponse.status}`);
       }
     })();
+
+    const REFRESH_TIMEOUT_MS = 15000;
+    const timeoutTask = new Promise<string>((_, reject) => {
+      setTimeout(() => reject(new Error('Refresh token request timed out')), REFRESH_TIMEOUT_MS);
+    });
+
+    const currentPromise = Promise.race([refreshTask, timeoutTask]).finally(() => {
+      if (refreshPromises[characterId] === currentPromise) {
+        delete refreshPromises[characterId];
+      }
+    });
+
+    refreshPromises[characterId] = currentPromise;
   }
 
   return refreshPromises[characterId];
 }
+
 export const ESI_SCOPES = [
   "esi-skills.read_skillqueue.v1",
   "esi-skills.read_skills.v1",
@@ -95,4 +105,3 @@ export function buildEsiAuthUrl(redirectUri: string, clientId: string, state: st
 
   return `https://login.eveonline.com/v2/oauth/authorize?${params.toString()}`;
 }
-

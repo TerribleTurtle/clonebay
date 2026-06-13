@@ -14,7 +14,7 @@ vi.mock('../../src/utils/logger', () => ({
 import { useCharacterStore } from '../../src/store/useCharacterStore';
 
 describe('CharacterCard', () => {
-  let mockRemoveAndReload: unknown;
+  let mockRemoveAndReload: import('vitest').Mock;
   
   beforeEach(() => {
     mockRemoveAndReload = vi.fn();

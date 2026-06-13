@@ -39,7 +39,7 @@ describe('ssoClient', () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
       json: async () => mockResponse
-    } as unknown);
+    } as unknown as Response);
 
     const result = await exchangeCodeForToken(mockCode, mockCodeVerifier, mockClientId, mockRedirectUri);
     
@@ -72,7 +72,7 @@ describe('ssoClient', () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
       json: async () => mockResponse
-    } as unknown);
+    } as unknown as Response);
 
     await expect(exchangeCodeForToken(mockCode, mockCodeVerifier, mockClientId, mockRedirectUri))
       .rejects.toThrow();

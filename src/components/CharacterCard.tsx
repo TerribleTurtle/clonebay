@@ -1,29 +1,20 @@
 
 import { useShallow } from 'zustand/react/shallow';
-import { useCharacterStore, StatusLight } from '../store/useCharacterStore';
+import { useCharacterStore } from '../store/useCharacterStore';
 import { CharacterPortrait } from './ui/CharacterPortrait';
 import { CharacterMetrics } from './ui/CharacterMetrics';
-import { CharacterStatusBoard, IndicatorStatus } from './ui/CharacterStatusBoard';
+import { CharacterStatusBoard } from './ui/CharacterStatusBoard';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useState } from 'react';
 import { useCharacterConfigStore } from '../store/useCharacterConfigStore';
 import { CharacterSettingsDialog } from './ui/CharacterSettingsDialog';
 import { logger } from '../utils/logger';
+import { useCharacterPresenter } from '../hooks/useCharacterPresenter';
 
 interface CharacterCardProps {
   characterId: string;
   onRemove?: (id: string) => void;
 }
-
-const mapStatus = (s: StatusLight): IndicatorStatus => {
-  switch (s) {
-    case 'Green': return 'green';
-    case 'Yellow': return 'yellow';
-    case 'Red': return 'red';
-    case 'Offline':
-    default: return 'offline';
-  }
-};
 
 export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
   const status = useCharacterStore(useShallow((state) => state.characters[characterId]));
@@ -49,22 +40,27 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
     }
   };
 
-  if (!status) return null;
+  const presenter = useCharacterPresenter(status, characterId);
 
-  const displayName = status.name || characterId;
-  const locationText = status.locationName || (status.location?.solar_system_id ? String(status.location.solar_system_id) : 'UNKNOWN SYSTEM');
+  if (!presenter) return null;
 
-  const isk = typeof status.isk === 'number' ? status.isk.toLocaleString() : '---';
-  const totalSp = typeof status.totalSp === 'number' ? (status.totalSp + (status.unallocatedSp || 0)).toLocaleString() : '---';
-
-  const clonesCount = status.clones ? status.clones.jump_clones.length : 0;
-  const maxClones = status.maxClones || 0;
-  const fatigueTimer = status.fatigue?.jump_fatigue_expire_date 
-    ? new Date(status.fatigue.jump_fatigue_expire_date).toLocaleString() 
-    : '00:00:00';
-  const activeShip = status.ship?.ship_name ?? 'Capsule';
-  const activeOrders = status.marketOrders ? (Array.isArray(status.marketOrders) ? status.marketOrders.length : status.marketOrders.count) : 0;
-  const unreadMail = status.mail?.total_unread_count !== undefined ? status.mail.total_unread_count : 0;
+  const {
+    displayName,
+    locationText,
+    isk,
+    totalSp,
+    clonesCount,
+    maxClones,
+    fatigueTimer,
+    activeShip,
+    activeOrders,
+    unreadMail,
+    statuses,
+    alerts,
+    metricsContexts,
+    stationName,
+    structureId
+  } = presenter;
 
   return (
     <div className="bg-eve-void rounded-none border border-eve-border hover:border-status-cyan hover:shadow-[0_0_8px_rgba(34,211,238,0.4)] transition-all flex flex-col h-full min-h-[220px] relative" role="article" aria-label={`Character Card for ${displayName}`}>
@@ -105,10 +101,10 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="bg-eve-tactical border-eve-border text-zinc-300 font-mono text-xs rounded-none shadow-[0_0_8px_rgba(34,211,238,0.2)]">
-                {status.stationName ? (
-                  <p>{status.stationName}</p>
-                ) : status.structureId ? (
-                  <p>Structure ID: {status.structureId}</p>
+                {stationName ? (
+                  <p>{stationName}</p>
+                ) : structureId ? (
+                  <p>Structure ID: {structureId}</p>
                 ) : (
                   <p>In Space</p>
                 )}
@@ -132,35 +128,23 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
         <CharacterMetrics 
           clonesCount={clonesCount}
           maxClones={maxClones}
-          clonesContext={status.clonesContext}
+          clonesContext={metricsContexts.clonesContext}
           fatigueTimer={fatigueTimer}
-          fatigueContext={status.fatigue?.jump_fatigue_expire_date ? { jumpFatigueExpireDate: status.fatigue.jump_fatigue_expire_date } : undefined}
+          fatigueContext={metricsContexts.fatigueContext}
           activeShip={activeShip}
-          shipContext={status.ship ? { shipName: status.ship.ship_name, typeName: status.ship.ship_type_id.toString() } : undefined}
+          shipContext={metricsContexts.shipContext}
           activeOrders={activeOrders}
-          ordersContext={status.ordersContext ? status.ordersContext.topOrders.map(o => ({ typeName: o })) : undefined}
+          ordersContext={metricsContexts.ordersContext}
           unreadMail={unreadMail}
-          mailContext={status.mailContext ? status.mailContext.unreadSubjects.map(s => ({ subject: s })) : undefined}
+          mailContext={metricsContexts.mailContext}
         />
       </div>
 
       <div className="mt-0">
         <CharacterStatusBoard 
           visibility={visibility}
-          statuses={{
-            skill: mapStatus(status.skills),
-            pi: mapStatus(status.pi),
-            indy: mapStatus(status.industry),
-            mail: mapStatus(status.mailStatus),
-            war: mapStatus(status.warStatus)
-          }}
-          alerts={{
-            skill: status.skillsContext?.queue,
-            pi: status.piContext?.alerts,
-            indy: status.indyContext?.alerts,
-            mail: status.mailContext?.unreadSubjects,
-            war: status.warContext?.alerts
-          }}
+          statuses={statuses}
+          alerts={alerts}
         />
         <CharacterSettingsDialog 
           characterId={characterId}

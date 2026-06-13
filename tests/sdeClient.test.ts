@@ -1,14 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchSdeType } from '../src/services/esi/sdeClient';
-import { get, set } from 'idb-keyval';
+import { get, set, del } from 'idb-keyval';
 import { HttpResponse, http } from 'msw';
 import { server } from './setup';
 import universeTypeRaw from './fixtures/universe_type.json';
-
-vi.mock('idb-keyval', () => ({
-  get: vi.fn(),
-  set: vi.fn(),
-}));
+import 'fake-indexeddb/auto';
 
 describe('sdeClient', () => {
   beforeEach(() => {
@@ -17,17 +13,15 @@ describe('sdeClient', () => {
 
   it('should return cached data from IndexedDB if available', async () => {
     const mockCachedData = { ...universeTypeRaw, type_id: 2256 };
-    vi.mocked(get).mockResolvedValue(mockCachedData);
+    await set('sde_type_2256', mockCachedData);
 
     const result = await fetchSdeType(2256);
 
-    expect(get).toHaveBeenCalledWith('sde_type_2256');
     expect(result).toEqual(mockCachedData);
-    expect(vi.mocked(set)).not.toHaveBeenCalled();
   });
 
   it('should fetch from ESI and cache to IndexedDB if not cached', async () => {
-    vi.mocked(get).mockResolvedValue(undefined);
+    await del('sde_type_2588');
 
     const fullMockData = {
       ...universeTypeRaw,
@@ -43,13 +37,13 @@ describe('sdeClient', () => {
 
     const result = await fetchSdeType(2588);
 
-    expect(get).toHaveBeenCalledWith('sde_type_2588');
     expect(result).toEqual(fullMockData);
-    expect(set).toHaveBeenCalledWith('sde_type_2588', fullMockData);
+    const cached = await get('sde_type_2588');
+    expect(cached).toEqual(fullMockData);
   });
 
   it('should throw an error if fetch fails', async () => {
-    vi.mocked(get).mockResolvedValue(undefined);
+    await del('sde_type_2544');
 
     server.use(
       http.get('https://esi.evetech.net/latest/universe/types/:typeId/', () => {

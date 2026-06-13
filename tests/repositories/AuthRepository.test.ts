@@ -1,9 +1,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../../src/auth/AuthRepository';
+import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter, StorageError } from '../../src/auth/AuthRepository';
 import { clear } from 'idb-keyval';
+import 'fake-indexeddb/auto';
+
+let failIdb = false;
+vi.mock('idb-keyval', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('idb-keyval')>();
+  return {
+    ...actual,
+    get: async (...args: Parameters<typeof actual.get>) => {
+      if (failIdb) throw new Error('Simulated IDB error');
+      return actual.get(...args);
+    },
+    set: async (...args: Parameters<typeof actual.set>) => {
+      if (failIdb) throw new Error('Simulated IDB error');
+      return actual.set(...args);
+    },
+    update: async (...args: Parameters<typeof actual.update>) => {
+      if (failIdb) throw new Error('Simulated IDB error');
+      return actual.update(...args);
+    }
+  };
+});
 
 describe('AuthRepository', () => {
   beforeEach(async () => {
+    failIdb = false;
     await clear();
     vi.clearAllMocks();
   });
@@ -85,6 +107,18 @@ describe('AuthRepository', () => {
     expect(dict['char1']).toBeUndefined();
     expect(dict['char2']?.characterName).toBe('Bob');
   });
+
+  it('fails loudly with StorageError on IDB read failure', async () => {
+    failIdb = true;
+    await expect(getAuthDictionary()).rejects.toThrow(StorageError);
+  });
+
+  it('fails loudly with StorageError on IDB write failure', async () => {
+    failIdb = true;
+    await expect(addOrUpdateCharacter('char1', {
+      accessToken: 'token',
+      refreshToken: 'refresh',
+      characterName: 'Alice'
+    })).rejects.toThrow(StorageError);
+  });
 });
-
-

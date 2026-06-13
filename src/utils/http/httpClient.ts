@@ -108,7 +108,8 @@ export class HttpClient {
         if (text) {
           try {
             data = JSON.parse(text);
-          } catch {
+          } catch (error) {
+            console.error('Failed to parse JSON response:', error);
             // @ts-expect-error fallback if JSON parse fails
             data = text;
           }

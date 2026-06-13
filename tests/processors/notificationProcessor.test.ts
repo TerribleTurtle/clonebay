@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { processNotifications } from '../../src/workers/processors/notificationProcessor';
 import type { EsiNotification, EsiWar } from '../../src/schemas/esi';
 
@@ -9,12 +9,19 @@ describe('notificationProcessor', () => {
   let mockEsiService: any;
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-13T10:00:00Z'));
     mockPostMessage = vi.fn();
     mockEsiService = {
       getWar: vi.fn(),
       resolveNames: vi.fn().mockResolvedValue({ data: [] })
     };
   });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
 
   it('should post Green status when there are no wars', async () => {
     const notifications: EsiNotification[] = [];

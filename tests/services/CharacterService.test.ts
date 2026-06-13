@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CharacterService } from '../../src/services/CharacterService';
 import * as AuthRepository from '../../src/auth/AuthRepository';
-import { useCharacterStore } from '../../src/store/useCharacterStore';
+import { useCharacterStore, DEFAULT_OFFLINE_STATUS, type CharacterStatus } from '../../src/store/useCharacterStore';
 
 vi.mock('../../src/auth/AuthRepository', () => ({
   removeCharacter: vi.fn()
@@ -13,12 +13,14 @@ describe('CharacterService', () => {
   beforeEach(() => {
     // Mock window.location.reload
     // @ts-expect-error - overriding properties
-    delete window.location;
-    window.location = { ...originalLocation, reload: vi.fn() } as unknown;
+    window.location = { ...originalLocation, reload: vi.fn() };
 
     useCharacterStore.setState({
       characters: {
-        'char-1': { id: 'char-1', name: 'Char 1' } as unknown
+        'char-1': { 
+          name: 'Char 1',
+          ...DEFAULT_OFFLINE_STATUS
+        } as CharacterStatus
       }
     });
   });

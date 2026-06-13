@@ -131,7 +131,7 @@ export async function processMetrics(context: EsiMetricsContext) {
     }
     
     if (stationId) {
-      const nameCache = new NameCacheService();
+      const nameCache = new NameCacheService(esiService);
       const resolved = await nameCache.resolveIdsToNames([stationId]).catch(() => ({} as Record<number, string>));
       stationName = resolved[stationId];
     }
@@ -156,7 +156,7 @@ export async function processMetrics(context: EsiMetricsContext) {
     const cloneStatus = calculateCloneStatus(clones?.last_clone_jump_date, now);
 
     // --- Hover Context Generation: Metrics Update ---
-    const nameCache = new NameCacheService();
+    const nameCache = new NameCacheService(esiService);
     let clonesContext:
       | { locationName: string; implants: string[] }[]
       | undefined = undefined;

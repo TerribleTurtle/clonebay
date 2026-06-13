@@ -1,17 +1,37 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getWalletJournalDictionary, saveCharacterWalletJournal, getCharacterWalletJournal } from '../../src/repositories/WalletJournalRepository';
+import { EsiWalletJournalEntry } from '../../src/schemas/esi/walletJournal';
+import { StorageError } from '../../src/auth/AuthRepository';
 import * as idb from 'idb-keyval';
+import 'fake-indexeddb/auto';
 
-vi.mock('idb-keyval', () => ({
-  get: vi.fn(),
-  update: vi.fn()
-}));
+let failIdb = false;
+vi.mock('idb-keyval', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('idb-keyval')>();
+  return {
+    ...actual,
+    get: async (...args: Parameters<typeof actual.get>) => {
+      if (failIdb) throw new Error('Simulated IDB error');
+      return actual.get(...args);
+    },
+    set: async (...args: Parameters<typeof actual.set>) => {
+      if (failIdb) throw new Error('Simulated IDB error');
+      return actual.set(...args);
+    },
+    update: async (...args: Parameters<typeof actual.update>) => {
+      if (failIdb) throw new Error('Simulated IDB error');
+      return actual.update(...args);
+    }
+  };
+});
 
 describe('WalletJournalRepository', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    failIdb = false;
+    await idb.clear();
     vi.clearAllMocks();
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-06-13T12:00:00Z'));
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2025-01-01T12:00:00Z'));
   });
 
   afterEach(() => {
@@ -19,32 +39,40 @@ describe('WalletJournalRepository', () => {
   });
 
   it('gets dictionary', async () => {
-    vi.mocked(idb.get).mockResolvedValue({ char1: [] });
+    await idb.set('eve_wallet_journal', { char1: [] });
     const dict = await getWalletJournalDictionary();
     expect(dict).toEqual({ char1: [] });
   });
 
   it('filters out non-actionable ref_types and old entries', async () => {
-    let savedDict: Record<string, { id: number }[]> = {};
-    vi.mocked(idb.update).mockImplementation(async (_key, updater) => {
-      savedDict = updater({}) as Record<string, { id: number }[]>;
-    });
-
-    const entries = [
-      { id: 1, ref_type: 'bounty_prizes', date: '2026-06-10T12:00:00Z' }, // Valid, 3 days old
-      { id: 2, ref_type: 'bounty_prizes', date: '2026-01-01T12:00:00Z' }, // Invalid, > 45 days old
-      { id: 3, ref_type: 'unknown_type', date: '2026-06-10T12:00:00Z' }, // Invalid, not actionable
-      { id: 4, ref_type: 'market_transaction', date: 'invalid_date' } // Invalid date
+    await idb.del('eve_wallet_journal');
+    
+    const mockEntries = [
+      { id: 1, ref_type: 'bounty_prizes', date: '2025-01-01T10:00:00Z' }, // Keep
+      { id: 2, ref_type: 'unknown_type', date: '2025-01-01T10:00:00Z' }, // Filter out (non-actionable)
+      { id: 3, ref_type: 'market_transaction', date: '2024-10-01T10:00:00Z' } // Filter out (older than 45 days)
     ];
 
-    await saveCharacterWalletJournal('char1', entries as Parameters<typeof saveCharacterWalletJournal>[1]);
-    expect(savedDict['char1']?.length).toBe(1);
-    expect(savedDict['char1']?.[0]?.id).toBe(1);
+    await saveCharacterWalletJournal('char1', mockEntries as unknown as EsiWalletJournalEntry[]);
+    const dict = await idb.get('eve_wallet_journal');
+    
+    expect(dict?.char1.length).toBe(1);
+    expect(dict?.char1[0].id).toBe(1);
   });
 
   it('gets character wallet journal', async () => {
-    vi.mocked(idb.get).mockResolvedValue({ char1: [{ id: 1 }] });
+    await idb.set('eve_wallet_journal', { char1: [{ id: 1 }] });
     const dict = await getCharacterWalletJournal('char1');
     expect(dict).toEqual([{ id: 1 }]);
+  });
+
+  it('fails loudly with StorageError on IDB read failure', async () => {
+    failIdb = true;
+    await expect(getWalletJournalDictionary()).rejects.toThrow(StorageError);
+  });
+
+  it('fails loudly with StorageError on IDB write failure', async () => {
+    failIdb = true;
+    await expect(saveCharacterWalletJournal('char1', [])).rejects.toThrow(StorageError);
   });
 });

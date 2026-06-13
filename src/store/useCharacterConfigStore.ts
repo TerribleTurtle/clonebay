@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { logger } from '../utils/logger';
 
 export interface CharacterVisibility {
   trackSkills: boolean;
@@ -36,6 +37,31 @@ const getDefaultConfig = (): CharacterConfig => ({
   },
   overrides: {}
 });
+
+const safeLocalStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      return localStorage.getItem(name);
+    } catch (e) {
+      logger.error('Failed to get item from localStorage', e);
+      return null;
+    }
+  },
+  setItem: (name: string, value: string): void => {
+    try {
+      localStorage.setItem(name, value);
+    } catch (e) {
+      logger.error('Failed to set item in localStorage', e);
+    }
+  },
+  removeItem: (name: string): void => {
+    try {
+      localStorage.removeItem(name);
+    } catch (e) {
+      logger.error('Failed to remove item from localStorage', e);
+    }
+  },
+};
 
 export const useCharacterConfigStore = create<CharacterConfigState>()(
   persist(
@@ -92,7 +118,7 @@ export const useCharacterConfigStore = create<CharacterConfigState>()(
     }),
     {
       name: 'eve-character-config-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => safeLocalStorage),
     }
   )
 );

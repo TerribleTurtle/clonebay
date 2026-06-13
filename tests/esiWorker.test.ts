@@ -4,7 +4,7 @@ import { server } from './setup';
 import characterSkillsRaw from './fixtures/character_skills.json';
 import characterPlanetRaw from './fixtures/character_planet.json';
 import { handleWorkerMessage } from '../src/workers/esiWorker';
-import type { WorkerContext } from '../src/workers/esiWorker';
+import { WorkerContext } from '../src/workers/types';
 
 const mockPostMessage = vi.fn();
 const mockClearTimeout = vi.fn();

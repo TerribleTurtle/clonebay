@@ -1,10 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useLogStore } from '../../src/store/useLogStore';
 
 describe('useLogStore', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-13T10:00:00Z'));
     useLogStore.getState().clearLogs();
   });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
 
   it('adds logs and respects MAX_LOGS', () => {
     expect(useLogStore.getState().logs.length).toBe(0);

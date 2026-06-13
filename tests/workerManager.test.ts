@@ -103,4 +103,16 @@ describe('WorkerManager', () => {
     
     expect(worker.terminate).not.toHaveBeenCalled();
   });
+
+  it('should handle worker boot crashes (initialization failure)', () => {
+    const error = new Error('Failed to create worker');
+    const failingFactory = vi.fn().mockImplementation(() => {
+      throw error;
+    });
+
+    const manager = WorkerManager.getInstance(failingFactory);
+    
+    expect(() => manager.start()).toThrow('Failed to create worker');
+    expect(logger.error).toHaveBeenCalledWith('WorkerManager: Failed to initialize worker', error);
+  });
 });

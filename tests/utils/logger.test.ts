@@ -2,14 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { logger } from '../../src/utils/logger';
 import { useLogStore } from '../../src/store/useLogStore';
 
-vi.mock('../../src/store/useLogStore', () => ({
-  useLogStore: {
-    getState: vi.fn(() => ({
-      addLog: vi.fn()
-    }))
-  }
-}));
-
 describe('logger', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
@@ -19,27 +11,26 @@ describe('logger', () => {
   beforeEach(() => {
     mockPostMessage = vi.fn();
     originalPostMessage = global.postMessage;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as unknown).postMessage = mockPostMessage;
+    (global as Record<string, unknown>)['postMessage'] = mockPostMessage;
     
     vi.spyOn(console, 'info').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    
+    useLogStore.setState({ logs: [] });
   });
 
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as unknown).postMessage = originalPostMessage;
+    (global as Record<string, unknown>)['postMessage'] = originalPostMessage;
     vi.restoreAllMocks();
   });
 
   it('should format log and add to store in main thread', () => {
-    const addLogMock = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(useLogStore.getState).mockReturnValue({ addLog: addLogMock } as unknown);
-    
     logger.info('Test message', { foo: 'bar' });
     
-    expect(addLogMock).toHaveBeenCalledWith(expect.objectContaining({
+    const logs = useLogStore.getState().logs;
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toEqual(expect.objectContaining({
       level: 'info',
       message: 'Test message',
       source: 'main',
@@ -48,16 +39,14 @@ describe('logger', () => {
   });
 
   it('should handle uncloneable object fallback', () => {
-    const addLogMock = vi.fn();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(useLogStore.getState).mockReturnValue({ addLog: addLogMock } as unknown);
-    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const obj: any = Symbol('test');
     
     logger.info('Test uncloneable', obj);
     
-    expect(addLogMock).toHaveBeenCalledWith(expect.objectContaining({
+    const logs = useLogStore.getState().logs;
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toEqual(expect.objectContaining({
       data: '[Uncloneable Object]'
     }));
   });
@@ -65,8 +54,7 @@ describe('logger', () => {
   it('should use postMessage in worker context', () => {
     // Temporarily hide document to simulate worker
     const originalDocument = global.document;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (global as unknown).document;
+    delete (global as Record<string, unknown>)['document'];
 
     logger.error('Worker error', new Error('test error'));
 
@@ -84,8 +72,7 @@ describe('logger', () => {
     });
 
     // Restore document
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as unknown).document = originalDocument;
+    (global as Record<string, unknown>)['document'] = originalDocument;
   });
 });
 

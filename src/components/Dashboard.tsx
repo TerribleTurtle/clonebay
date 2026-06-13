@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCharacterStore } from '../store/useCharacterStore';
 import { logger } from '../utils/logger';
 import { CharacterCard } from './CharacterCard';
-import { useEsiWorkerManager } from './useEsiWorkerManager';
+import { useEsiWorkerManager } from '../hooks/useEsiWorkerManager';
 import { SettingsRepository } from '../repositories/SettingsRepository';
 import { CharacterService } from '../services/CharacterService';
 import { Button } from './ui/Button';

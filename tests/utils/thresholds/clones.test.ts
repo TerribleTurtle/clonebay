@@ -1,9 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { calculateCloneStatus } from '../../../src/utils/thresholds/clones';
 import { MS_IN_HOUR, DEFAULT_CLONE_COOLDOWN_HOURS } from '../../../src/utils/thresholds/core';
 import characterClonesFixture from '../../fixtures/character_clones.json';
 
 describe('calculateCloneStatus', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-13T10:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   it('should return Green if lastJumpDate is null or undefined', () => {
     expect(calculateCloneStatus(null, Date.now())).toBe('Green');
     expect(calculateCloneStatus(undefined, Date.now())).toBe('Green');

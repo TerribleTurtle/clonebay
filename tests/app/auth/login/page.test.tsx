@@ -17,8 +17,8 @@ describe('LoginPage', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    delete (window as unknown).location;
-    window.location = { ...originalLocation, href: '' } as unknown;
+    delete (window as unknown as { location: unknown }).location;
+    window.location = { ...originalLocation, href: '' } as unknown as string & Location;
     vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', 'test-client-id');
   });
 

@@ -128,5 +128,15 @@ export const handlers = [
 
   http.post('https://login.eveonline.com/v2/oauth/token', () => {
     return HttpResponse.json(mockOauth);
+  }),
+
+  http.post('/api/resolve', async ({ request }) => {
+    const ids = await request.json() as number[];
+    const result = ids.map(id => ({ id, name: `Resolved Name ${id}`, category: 'character' }));
+    return HttpResponse.json(result);
+  }),
+
+  http.get('https://esi.evetech.net/latest/characters/:characterId/mail/', () => {
+    return HttpResponse.json([]);
   })
 ];

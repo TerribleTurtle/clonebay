@@ -10,7 +10,7 @@ vi.mock('../../../src/hooks/useDataWipe', () => ({
 describe('TrustPage', () => {
   it('calls handleWipeData on Execute Terminal Wipe', () => {
     const mockHandleWipeData = vi.fn();
-    (useDataWipe as unknown).mockReturnValue({ handleWipeData: mockHandleWipeData });
+    (useDataWipe as ReturnType<typeof vi.fn>).mockReturnValue({ handleWipeData: mockHandleWipeData });
 
     render(<TrustPage />);
     const wipeBtn = screen.getByRole('button', { name: /Execute Terminal Wipe/i });

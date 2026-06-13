@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { processSkills } from '../../src/workers/processors/skillsProcessor';
 import { EsiSkillQueueSchema, type EsiSkillQueue } from '../../src/schemas/esi';
+import type { EsiResponse } from '../../src/services/esi/esiClient';
 import mockSkillQueueRaw from '../fixtures/mockSkillQueue.json';
 
 describe('skillsProcessor', () => {
@@ -126,7 +127,7 @@ describe('skillsProcessor', () => {
       get: () => { throw new Error('Test error'); }
     });
 
-    await processSkills('char-1', badSkillsResult as unknown, mockNameCache, mockPostMessage);
+    await processSkills('char-1', badSkillsResult as unknown as EsiResponse<EsiSkillQueue[]>, mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
