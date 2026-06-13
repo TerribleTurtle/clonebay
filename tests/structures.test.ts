@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { calculateStructureStatus } from '../src/utils/thresholds/structures';
 import type { EsiCorporationStructure } from '../src/schemas/esi/corporation';
 import mockStructures from './fixtures/mockCorporationStructures.json';
@@ -7,6 +7,15 @@ const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 describe('calculateStructureStatus', () => {
   const baseStructure: EsiCorporationStructure = mockStructures[0] as EsiCorporationStructure;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   it('returns Red for vulnerable/reinforced states regardless of fuel', () => {
     const nowMs = Date.now();

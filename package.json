@@ -14,7 +14,7 @@
     "deps:check": "depcruise src",
     "prepare": "husky",
     "playground": "npx tsx scripts/playground.ts",
-    "deploy:prod": "npm run build && node scripts/fix-windows-build.mjs && npx wrangler pages deploy out --project-name clonebay"
+    "deploy:prod": "npm run build && node scripts/fix-windows-build.mjs && npx wrangler pages deploy out --project-name clonebay --branch main"
   },
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.8",
@@ -44,7 +44,7 @@
     "eslint-plugin-functional": "10.0.0",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-promise": "7.3.0",
-    "fake-indexeddb": "6.2.5",
+    "fake-indexeddb": "^6.2.5",
     "husky": "9.1.7",
     "jsdom": "29.1.1",
     "lint-staged": "17.0.7",

@@ -18,16 +18,12 @@ describe('pkce', () => {
   });
 
   it('generateCodeChallenge should compute correct base64url encoded SHA-256 hash', async () => {
+    const { createHash } = await import('crypto');
     const codeVerifier = 'a_very_secure_random_string_that_is_long_enough';
     const challenge = await generateCodeChallenge(codeVerifier);
 
-    // To verify, we check against a known result or the format.
-    // The base64url of SHA-256 for this verifier.
-    expect(challenge).toMatch(/^[A-Za-z0-9_-]+$/);
-    expect(challenge.includes('+')).toBe(false);
-    expect(challenge.includes('/')).toBe(false);
-    expect(challenge.includes('=')).toBe(false);
-    expect(challenge.length).toBeGreaterThan(40);
+    const expectedHash = createHash('sha256').update(codeVerifier).digest('base64url');
+    expect(challenge).toBe(expectedHash);
   });
 });
 

@@ -1,0 +1,25 @@
+{
+  "links": [],
+  "pins": [
+    {
+      "latitude": 1.55087844973,
+      "longitude": 0.717145933308,
+      "pin_id": 1,
+      "type_id": 1063,
+      "expiry_time": "2026-06-04T10:00:00Z"
+    },
+    {
+      "latitude": 1.53360639935,
+      "longitude": 0.709775584394,
+      "pin_id": 2,
+      "type_id": 1048,
+      "contents": [
+        {
+          "type_id": 9999,
+          "amount": 10
+        }
+      ]
+    }
+  ],
+  "routes": []
+}

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { addOrUpdateCharacter, getAuthDictionary, setAuthDictionary, removeCharacter } from '../src/auth/AuthRepository';
 import { clear } from 'idb-keyval';
 
@@ -6,6 +6,10 @@ describe('AuthRepository', () => {
   beforeEach(async () => {
     await clear();
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('returns empty dictionary when no data exists', async () => {

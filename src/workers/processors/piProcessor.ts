@@ -6,7 +6,6 @@ import { logger } from '../../utils/logger';
 
 import { IEsiService } from '../../services/esi/IEsiService';
 import { PI_SDE_DATA } from '../../utils/piSdeData';
-import { NameCacheService } from '../../services/NameCacheService';
 
 const PI_GROUP_COMMAND_CENTER = 1043;
 const PI_GROUP_SPACEPORT = 1048;
@@ -40,6 +39,7 @@ export async function processPi(
   planetsResult: EsiResponse<EsiPlanet[]> | null,
   esiService: IEsiService,
   accessToken: string,
+  nameCache: import('../../services/NameCacheService').NameCacheService,
   postMessage: (msg: unknown) => void
 ) {
   if (planetsResult && planetsResult.data) {
@@ -98,7 +98,6 @@ export async function processPi(
       
       const piContext: { alerts: string[] } = { alerts: [] };
       if (alerts && alerts.length > 0) {
-        const nameCache = new NameCacheService();
         const planetIds = Array.from(new Set(alerts.map(a => a.planetId)));
         
         const systemIds = planetIds.map(pid => planetsResult.data?.find(p => p.planet_id === pid)?.solar_system_id).filter((id): id is number => id !== undefined);
@@ -115,7 +114,7 @@ export async function processPi(
           if (a.message.includes('Extraction Program')) {
              const pin = allPins.find(p => p.planetId === a.planetId && p.isExtractor);
              if (pin && pin.extractorExpiryTime) {
-                const remaining = Math.max(0, Date.parse(pin.extractorExpiryTime) - Date.now());
+                const remaining = Math.max(0, new Date(pin.extractorExpiryTime).getTime() - Date.now());
                 timerStr = ` (${formatDuration(remaining)})`;
              }
           }
@@ -129,20 +128,19 @@ export async function processPi(
         } else {
           piContext.alerts.push(`${planetCount} Planets Active.`);
           
-          const nameCache = new NameCacheService();
           const planetIds = planetsResult.data?.map(p => p.planet_id) || [];
           const systemIds = planetsResult.data?.map(p => p.solar_system_id).filter((id): id is number => id !== undefined) || [];
           const idsToResolve = Array.from(new Set([...planetIds, ...systemIds]));
           const resolvedNames = await nameCache.resolveIdsToNames(idsToResolve);
           
           const activeExtractors = allPins.filter(p => p.isExtractor && p.extractorExpiryTime);
-          activeExtractors.sort((a, b) => Date.parse(a.extractorExpiryTime!) - Date.parse(b.extractorExpiryTime!));
+          activeExtractors.sort((a, b) => new Date(a.extractorExpiryTime!).getTime() - new Date(b.extractorExpiryTime!).getTime());
           
           for (const ext of activeExtractors) {
              const planetInfo = planetsResult.data?.find(p => p.planet_id === ext.planetId);
              const systemName = planetInfo && resolvedNames[planetInfo.solar_system_id] ? resolvedNames[planetInfo.solar_system_id] : 'Unknown';
              const planetName = resolvedNames[ext.planetId] || `Planet ${ext.planetId}`;
-             const remaining = Math.max(0, Date.parse(ext.extractorExpiryTime!) - Date.now());
+             const remaining = Math.max(0, new Date(ext.extractorExpiryTime!).getTime() - Date.now());
              piContext.alerts.push(`${systemName} - ${planetName}: ${formatDuration(remaining)}`);
           }
         }

@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
+import 'fake-indexeddb/auto';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import CallbackPage from '../src/app/auth/callback/page';
 import { exchangeCodeForToken } from '../src/services/esi/ssoClient';
+import { clearAuthDictionary, getAuthDictionary } from '../src/auth/AuthRepository';
 
 const mockPush = vi.fn();
 let mockSearchParams = new URLSearchParams();
@@ -13,14 +15,6 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => mockSearchParams
 }));
 
-vi.mock('../src/auth/AuthRepository', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../src/auth/AuthRepository')>();
-  return {
-    ...actual,
-    addOrUpdateCharacter: vi.fn()
-  };
-});
-
 vi.mock('../src/services/esi/ssoClient', () => ({
   exchangeCodeForToken: vi.fn()
 }));
@@ -28,9 +22,10 @@ vi.mock('../src/services/esi/ssoClient', () => ({
 describe('Auth Callback', () => {
   const originalEnv = process.env;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     sessionStorage.clear();
+    await clearAuthDictionary();
     mockSearchParams = new URLSearchParams();
     process.env = { ...originalEnv };
     process.env['NEXT_PUBLIC_EVE_CLIENT_ID'] = 'test-client-id';
@@ -76,8 +71,8 @@ describe('Auth Callback', () => {
       expect(mockPush).toHaveBeenCalledWith('/');
     });
 
-    const { addOrUpdateCharacter } = await import('../src/auth/AuthRepository');
-    expect(addOrUpdateCharacter).toHaveBeenCalledWith('123456789', {
+    const authDict = await getAuthDictionary();
+    expect(authDict['123456789']).toEqual({
       accessToken: 'fake-access',
       refreshToken: 'fake-refresh',
       characterName: 'Test Character'

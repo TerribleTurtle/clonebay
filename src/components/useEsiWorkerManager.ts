@@ -35,10 +35,12 @@ export const useEsiWorkerManager = () => {
       unsubscribe = manager.subscribe((event) => {
         const { type, payload, timestamp } = event.data;
         if (type === 'ESI_DATA_UPDATE') {
-          const updatePayload: Partial<CharacterStatus> = { [payload.dataType]: payload.status };
+          const stateKey = payload.dataType === 'war' ? 'warStatus' : payload.dataType;
+          const updatePayload: Partial<CharacterStatus> = { [stateKey]: payload.status };
           if (payload.dataType === 'skills' && payload.skillsContext) updatePayload.skillsContext = payload.skillsContext;
           if (payload.dataType === 'pi' && payload.piContext) updatePayload.piContext = payload.piContext;
           if (payload.dataType === 'industry' && payload.indyContext) updatePayload.indyContext = payload.indyContext;
+          if (payload.dataType === 'war' && payload.data?.warContext) updatePayload.warContext = payload.data.warContext;
           if (payload.maxClones !== undefined) updatePayload.maxClones = payload.maxClones;
           queueUpdate(payload.characterId, updatePayload);
         } else if (type === 'ESI_METRICS_UPDATE') {

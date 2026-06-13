@@ -11,6 +11,7 @@ import { processNotifications } from "./processors/notificationProcessor";
 import { LiveEsiService } from "../services/esi/LiveEsiService";
 import { MockEsiService } from "../services/esi/MockEsiService";
 import type { IEsiService } from "../services/esi/IEsiService";
+import { NameCacheService } from "../services/NameCacheService";
 import { saveCharacterNotifications } from "../repositories/NotificationRepository";
 import { saveCharacterWalletJournal } from "../repositories/WalletJournalRepository";
 import type { EsiResponse } from "../services/esi/esiClient";
@@ -30,48 +31,69 @@ let isPolling = false;
 let pollingTimeout: number | null = null;
 let activeMockMode = false;
 
-self.onmessage = async (event: MessageEvent) => {
+export interface WorkerContext {
+  postMessage: (msg: unknown) => void;
+  setTimeout: (cb: TimerHandler, ms: number) => number;
+  clearTimeout: (id: number) => void;
+}
+
+const defaultWorkerContext: WorkerContext = {
+  postMessage: (msg: unknown) => self.postMessage(msg),
+  setTimeout: (cb: TimerHandler, ms: number) => self.setTimeout(cb, ms),
+  clearTimeout: (id: number) => self.clearTimeout(id),
+};
+
+export async function handleWorkerMessage(event: MessageEvent, workerContext = defaultWorkerContext) {
   const { type, isMockMode } = event.data;
 
   if (type === "PING") {
-    self.postMessage({ type: "PONG" });
+    workerContext.postMessage({ type: "PONG" });
   } else if (type === "START_POLLING") {
     if (!isPolling) {
       logger.info("ESI Worker: Polling started");
       activeMockMode = isMockMode || false;
       isPolling = true;
-      pollLoop();
+      pollLoop(workerContext);
     }
   } else if (type === "STOP_POLLING") {
     if (isPolling) {
       logger.info("ESI Worker: Polling stopped");
       if (pollingTimeout !== null) {
-        self.clearTimeout(pollingTimeout);
+        workerContext.clearTimeout(pollingTimeout);
         pollingTimeout = null;
       }
       isPolling = false;
     }
   }
-};
+}
 
-async function pollLoop() {
+if (typeof self !== 'undefined') {
+  self.onmessage = (event: MessageEvent) => {
+    handleWorkerMessage(event).catch((err) => {
+      logger.error("ESI Worker: Error handling message", err);
+    });
+  };
+}
+
+async function pollLoop(workerContext: WorkerContext) {
   if (!isPolling) return;
   const esiService: IEsiService = activeMockMode
     ? new MockEsiService()
     : new LiveEsiService();
 
-  await pollData(esiService);
+  await pollData(esiService, workerContext);
 
   if (isPolling) {
-    pollingTimeout = self.setTimeout(
-      pollLoop,
+    pollingTimeout = workerContext.setTimeout(
+      () => pollLoop(workerContext),
       POLLING_INTERVAL_SECONDS * MS_PER_SECOND,
     );
   }
 }
 
-async function pollData(esiService: IEsiService): Promise<void> {
+async function pollData(esiService: IEsiService, workerContext: WorkerContext): Promise<void> {
   const isMockMode = activeMockMode;
+  const nameCache = new NameCacheService();
   const structuresCache = new Map<
     number,
     Promise<EsiResponse<EsiCorporationStructure[]> | null>
@@ -171,7 +193,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
               contractsResult,
               marketOrdersResult,
               isMockMode,
-              postMessage: (msg) => self.postMessage(msg),
+              postMessage: (msg) => workerContext.postMessage(msg),
               esiService,
               accessToken,
             });
@@ -182,7 +204,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
             `ESI Worker: Error processing metrics for ${charId}`,
             err,
           );
-          self.postMessage({
+          workerContext.postMessage({
             type: "ESI_METRICS_UPDATE",
             payload: {
               characterId: charId,
@@ -199,7 +221,8 @@ async function pollData(esiService: IEsiService): Promise<void> {
           await processSkills(
             charId,
             skillsResult,
-            (msg) => self.postMessage(msg)
+            nameCache,
+            (msg) => workerContext.postMessage(msg)
           );
         })
         .catch((err) => {
@@ -207,7 +230,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
             `ESI Worker: Error processing skills for ${charId}`,
             err,
           );
-          self.postMessage({
+          workerContext.postMessage({
             type: "ESI_DATA_UPDATE",
             payload: {
               characterId: charId,
@@ -227,7 +250,8 @@ async function pollData(esiService: IEsiService): Promise<void> {
             charId,
             industryResult,
             charSkillsResult,
-            (msg) => self.postMessage(msg)
+            nameCache,
+            (msg) => workerContext.postMessage(msg)
           );
         })
         .catch((err) => {
@@ -235,7 +259,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
             `ESI Worker: Error processing industry for ${charId}`,
             err,
           );
-          self.postMessage({
+          workerContext.postMessage({
             type: "ESI_DATA_UPDATE",
             payload: {
               characterId: charId,
@@ -253,12 +277,13 @@ async function pollData(esiService: IEsiService): Promise<void> {
             planetsResult,
             esiService,
             accessToken,
-            (msg) => self.postMessage(msg),
+            nameCache,
+            (msg) => workerContext.postMessage(msg),
           );
         })
         .catch((err) => {
           logger.error(`ESI Worker: Error processing PI for ${charId}`, err);
-          self.postMessage({
+          workerContext.postMessage({
             type: "ESI_DATA_UPDATE",
             payload: {
               characterId: charId,
@@ -281,7 +306,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
               charId,
               notificationsResponse.data,
               esiService,
-              (msg) => self.postMessage(msg)
+              (msg) => workerContext.postMessage(msg)
             );
           }
         })
@@ -313,7 +338,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
         esiService,
         accessToken,
         structuresCache,
-        (msg) => self.postMessage(msg),
+        (msg) => workerContext.postMessage(msg),
       );
 
       await Promise.all([
@@ -327,7 +352,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
       ]);
     } catch (err) {
       logger.error(`ESI Worker: Error in character loop for ${charId}:`, err);
-      self.postMessage({
+      workerContext.postMessage({
         type: "ESI_METRICS_UPDATE",
         payload: {
           characterId: charId,
@@ -337,7 +362,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
           cloneStatus: "Red",
         },
       });
-      self.postMessage({
+      workerContext.postMessage({
         type: "ESI_DATA_UPDATE",
         payload: {
           characterId: charId,
@@ -346,7 +371,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
           data: null,
         },
       });
-      self.postMessage({
+      workerContext.postMessage({
         type: "ESI_DATA_UPDATE",
         payload: {
           characterId: charId,
@@ -355,7 +380,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
           data: null,
         },
       });
-      self.postMessage({
+      workerContext.postMessage({
         type: "ESI_DATA_UPDATE",
         payload: {
           characterId: charId,
@@ -364,7 +389,7 @@ async function pollData(esiService: IEsiService): Promise<void> {
           data: null,
         },
       });
-      self.postMessage({
+      workerContext.postMessage({
         type: "ESI_DATA_UPDATE",
         payload: {
           characterId: charId,
@@ -377,5 +402,5 @@ async function pollData(esiService: IEsiService): Promise<void> {
   });
 
   await Promise.allSettled(characterPromises);
-  self.postMessage({ type: 'POLL_COMPLETE', timestamp: Date.now() });
+  workerContext.postMessage({ type: 'POLL_COMPLETE', timestamp: Date.now() });
 }

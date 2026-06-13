@@ -1,19 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { processPi } from '../../src/workers/processors/piProcessor';
 import { EsiPlanetSchema, EsiPlanetLayoutSchema, type EsiPlanetLayout } from '../../src/schemas/esi';
 import mockPlanetsRaw from '../fixtures/mockPlanets.json';
+import piLayoutRaw from '../fixtures/pi_layout.json';
 import { PI_SDE_DATA } from '../../src/utils/piSdeData';
-
-vi.mock('idb-keyval', () => ({
-  get: vi.fn().mockResolvedValue({}),
-  set: vi.fn().mockResolvedValue(undefined)
-}));
 
 describe('piProcessor', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockPostMessage: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockEsiService: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockNameCache: any;
 
   beforeEach(() => {
     mockPostMessage = vi.fn();
@@ -22,9 +20,15 @@ describe('piProcessor', () => {
     mockEsiService = {
       getPlanetLayout: vi.fn()
     };
+    mockNameCache = { resolveIdsToNames: vi.fn().mockResolvedValue({}) };
     
     // Inject mock volume data to simulate items filling storage
     PI_SDE_DATA[9999] = { group_id: 0, volume: 100 };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllTimers();
   });
 
   it('should post Green status when extractors are active > 12 hours and storage is nominal', async () => {
@@ -34,27 +38,26 @@ describe('piProcessor', () => {
     const mockPlanet = EsiPlanetSchema.parse(mockPlanetsRaw[0]);
     const mockPlanets = [mockPlanet];
 
-    const mockLayout: EsiPlanetLayout = {
+    const baseLayout = EsiPlanetLayoutSchema.parse(piLayoutRaw);
+    const validLayout: EsiPlanetLayout = {
+      ...baseLayout,
       pins: [
         {
-          pin_id: 1,
-          type_id: 1063, // Extractor
+          ...baseLayout.pins![0],
           expiry_time: new Date(now + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
         },
         {
-          pin_id: 2,
-          type_id: 1048, // Spaceport (10,000 capacity)
+          ...baseLayout.pins![1],
           contents: [
             { type_id: 9999, amount: 10 } // 10 * 100 = 1000 used (10%)
           ]
         }
-      ]
+      ] as EsiPlanetLayout['pins']
     };
-    const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
 
     mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -68,19 +71,20 @@ describe('piProcessor', () => {
 
     const mockPlanets = [EsiPlanetSchema.parse(mockPlanetsRaw[0])];
 
-    const mockLayout: EsiPlanetLayout = {
+    const baseLayout = EsiPlanetLayoutSchema.parse(piLayoutRaw);
+    const validLayout: EsiPlanetLayout = {
+      ...baseLayout,
       pins: [
         {
-          pin_id: 1,
-          type_id: 1063, // Extractor
+          ...baseLayout.pins![0],
           expiry_time: new Date(now + 10 * 60 * 60 * 1000).toISOString(), // 10 hours
-        }
-      ]
+        },
+        baseLayout.pins![1]
+      ] as EsiPlanetLayout['pins']
     };
-    const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
     mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -94,19 +98,20 @@ describe('piProcessor', () => {
 
     const mockPlanets = [EsiPlanetSchema.parse(mockPlanetsRaw[0])];
 
-    const mockLayout: EsiPlanetLayout = {
+    const baseLayout = EsiPlanetLayoutSchema.parse(piLayoutRaw);
+    const validLayout: EsiPlanetLayout = {
+      ...baseLayout,
       pins: [
         {
-          pin_id: 1,
-          type_id: 1063, // Extractor
+          ...baseLayout.pins![0],
           expiry_time: new Date(now).toISOString(), // Exact Zero Boundary
-        }
-      ]
+        },
+        baseLayout.pins![1]
+      ] as EsiPlanetLayout['pins']
     };
-    const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
     mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -120,21 +125,22 @@ describe('piProcessor', () => {
 
     const mockPlanets = [EsiPlanetSchema.parse(mockPlanetsRaw[0])];
 
-    const mockLayout: EsiPlanetLayout = {
+    const baseLayout = EsiPlanetLayoutSchema.parse(piLayoutRaw);
+    const validLayout: EsiPlanetLayout = {
+      ...baseLayout,
       pins: [
+        baseLayout.pins![0],
         {
-          pin_id: 2,
-          type_id: 1048, // Spaceport (10,000 capacity)
+          ...baseLayout.pins![1],
           contents: [
             { type_id: 9999, amount: 100 } // 100 * 100 = 10000 used (100%)
           ]
         }
-      ]
+      ] as EsiPlanetLayout['pins']
     };
-    const validLayout = EsiPlanetLayoutSchema.parse(mockLayout);
     mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
-    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -143,7 +149,7 @@ describe('piProcessor', () => {
   });
 
   it('should post Offline status when ESI is offline', async () => {
-    await processPi('char-1', { status: 'Offline', cached: false, data: null }, mockEsiService, 'token', mockPostMessage);
+    await processPi('char-1', { status: 'Offline', cached: false, data: null }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

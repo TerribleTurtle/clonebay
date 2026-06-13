@@ -2,7 +2,6 @@ import { calculateIndustryStatus } from '../../utils/thresholds';
 import type { EsiIndustryJob, EsiCharacterSkillsResponse } from '../../schemas/esi';
 import type { EsiResponse } from '../../services/esi/esiClient';
 import { logger } from '../../utils/logger';
-import { NameCacheService } from '../../services/NameCacheService';
 
 const SKILL_ID_MASS_PRODUCTION = 3388;
 const SKILL_ID_ADVANCED_MASS_PRODUCTION = 24630;
@@ -11,6 +10,7 @@ export async function processIndustry(
   charId: string, 
   industryResult: EsiResponse<EsiIndustryJob[]> | null, 
   charSkillsResult: EsiResponse<EsiCharacterSkillsResponse> | null,
+  nameCache: import('../../services/NameCacheService').NameCacheService,
   postMessage: (msg: unknown) => void
 ) {
   try {
@@ -28,7 +28,6 @@ export async function processIndustry(
       
       const indyContext: { alerts: string[] } = { alerts: [] };
       if (alerts && alerts.length > 0) {
-        const nameCache = new NameCacheService();
         // Extract IDs for resolution
         const typeIds = alerts.map(a => a.blueprintId).filter(id => id > 0);
         const locationIds = alerts.flatMap(a => [a.facilityId, a.stationId]).filter((id): id is number => id !== undefined && id > 0);

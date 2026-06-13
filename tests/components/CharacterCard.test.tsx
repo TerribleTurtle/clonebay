@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CharacterCard } from '../../src/components/CharacterCard';
 
 import { CharacterService } from '../../src/services/CharacterService';
@@ -17,58 +17,42 @@ vi.mock('../../src/services/CharacterService', () => ({
   }
 }));
 
-vi.mock('../../src/store/useCharacterStore', () => {
-  const storeState = {
-    characters: {},
-  };
-
-  const useCharacterStore = vi.fn((selector) => {
-    return selector(storeState);
-  });
-  
-  return { useCharacterStore };
-});
+import { useCharacterStore } from '../../src/store/useCharacterStore';
 
 describe('CharacterCard', () => {
   let mockRemoveAndReload: ReturnType<typeof vi.fn>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let useCharacterStoreMock: any;
 
   beforeEach(async () => {
     vi.resetAllMocks();
     mockRemoveAndReload = CharacterService.removeAndReload as unknown as ReturnType<typeof vi.fn>;
     
-    useCharacterStoreMock = await import('../../src/store/useCharacterStore');
-    
-    const storeState = {
-      characters: {
-        'char-1': {
-          name: 'Test Pilot',
-          locationName: 'Jita IV - Moon 4',
-          isk: 1000000,
-          totalSp: 5000000,
-          unallocatedSp: 100000,
-          clones: { jump_clones: [1, 2] },
-          fatigue: { jump_fatigue_expire_date: new Date('2026-06-05T00:00:00Z').toISOString() },
-          transactions: { count: 5 },
-          mail: { total_unread_count: 2 },
-          contracts: { count: 3 },
-          marketOrders: { count: 10 },
-          ship: { ship_name: 'Test Ship', ship_type_id: 123 },
-          skills: 'Green',
-          industry: 'Yellow',
-          pi: 'Red',
-          walletStatus: 'Green',
-          locationStatus: 'Green',
-          mailStatus: 'Yellow',
-          cloneStatus: 'Green'
-        }
-      },
-    };
-
-    useCharacterStoreMock.useCharacterStore.mockImplementation((selector: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
-      return selector(storeState);
+    localStorage.clear();
+    useCharacterStore.setState({ characters: {}, lastPolled: null });
+    useCharacterStore.getState().updateCharacterStatus('char-1', {
+      name: 'Test Pilot',
+      locationName: 'Jita IV - Moon 4',
+      isk: 1000000,
+      totalSp: 5000000,
+      unallocatedSp: 100000,
+      clones: { jump_clones: [{ jump_clone_id: 1, location_id: 123, location_type: 'station', implants: [1, 2] }] },
+      fatigue: { jump_fatigue_expire_date: new Date('2026-06-05T00:00:00Z').toISOString() },
+      transactions: { count: 5 },
+      mail: { total_unread_count: 2 },
+      contracts: { count: 3 },
+      marketOrders: { count: 10 },
+      ship: { ship_item_id: 1, ship_name: 'Test Ship', ship_type_id: 123 },
+      skills: 'Green',
+      industry: 'Yellow',
+      pi: 'Red',
+      walletStatus: 'Green',
+      locationStatus: 'Green',
+      mailStatus: 'Yellow',
+      cloneStatus: 'Green'
     });
+  });
+
+  afterEach(() => {
+    useCharacterStore.setState({ characters: {}, lastPolled: null });
   });
 
   it('renders character details correctly', () => {
@@ -96,5 +80,3 @@ describe('CharacterCard', () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
-
-

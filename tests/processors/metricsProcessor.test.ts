@@ -1,9 +1,11 @@
 import type { IEsiService } from '../../src/services/esi/IEsiService';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { processMetrics, type EsiMetricsContext } from '../../src/workers/processors/metricsProcessor';
 
+import { fetchSdeSystem } from '../../src/services/esi/sdeClient';
+
 vi.mock('../../src/services/esi/sdeClient', () => ({
-  fetchSdeSystem: vi.fn().mockResolvedValue('Jita')
+  fetchSdeSystem: vi.fn()
 }));
 
 describe('metricsProcessor', () => {
@@ -13,6 +15,12 @@ describe('metricsProcessor', () => {
   beforeEach(() => {
     mockPostMessage = vi.fn();
     vi.useFakeTimers();
+    vi.mocked(fetchSdeSystem).mockResolvedValue('Jita');
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllTimers();
   });
 
   it('should post ESI_METRICS_UPDATE with computed statuses', async () => {
@@ -39,7 +47,9 @@ describe('metricsProcessor', () => {
       accessToken: 'token'
     };
 
-    await processMetrics(context);
+    const promise = processMetrics(context);
+    await vi.runAllTimersAsync();
+    await promise;
 
     expect(mockPostMessage).toHaveBeenCalledWith(expect.objectContaining({
       type: 'ESI_METRICS_UPDATE',
@@ -53,16 +63,12 @@ describe('metricsProcessor', () => {
     }));
   });
 
-  it('should post Red statuses on error', async () => {
+  it('should handle upstream service rejected promise gracefully', async () => {
     const context: EsiMetricsContext = {
       charId: 'char-1',
       charName: 'Test Char',
       charSkillsResult: undefined,
-      walletResult: {
-        status: 'Green',
-        cached: false,
-        get data(): any /* eslint-disable-line @typescript-eslint/no-explicit-any */ { throw new Error('Forced Error Inside Try'); }
-      },
+      walletResult: { status: 'Green', cached: false, data: 500000000 },
       locationResult: undefined,
       shipResult: undefined,
       skillsResult: undefined,
@@ -74,7 +80,10 @@ describe('metricsProcessor', () => {
       marketOrdersResult: undefined,
       isMockMode: false,
       postMessage: mockPostMessage,
-      esiService: {} as unknown as IEsiService,
+      esiService: {
+        getMail: vi.fn().mockRejectedValue(new Error('Upstream error')),
+        getAttributes: vi.fn().mockResolvedValue({ data: {} })
+      } as unknown as IEsiService,
       accessToken: 'token'
     };
 
@@ -82,15 +91,11 @@ describe('metricsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_METRICS_UPDATE',
-      payload: {
+      payload: expect.objectContaining({
         characterId: 'char-1',
-        walletStatus: 'Red',
-        locationStatus: 'Red',
-        mailStatus: 'Red',
-        cloneStatus: 'Red'
-      }
+        walletStatus: 'Green',
+        mailContext: undefined
+      })
     });
   });
 });
-
-

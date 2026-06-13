@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WorkerManager } from '../src/workers/WorkerManager';
 import { logger } from '../src/utils/logger';
 
@@ -11,47 +11,39 @@ vi.mock('../src/utils/logger', () => ({
   }
 }));
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
- 
 class MockWorker {
   onmessage: ((ev: MessageEvent) => unknown) | null = null;
   onerror: ((ev: ErrorEvent) => unknown) | null = null;
   
   static latestInstance: MockWorker | null = null;
 
-  constructor(_stringUrl: string | URL) {
+  constructor() {
     MockWorker.latestInstance = this;
   }
   
-  postMessage(_msg: unknown) {}
-  
-  terminate() {}
+  postMessage = vi.fn();
+  terminate = vi.fn();
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */
- 
-
-beforeAll(() => {
-  vi.stubGlobal('Worker', MockWorker);
-});
 
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
+  vi.spyOn(Math, 'random').mockReturnValue(0.5);
+  MockWorker.latestInstance = null;
 });
 
 afterEach(() => {
   const manager = WorkerManager.getInstance();
   manager.stop();
+  // @ts-expect-error Reset singleton for isolated tests
+  WorkerManager.instance = undefined;
   vi.useRealTimers();
-});
-
-afterAll(() => {
-  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 describe('WorkerManager', () => {
   it('should restart worker with exponential backoff on crash', () => {
-    const manager = WorkerManager.getInstance();
+    const manager = WorkerManager.getInstance(() => new MockWorker() as unknown as Worker);
     manager.start();
     
     const worker = MockWorker.latestInstance!;
@@ -77,11 +69,10 @@ describe('WorkerManager', () => {
   });
 
   it('should terminate worker and restart on missed PONG', () => {
-    const manager = WorkerManager.getInstance();
+    const manager = WorkerManager.getInstance(() => new MockWorker() as unknown as Worker);
     manager.start();
     
     const worker = MockWorker.latestInstance!;
-    const terminateSpy = vi.spyOn(worker, 'terminate');
     
     // Advance time to trigger PING
     vi.advanceTimersByTime(30000);
@@ -92,15 +83,14 @@ describe('WorkerManager', () => {
     }).toThrow('WorkerManager: Missed PONG, terminating worker');
     
     expect(logger.error).toHaveBeenCalledWith('WorkerManager: Missed PONG, terminating worker');
-    expect(terminateSpy).toHaveBeenCalled();
+    expect(worker.terminate).toHaveBeenCalled();
   });
 
   it('should not terminate if PONG is received', () => {
-    const manager = WorkerManager.getInstance();
+    const manager = WorkerManager.getInstance(() => new MockWorker() as unknown as Worker);
     manager.start();
     
     const worker = MockWorker.latestInstance!;
-    const terminateSpy = vi.spyOn(worker, 'terminate');
     
     // Advance time to trigger PING
     vi.advanceTimersByTime(30000);
@@ -111,7 +101,6 @@ describe('WorkerManager', () => {
     // Advance time past timeout
     vi.advanceTimersByTime(5000);
     
-    expect(terminateSpy).not.toHaveBeenCalled();
+    expect(worker.terminate).not.toHaveBeenCalled();
   });
 });
-

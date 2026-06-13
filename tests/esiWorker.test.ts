@@ -3,20 +3,13 @@ import { http, HttpResponse } from 'msw';
 import { server } from './setup';
 import characterSkillsRaw from './fixtures/character_skills.json';
 import characterPlanetRaw from './fixtures/character_planet.json';
+import { handleWorkerMessage } from '../src/workers/esiWorker';
+import type { WorkerContext } from '../src/workers/esiWorker';
 
 const mockPostMessage = vi.fn();
 const mockClearTimeout = vi.fn();
 const MOCK_TIMEOUT_ID = 123;
 const mockSetTimeout = vi.fn().mockReturnValue(MOCK_TIMEOUT_ID);
-
-const mockOnMessage: unknown = null;
-
-vi.stubGlobal('self', {
-  onmessage: mockOnMessage,
-  postMessage: mockPostMessage,
-  setTimeout: mockSetTimeout,
-  clearTimeout: mockClearTimeout,
-});
 
 let mockStore: Record<string, unknown> = {};
 
@@ -28,16 +21,22 @@ vi.mock('idb-keyval', () => {
   };
 });
 
-// We rely on MSW to intercept network requests naturally.
-
 describe('esiWorker', () => {
+  let mockWorkerContext: WorkerContext;
+
   beforeEach(async () => {
     vi.clearAllMocks();
     mockSetTimeout.mockReturnValue(MOCK_TIMEOUT_ID);
     mockStore = {};
     
-    // reset module cache to re-evaluate esiWorker and attach onmessage fresh
-    vi.resetModules();
+    mockWorkerContext = {
+      postMessage: mockPostMessage,
+      setTimeout: mockSetTimeout,
+      clearTimeout: mockClearTimeout,
+    };
+    
+    // Reset state between tests if needed (e.g., stopping polling)
+    await handleWorkerMessage(new MessageEvent('message', { data: { type: 'STOP_POLLING' } }), mockWorkerContext);
   });
 
   it('dispatches postMessage with status Green when fetchEsi succeeds via MSW', async () => {
@@ -58,15 +57,8 @@ describe('esiWorker', () => {
       })
     );
 
-    await import('../src/workers/esiWorker');
+    await handleWorkerMessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }), mockWorkerContext);
 
-    const selfObj = global.self;
-    if (selfObj && typeof selfObj.onmessage === 'function') {
-      const event = new MessageEvent('message', { data: { type: 'START_POLLING' } });
-      await selfObj.onmessage(event);
-    }
-
-    // Since mockSkillQueue has completed skills (or active ones), the exact output depends on math.
     await vi.waitFor(() => {
       expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -81,16 +73,11 @@ describe('esiWorker', () => {
   });
 
   it('clears polling timeout when STOP_POLLING is received', async () => {
-    await import('../src/workers/esiWorker');
-    const selfObj = global.self;
-    if (selfObj && typeof selfObj.onmessage === 'function') {
-      // First start polling to set the interval
-      await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
-      await vi.waitFor(() => expect(mockSetTimeout).toHaveBeenCalled());
+    await handleWorkerMessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }), mockWorkerContext);
+    await vi.waitFor(() => expect(mockSetTimeout).toHaveBeenCalled());
       
-      // Now stop polling
-      await selfObj.onmessage(new MessageEvent('message', { data: { type: 'STOP_POLLING' } }));
-    }
+    await handleWorkerMessage(new MessageEvent('message', { data: { type: 'STOP_POLLING' } }), mockWorkerContext);
+    
     expect(mockClearTimeout).toHaveBeenCalledWith(MOCK_TIMEOUT_ID);
   });
 
@@ -119,11 +106,7 @@ describe('esiWorker', () => {
       })
     );
 
-    await import('../src/workers/esiWorker');
-    const selfObj = global.self;
-    if (selfObj && typeof selfObj.onmessage === 'function') {
-      await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
-    }
+    await handleWorkerMessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }), mockWorkerContext);
 
     await vi.waitFor(() => {
     expect(mockPostMessage).toHaveBeenCalledWith(
@@ -132,9 +115,6 @@ describe('esiWorker', () => {
         payload: expect.objectContaining({
           characterId: '2112345678',
           dataType: 'industry',
-          // maxJobs = 1 + 4 + 2 = 7. 
-          // mockIndustryJobs might have fewer than 7 jobs, meaning status will be Red
-          // Since mockIndustryJobs has only 1 job, with 7 max slots, it should be Red.
           status: 'Red'
         })
       })
@@ -169,11 +149,7 @@ describe('esiWorker', () => {
       })
     );
 
-    await import('../src/workers/esiWorker');
-    const selfObj = global.self;
-    if (selfObj && typeof selfObj.onmessage === 'function') {
-      await selfObj.onmessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }));
-    }
+    await handleWorkerMessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }), mockWorkerContext);
 
     await vi.waitFor(() => {
     expect(mockPostMessage).toHaveBeenCalledWith(
@@ -188,5 +164,3 @@ describe('esiWorker', () => {
     });
   });
 });
-
-

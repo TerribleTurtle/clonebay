@@ -1,10 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useCharacterStore } from '../../src/store/useCharacterStore';
 
 describe('useCharacterStore', () => {
   beforeEach(() => {
+    localStorage.clear();
     // Reset store before each test
-    useCharacterStore.setState({ characters: {} });
+    useCharacterStore.setState({ characters: {}, lastPolled: null });
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('initializes with an empty character dictionary', () => {

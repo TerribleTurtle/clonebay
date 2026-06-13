@@ -2,7 +2,6 @@ import { calculateSkillQueueStatus } from "../../utils/thresholds";
 import type { EsiSkillQueue } from "../../schemas/esi";
 import type { EsiResponse } from "../../services/esi/esiClient";
 import { logger } from "../../utils/logger";
-import { NameCacheService } from "../../services/NameCacheService";
 
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_MINUTE = 60;
@@ -31,6 +30,7 @@ function formatDuration(ms: number): string {
 export async function processSkills(
   charId: string,
   skillsResult: EsiResponse<EsiSkillQueue[]> | null,
+  nameCache: import('../../services/NameCacheService').NameCacheService,
   postMessage: (msg: unknown) => void
 ) {
   try {
@@ -45,7 +45,6 @@ export async function processSkills(
       try {
         const top3 = skillsResult.data.slice(0, MAX_DISPLAYED_SKILLS);
         if (top3.length > 0) {
-          const nameCache = new NameCacheService();
           const skillIds = top3.map((s) => s.skill_id);
           const resolvedNames = await nameCache.resolveIdsToNames(
             skillIds

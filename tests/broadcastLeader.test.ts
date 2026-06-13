@@ -45,6 +45,8 @@ describe('BroadcastLeader', () => {
     if (leader) {
       leader.terminate();
     }
+    vi.useRealTimers();
+    vi.clearAllTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
