@@ -1,5 +1,5 @@
 import type { EsiCorporationStructure } from '../../schemas/esi/corporation';
-import type { StatusLight } from '../../store/useCharacterStore';
+import type { StatusLight } from '../../store/slices/types';
 
 const HOURS_PER_DAY = 24;
 const MINS_PER_HOUR = 60;

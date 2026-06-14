@@ -1,7 +1,8 @@
-import { CharacterStatus, StatusLight } from '../store/useCharacterStore';
-import { IndicatorStatus } from '../components/ui/CharacterStatusBoard';
+import { CharacterStatus, StatusLight } from '../store/slices/types';
 
-export function mapStatus(s: StatusLight): IndicatorStatus {
+export type PresenterStatus = 'green' | 'yellow' | 'red' | 'offline';
+
+export function mapStatus(s: StatusLight): PresenterStatus {
   switch (s) {
     case 'Green': return 'green';
     case 'Yellow': return 'yellow';

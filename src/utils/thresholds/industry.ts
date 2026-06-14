@@ -1,6 +1,10 @@
 import { EsiIndustryJob } from '../../schemas/esi';
 import { DashboardStatus, YELLOW_THRESHOLD_HOURS, MS_IN_HOUR } from './core';
 
+export type IndustryAlert =
+  | { type: 'slot'; message: 'Empty Slot' }
+  | { type: 'job'; facilityId?: number; stationId?: number; blueprintId: number; message: string };
+
 /**
  * Calculates the status of a character's Industry Jobs.
  * - RED: Job is Finished (waiting for delivery) OR an available slot is Empty.
@@ -16,12 +20,12 @@ export function calculateIndustryStatus(
   jobs: EsiIndustryJob[],
   maxJobs: number,
   nowMs: number
-): { status: DashboardStatus; alerts: { facilityId?: number; stationId?: number; blueprintId: number; message: string }[] } {
-  const alerts: { facilityId?: number; stationId?: number; blueprintId: number; message: string }[] = [];
+): { status: DashboardStatus; alerts: IndustryAlert[] } {
+  const alerts: IndustryAlert[] = [];
 
   if (!jobs) {
     if (maxJobs > 0) {
-      alerts.push({ blueprintId: 0, message: 'Empty Slot' });
+      alerts.push({ type: 'slot', message: 'Empty Slot' });
     }
     return { status: maxJobs > 0 ? 'Red' : 'Green', alerts };
   }
@@ -36,7 +40,7 @@ export function calculateIndustryStatus(
     status = 'Red';
     const emptySlots = maxJobs - relevantJobs.length;
     for (let i = 0; i < emptySlots; i++) {
-        alerts.push({ blueprintId: 0, message: 'Empty Slot' });
+        alerts.push({ type: 'slot', message: 'Empty Slot' });
     }
   }
 
@@ -44,6 +48,7 @@ export function calculateIndustryStatus(
 
   for (const job of relevantJobs) {
     const alertBase = {
+      type: 'job' as const,
       facilityId: job.facility_id,
       stationId: job.station_id,
       blueprintId: job.blueprint_type_id // Use type_id to resolve name

@@ -94,7 +94,7 @@ export function CharacterStatusBoard({ statuses, alerts, visibility }: Character
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="bg-zinc-900/40 border-t border-zinc-800 p-3 flex justify-center gap-6 items-center px-6 relative mt-auto min-h-[73px]">
+      <div className="bg-zinc-900/40 border-t border-zinc-800 p-3 flex flex-wrap justify-center gap-6 items-center px-6 relative mt-auto min-h-[73px]">
         {indicators.map(({ key, label, status, contextAlerts }) => (
           <Tooltip key={key}>
             <TooltipTrigger asChild>

@@ -23,12 +23,12 @@ describe('useEsiWorkerManager', () => {
 
     const { unmount } = renderHook(() => useEsiWorkerManager());
     
-    expect(WorkerManager.getInstance).toHaveBeenCalled();
-    expect(mockSubscribe).toHaveBeenCalled();
-    expect(mockStart).toHaveBeenCalled();
+    expect(WorkerManager.getInstance).toHaveBeenCalledWith(expect.any(Function));
+    expect(mockSubscribe).toHaveBeenCalledWith(expect.any(Function));
+    expect(mockStart).toHaveBeenCalledWith(false);
 
     unmount();
-    expect(mockStop).toHaveBeenCalled();
+    expect(mockStop).toHaveBeenCalledTimes(1);
   });
 });
 

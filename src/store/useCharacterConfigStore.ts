@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { logger } from '../utils/logger';
+import { safeLocalStorage } from '../utils/storageAdapter';
 
 export interface CharacterVisibility {
   trackSkills: boolean;
@@ -21,10 +21,10 @@ export interface CharacterConfig {
 }
 
 interface CharacterConfigState {
-  configs: Record<number, CharacterConfig>;
-  setOverride: (charId: number, key: keyof CharacterOverrides, value: number) => void;
-  clearOverride: (charId: number, key: keyof CharacterOverrides) => void;
-  setVisibility: (charId: number, key: keyof CharacterVisibility, value: boolean) => void;
+  configs: Record<string, CharacterConfig>;
+  setOverride: (charId: string, key: keyof CharacterOverrides, value: number) => void;
+  clearOverride: (charId: string, key: keyof CharacterOverrides) => void;
+  setVisibility: (charId: string, key: keyof CharacterVisibility, value: boolean) => void;
 }
 
 const getDefaultConfig = (): CharacterConfig => ({
@@ -38,30 +38,7 @@ const getDefaultConfig = (): CharacterConfig => ({
   overrides: {}
 });
 
-const safeLocalStorage = {
-  getItem: (name: string): string | null => {
-    try {
-      return localStorage.getItem(name);
-    } catch (e) {
-      logger.error('Failed to get item from localStorage', e);
-      return null;
-    }
-  },
-  setItem: (name: string, value: string): void => {
-    try {
-      localStorage.setItem(name, value);
-    } catch (e) {
-      logger.error('Failed to set item in localStorage', e);
-    }
-  },
-  removeItem: (name: string): void => {
-    try {
-      localStorage.removeItem(name);
-    } catch (e) {
-      logger.error('Failed to remove item from localStorage', e);
-    }
-  },
-};
+
 
 export const useCharacterConfigStore = create<CharacterConfigState>()(
   persist(

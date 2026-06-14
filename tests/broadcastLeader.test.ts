@@ -21,6 +21,17 @@ describe('BroadcastLeader', () => {
     mockClose = vi.fn();
     mockOnMessage = null;
 
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    vi.stubGlobal('crypto', {
+      getRandomValues: (arr: Uint8Array | Uint16Array | Uint32Array) => {
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = 50;
+        }
+        return arr;
+      },
+      randomUUID: () => '12345678-1234-1234-1234-123456789012'
+    });
+
     vi.stubGlobal('BroadcastChannel', class {
       name: string;
       constructor(name: string) {

@@ -2,8 +2,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { http, HttpResponse } from 'msw';
-import { fetchEsi, checkDailyDowntime, resetGlobalPauseForTests, getAdjustedNow } from '../src/services/esi/esiClient';
-import { getAuthDictionary } from '../src/auth/AuthRepository';
+import { fetchEsi, checkDailyDowntime, resetGlobalPauseForTests, getAdjustedNow, resetQueueForTests } from '../src/services/esi/esiClient';
+import { addOrUpdateCharacter } from '../src/auth/AuthRepository';
+import { setCachedEsiData } from '../src/services/esi/esiCache';
+import { clear as idbClear } from 'idb-keyval';
 import { server } from './setup';
 
 const MOCK_YEAR = 2023;
@@ -11,36 +13,21 @@ const DOWNTIME_HOUR = 11;
 const DOWNTIME_MINUTE = 5;
 const NON_DOWNTIME_HOUR = 12;
 
-vi.mock('../src/services/esi/esiCache', () => ({
-  getCachedEsiData: vi.fn().mockResolvedValue(null),
-  setCachedEsiData: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock('../src/auth/AuthRepository', () => ({
-  getAuthDictionary: vi.fn().mockResolvedValue({}),
-  addOrUpdateCharacter: vi.fn().mockResolvedValue(undefined),
-}));
-
 describe('ESI Client', () => {
   beforeEach(async () => {
-    vi.useFakeTimers();
     resetGlobalPauseForTests();
+    resetQueueForTests();
     vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', 'test-client-id');
-    
-    // Restore default mock behaviors since mockReset clears them
-    const esiCache = await import('../src/services/esi/esiCache');
-    vi.mocked(esiCache.getCachedEsiData).mockResolvedValue(null);
-    vi.mocked(esiCache.setCachedEsiData).mockResolvedValue(undefined);
-    
-    const authRepo = await import('../src/auth/AuthRepository');
-    vi.mocked(authRepo.getAuthDictionary).mockResolvedValue({});
-    vi.mocked(authRepo.addOrUpdateCharacter).mockResolvedValue(undefined);
+    await idbClear();
+    vi.useFakeTimers({ toFake: ['Date'] });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.useRealTimers();
     vi.clearAllMocks();
     vi.unstubAllEnvs();
+    await idbClear();
+    resetQueueForTests();
   });
 
   it('should return Offline status during Daily Downtime (11:00-11:15 UTC)', async () => {
@@ -83,7 +70,7 @@ describe('ESI Client', () => {
     expect(result1.status).toBe('Green');
 
     const result2 = await fetchEsi({
-      url: 'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
+      url: 'https://esi.evetech.net/latest/characters/2112345678/industry/jobs/',
       accessToken: 'dummy-token',
       characterId: '2112345678',
       schema: z.unknown()
@@ -96,9 +83,10 @@ describe('ESI Client', () => {
     const date = new Date(Date.UTC(MOCK_YEAR, 1, 1, NON_DOWNTIME_HOUR, 0, 0));
     vi.setSystemTime(date);
 
-    vi.mocked(getAuthDictionary).mockResolvedValue({
-      // @ts-expect-error - Testing missing types
-      '2112345678': { accessToken: 'old-token', refreshToken: 'valid-refresh-token' }
+    await addOrUpdateCharacter('2112345678', {
+      accessToken: 'old-token',
+      refreshToken: 'valid-refresh-token',
+      characterName: 'Test Char'
     });
 
     let attempt = 0;
@@ -185,7 +173,7 @@ describe('ESI Client', () => {
     }));
 
     // Let the event loop process initial fetch calls
-    await vi.advanceTimersByTimeAsync(10);
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Only 5 should have hit the MSW handler because the 6th is queued by MAX_CONCURRENT_REQUESTS
     expect(handlerCalls).toBe(5);
@@ -194,7 +182,7 @@ describe('ESI Client', () => {
     unblockRequests!();
 
     // Advance timers enough for MSW and fetch to settle
-    await vi.advanceTimersByTimeAsync(100);
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     await Promise.all(requests);
 
@@ -206,12 +194,13 @@ describe('ESI Client', () => {
     const date = new Date(Date.UTC(MOCK_YEAR, 1, 1, NON_DOWNTIME_HOUR, 0, 0));
     vi.setSystemTime(date);
 
-    const mockEsiCache = await import('../src/services/esi/esiCache');
-    vi.mocked(mockEsiCache.getCachedEsiData).mockResolvedValueOnce({
-      data: [{ cached: true }],
-      eTag: '"my-etag"',
-      expires: date.getTime() - 1000 // expired so it fetches
-    });
+    await setCachedEsiData(
+      'https://esi.evetech.net/latest/characters/2112345678/skillqueue/',
+      [{ cached: true }],
+      '"my-etag"',
+      new Date(date.getTime() - 1000).toUTCString(),
+      date.getTime()
+    );
 
     server.use(
       http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', ({ request }) => {
@@ -238,9 +227,10 @@ describe('ESI Client', () => {
     const date = new Date(Date.UTC(MOCK_YEAR, 1, 1, NON_DOWNTIME_HOUR, 0, 0));
     vi.setSystemTime(date);
 
-    vi.mocked(getAuthDictionary).mockResolvedValue({
-      // @ts-expect-error - Testing missing types
-      '2112345678': { accessToken: 'old-token', refreshToken: 'valid-refresh-token' }
+    await addOrUpdateCharacter('2112345678', {
+      accessToken: 'old-token',
+      refreshToken: 'valid-refresh-token',
+      characterName: 'Test Char'
     });
 
     server.use(
@@ -264,9 +254,8 @@ describe('ESI Client', () => {
     const date = new Date(Date.UTC(MOCK_YEAR, 1, 1, NON_DOWNTIME_HOUR, 0, 0));
     vi.setSystemTime(date);
 
-    // Cache returns null, simulating empty cache
-    const mockEsiCache = await import('../src/services/esi/esiCache');
-    vi.mocked(mockEsiCache.getCachedEsiData).mockResolvedValueOnce(null);
+    // Ensure cache is empty
+    await idbClear();
 
     server.use(
       http.get('https://esi.evetech.net/latest/characters/2112345678/skillqueue/', () => {
@@ -282,5 +271,3 @@ describe('ESI Client', () => {
     })).rejects.toThrow('ESI request failed with status 304: Not Modified');
   });
 });
-
-

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CharacterService } from '../../src/services/CharacterService';
 import * as AuthRepository from '../../src/auth/AuthRepository';
-import { useCharacterStore, DEFAULT_OFFLINE_STATUS, type CharacterStatus } from '../../src/store/useCharacterStore';
+import { useBoundStore, DEFAULT_OFFLINE_STATUS, type CharacterStatus } from '../../src/store/useBoundStore';
 
 vi.mock('../../src/auth/AuthRepository', () => ({
   removeCharacter: vi.fn()
@@ -12,10 +12,12 @@ describe('CharacterService', () => {
 
   beforeEach(() => {
     // Mock window.location.reload
-    // @ts-expect-error - overriding properties
-    window.location = { ...originalLocation, reload: vi.fn() };
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: { ...originalLocation, reload: vi.fn() }
+    });
 
-    useCharacterStore.setState({
+    useBoundStore.setState({
       characters: {
         'char-1': { 
           name: 'Char 1',
@@ -26,8 +28,10 @@ describe('CharacterService', () => {
   });
 
   afterEach(() => {
-    // @ts-expect-error - overriding properties
-    window.location = originalLocation;
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: originalLocation
+    });
     vi.clearAllMocks();
   });
 
@@ -37,7 +41,7 @@ describe('CharacterService', () => {
     await CharacterService.removeAndReload('char-1');
 
     expect(AuthRepository.removeCharacter).toHaveBeenCalledWith('char-1');
-    expect(useCharacterStore.getState().characters['char-1']).toBeUndefined();
+    expect(useBoundStore.getState().characters['char-1']).toBeUndefined();
     expect(window.location.reload).toHaveBeenCalled();
   });
 });

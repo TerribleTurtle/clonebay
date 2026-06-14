@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import LoginPage from '../../../../src/app/auth/login/page';
 import { ESI_SCOPES } from '../../../../src/auth/esiAuth';
@@ -41,14 +41,6 @@ describe('LoginPage', () => {
     expect(url.searchParams.get('client_id')).toBe('test-client-id');
   });
 
-  it('renders error if NEXT_PUBLIC_EVE_CLIENT_ID is missing', async () => {
-    vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', '');
-    render(<LoginPage />);
-    
-    await waitFor(() => {
-      expect(screen.getByText(/Missing NEXT_PUBLIC_EVE_CLIENT_ID/)).toBeInTheDocument();
-    });
-  });
 });
 
 

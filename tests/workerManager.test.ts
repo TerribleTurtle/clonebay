@@ -33,10 +33,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const manager = WorkerManager.getInstance();
-  manager.stop();
-  // @ts-expect-error Reset singleton for isolated tests
-  WorkerManager.instance = undefined;
+  WorkerManager.resetForTests();
   vi.useRealTimers();
   vi.restoreAllMocks();
 });

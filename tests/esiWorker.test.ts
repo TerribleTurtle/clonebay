@@ -74,7 +74,7 @@ describe('esiWorker', () => {
 
   it('clears polling timeout when STOP_POLLING is received', async () => {
     await handleWorkerMessage(new MessageEvent('message', { data: { type: 'START_POLLING' } }), mockWorkerContext);
-    await vi.waitFor(() => expect(mockSetTimeout).toHaveBeenCalled());
+    await vi.waitFor(() => expect(mockSetTimeout).toHaveBeenCalledWith(expect.any(Function), 60000));
       
     await handleWorkerMessage(new MessageEvent('message', { data: { type: 'STOP_POLLING' } }), mockWorkerContext);
     

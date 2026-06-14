@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { useCharacterStore } from "../../src/store/useCharacterStore";
+import { useBoundStore } from "../../src/store/useBoundStore";
 
-describe('useCharacterStore', () => {
+describe('useBoundStore', () => {
   beforeEach(() => {
     localStorage.clear();
     // Reset store before each test
-    useCharacterStore.setState({ characters: {}, lastPolled: null });
+    useBoundStore.setState({ characters: {}, lastPolled: null });
   });
 
   afterEach(() => {
@@ -13,16 +13,16 @@ describe('useCharacterStore', () => {
   });
 
   it('initializes with an empty character dictionary', () => {
-    const state = useCharacterStore.getState();
+    const state = useBoundStore.getState();
     expect(state.characters).toEqual({});
   });
 
   it('adds a new character with partial status payload and defaults the rest to Offline', () => {
-    const { updateCharacterStatus } = useCharacterStore.getState();
+    const { updateCharacterStatus } = useBoundStore.getState();
     
     updateCharacterStatus('char-1', { skills: 'Green' });
     
-    const state = useCharacterStore.getState();
+    const state = useBoundStore.getState();
     expect(state.characters['char-1']).toEqual({
       skills: 'Green',
       industry: 'Offline',
@@ -37,12 +37,12 @@ describe('useCharacterStore', () => {
   });
 
   it('updates an existing character status without overwriting unprovided fields', () => {
-    useCharacterStore.getState().updateCharacterStatus('char-1', { skills: 'Green', industry: 'Green', pi: 'Red' });
+    useBoundStore.getState().updateCharacterStatus('char-1', { skills: 'Green', industry: 'Green', pi: 'Red' });
     
     // Now update just PI
-    useCharacterStore.getState().updateCharacterStatus('char-1', { pi: 'Green' });
+    useBoundStore.getState().updateCharacterStatus('char-1', { pi: 'Green' });
 
-    const state = useCharacterStore.getState();
+    const state = useBoundStore.getState();
     expect(state.characters['char-1']).toEqual({
       skills: 'Green',
       industry: 'Green',

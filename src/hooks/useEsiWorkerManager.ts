@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
-import { useCharacterStore, CharacterStatus } from '../store/useCharacterStore';
+import { useBoundStore } from '../store/useBoundStore';
+import { CharacterStatus } from '../store/slices/types';
 import { useLogStore } from '../store/useLogStore';
-import { WorkerManager } from '../workers/WorkerManager';
+import { WorkerService } from '../services/WorkerService';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { logger } from '../utils/logger';
 
 const BATCH_FLUSH_DELAY_MS = 50;
@@ -11,12 +13,12 @@ export const useEsiWorkerManager = () => {
     let unsubscribe: () => void;
     let flushTimeout: ReturnType<typeof setTimeout> | null = null;
     try {
-      const manager = WorkerManager.getInstance(() => new Worker(new URL('../workers/esiWorker.ts', import.meta.url)));
+      const manager = WorkerService.getManager();
       
       let pendingUpdates: Record<string, Partial<CharacterStatus>> = {};
       const flushUpdates = () => {
         if (Object.keys(pendingUpdates).length > 0) {
-          useCharacterStore.getState().updateMultipleCharacters(pendingUpdates);
+          useBoundStore.getState().updateMultipleCharacters(pendingUpdates);
           pendingUpdates = {};
         }
         flushTimeout = null;
@@ -48,13 +50,13 @@ export const useEsiWorkerManager = () => {
           const { characterId, ...metrics } = payload;
           queueUpdate(characterId, metrics);
         } else if (type === 'POLL_COMPLETE') {
-          useCharacterStore.getState().setLastPolled(timestamp);
+          useBoundStore.getState().setLastPolled(timestamp);
         } else if (type === 'WORKER_LOG') {
           useLogStore.getState().addLog(payload);
         }
       });
       
-      const isMock = localStorage.getItem('eve_mock_mode') === 'true';
+      const isMock = useSettingsStore.getState().isMockMode;
       manager.start(isMock);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -67,7 +69,7 @@ export const useEsiWorkerManager = () => {
         unsubscribe();
       }
       if (flushTimeout) clearTimeout(flushTimeout);
-      WorkerManager.getInstance().stop();
+      WorkerService.getManager().stop();
     };
   }, []);
 };

@@ -11,7 +11,7 @@ vi.mock('../../src/utils/logger', () => ({
 
 
 
-import { useCharacterStore } from '../../src/store/useCharacterStore';
+import { useBoundStore } from '../../src/store/useBoundStore';
 
 describe('CharacterCard', () => {
   let mockRemoveAndReload: import('vitest').Mock;
@@ -20,8 +20,8 @@ describe('CharacterCard', () => {
     mockRemoveAndReload = vi.fn();
     
     localStorage.clear();
-    useCharacterStore.setState({ characters: {}, lastPolled: null });
-    useCharacterStore.getState().updateCharacterStatus('char-1', {
+    useBoundStore.setState({ characters: {}, lastPolled: null });
+    useBoundStore.getState().updateCharacterStatus('char-1', {
       name: 'Test Pilot',
       locationName: 'Jita IV - Moon 4',
       isk: 1000000,
@@ -45,7 +45,8 @@ describe('CharacterCard', () => {
   });
 
   afterEach(() => {
-    useCharacterStore.setState({ characters: {}, lastPolled: null });
+    useBoundStore.setState({ characters: {}, lastPolled: null });
+    localStorage.clear();
   });
 
   it('renders character details correctly and applies correct styles', () => {

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Dashboard } from '../../src/components/Dashboard';
 import { SettingsRepository } from '../../src/repositories/SettingsRepository';
-import { useCharacterStore } from '../../src/store/useCharacterStore';
+import { useBoundStore } from '../../src/store/useBoundStore';
 
 // Mocks
 vi.mock('next/navigation', () => ({
@@ -27,7 +27,7 @@ describe('Dashboard', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
-    useCharacterStore.setState({ characters: {}, lastPolled: null });
+    useBoundStore.setState({ characters: {}, lastPolled: null });
 
     // Mock window.location.reload
     Object.defineProperty(window, 'location', {
@@ -37,11 +37,12 @@ describe('Dashboard', () => {
   });
 
   afterEach(() => {
-    useCharacterStore.setState({ characters: {}, lastPolled: null });
+    useBoundStore.setState({ characters: {}, lastPolled: null });
     Object.defineProperty(window, 'location', {
       configurable: true,
       value: originalLocation,
     });
+    localStorage.clear();
   });
 
   it('renders initial state without characters', () => {
@@ -50,8 +51,8 @@ describe('Dashboard', () => {
   });
 
   it('renders characters', () => {
-    useCharacterStore.getState().updateCharacterStatus('char-1', { name: 'Alice' });
-    useCharacterStore.getState().updateCharacterStatus('char-2', { name: 'Bob' });
+    useBoundStore.getState().updateCharacterStatus('char-1', { name: 'Alice' });
+    useBoundStore.getState().updateCharacterStatus('char-2', { name: 'Bob' });
 
     render(<Dashboard />);
     expect(screen.getByRole('heading', { name: 'Alice' })).toBeInTheDocument();
@@ -65,7 +66,7 @@ describe('Dashboard', () => {
     
     // Meaningful integration assertion: the store clears, local storage is updated, and reload is called
     expect(SettingsRepository.getMockMode()).toBe(true);
-    expect(useCharacterStore.getState().characters).toEqual({});
+    expect(useBoundStore.getState().characters).toEqual({});
     expect(window.location.reload).toHaveBeenCalled();
   });
 });

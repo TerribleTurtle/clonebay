@@ -7,7 +7,6 @@ export interface HttpRequest {
   headers?: Record<string, string>;
   body?: unknown;
   context: {
-    schema?: import('zod').ZodTypeAny;
     characterId?: string;
     accessToken?: string;
     retries?: number;
@@ -96,7 +95,11 @@ export class HttpClient {
       }
 
       if (currentReq.body !== undefined) {
-        fetchOptions.body = JSON.stringify(currentReq.body);
+        if (typeof currentReq.body === 'string' || currentReq.body instanceof URLSearchParams) {
+          fetchOptions.body = currentReq.body;
+        } else {
+          fetchOptions.body = JSON.stringify(currentReq.body);
+        }
       }
 
       // eslint-disable-next-line no-restricted-globals
@@ -106,7 +109,7 @@ export class HttpClient {
       if (fetchResponse.status !== HTTP_STATUS_NO_CONTENT && fetchResponse.status !== HTTP_STATUS_NOT_MODIFIED) {
         const text = await fetchResponse.text();
         if (text) {
-          data = JSON.parse(text);
+          data = JSON.parse(text) as T;
         }
       }
 

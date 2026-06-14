@@ -10,7 +10,7 @@ export interface CharacterMetricsData {
   clonesCount: number;
   maxClones: number;
   clonesContext?: { locationName: string; count: number }[] | undefined;
-  fatigueTimer: string;
+  fatigueTimer: string | ReactNode;
   fatigueContext?: { jumpFatigueExpireDate?: string } | undefined;
   activeShip: string;
   shipContext?: { shipName: string; typeName: string } | undefined;
@@ -53,7 +53,7 @@ function MetricBlock({ label, value, valueClassName = "text-zinc-100", children 
 export function CharacterMetrics({ data }: CharacterMetricsProps) {
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="grid grid-cols-5 gap-[1px] bg-eve-border font-mono text-xs text-zinc-400 w-full border-t border-eve-border">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-[1px] bg-eve-border font-mono text-xs text-zinc-400 w-full border-t border-eve-border">
         
         <MetricBlock
           label="Clones"

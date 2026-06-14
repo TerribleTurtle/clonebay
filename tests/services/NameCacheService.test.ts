@@ -26,7 +26,7 @@ describe('NameCacheService', () => {
       universe: { resolveNames: vi.fn() },
     } as unknown as IEsiService;
 
-    service = new NameCacheService(mockEsiService);
+    service = new NameCacheService(mockEsiService.universe);
     vi.mocked(idbKeyval.get).mockResolvedValue({});
   });
 

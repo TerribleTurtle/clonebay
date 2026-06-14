@@ -29,13 +29,13 @@ export async function processIndustry(
       const indyContext: { alerts: string[] } = { alerts: [] };
       if (alerts && alerts.length > 0) {
         // Extract IDs for resolution
-        const typeIds = alerts.map(a => a.blueprintId).filter(id => id > 0);
-        const locationIds = alerts.flatMap(a => [a.facilityId, a.stationId]).filter((id): id is number => id !== undefined && id > 0);
+        const typeIds = alerts.map(a => a.type === 'job' ? a.blueprintId : undefined).filter((id): id is number => id !== undefined && id > 0);
+        const locationIds = alerts.flatMap(a => a.type === 'job' ? [a.facilityId, a.stationId] : []).filter((id): id is number => id !== undefined && id > 0);
         const uniqueIds = Array.from(new Set([...typeIds, ...locationIds]));
         const resolvedNames = await nameCache.resolveIdsToNames(uniqueIds);
         
         indyContext.alerts = alerts.map(a => {
-          if (a.blueprintId === 0) return a.message; // Empty Slot usually has no blueprint
+          if (a.type === 'slot') return a.message; 
           
           const bpName = resolvedNames[a.blueprintId] || `Blueprint ${a.blueprintId}`;
           const locationId = a.facilityId || a.stationId;

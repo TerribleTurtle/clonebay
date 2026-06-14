@@ -13,7 +13,7 @@ describe('esiCache', () => {
     vi.useRealTimers();
   });
 
-  it('rejects past dates and expires data correctly', async () => {
+  it('returns past dates correctly to allow 304 revalidation', async () => {
     const url = 'https://api.eve.com/data';
     
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
@@ -22,7 +22,8 @@ describe('esiCache', () => {
     await setCachedEsiData(url, { some: 'data' }, 'fake-etag', pastDateStr, Date.now());
     
     const result = await getCachedEsiData(url, Date.now());
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result?.eTag).toBe('fake-etag');
   });
 
   it('verifies ETag string caching logic', async () => {
@@ -38,7 +39,7 @@ describe('esiCache', () => {
     expect(result?.data).toEqual({ some: 'data2' });
   });
 
-  it('expires data when Date.now() equals expires exact time', async () => {
+  it('returns data when Date.now() equals expires exact time to allow revalidation', async () => {
     const url = 'https://api.eve.com/data-exact';
     vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
     const exactDateStr = new Date('2026-01-01T10:00:00Z').toUTCString();
@@ -46,7 +47,8 @@ describe('esiCache', () => {
     await setCachedEsiData(url, { some: 'data-exact' }, 'exact-etag', exactDateStr, Date.now());
     
     const result = await getCachedEsiData(url, Date.now());
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result?.eTag).toBe('exact-etag');
   });
 
   it('defaults to 5 minutes if expires header is un-parsable', async () => {
@@ -60,10 +62,11 @@ describe('esiCache', () => {
     const resultBefore = await getCachedEsiData(url, Date.now());
     expect(resultBefore).not.toBeNull();
 
-    // Should be expired at 10:05
+    // Should still return the item after 10:05 to allow 304 revalidation
     vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
     const resultAfter = await getCachedEsiData(url, Date.now());
-    expect(resultAfter).toBeNull();
+    expect(resultAfter).not.toBeNull();
+    expect(resultAfter?.eTag).toBe('unparsable-etag');
   });
 
   it('defaults to 5 minutes if expires header is null', async () => {
@@ -77,10 +80,11 @@ describe('esiCache', () => {
     const resultBefore = await getCachedEsiData(url, Date.now());
     expect(resultBefore).not.toBeNull();
 
-    // Should be expired at 10:05
+    // Should still return the item after 10:05 to allow 304 revalidation
     vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
     const resultAfter = await getCachedEsiData(url, Date.now());
-    expect(resultAfter).toBeNull();
+    expect(resultAfter).not.toBeNull();
+    expect(resultAfter?.eTag).toBe('null-etag');
   });
 });
 

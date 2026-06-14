@@ -10,6 +10,10 @@ export interface PiPinState {
   hasUnroutedMaterials: boolean;
 }
 
+export type PiAlert =
+  | { type: 'dormant'; message: string }
+  | { type: 'planet'; planetId: number; message: string };
+
 export function evaluateStorage(pin: PiPinState): { status: DashboardStatus; alert?: string } {
   if (!pin.isStorage || pin.storageCapacity === undefined || pin.storageUsed === undefined) {
     return { status: 'Green' };
@@ -63,8 +67,8 @@ export function evaluateExtractor(pin: PiPinState, nowMs: number): { status: Das
 export function calculatePiStatus(
   pins: PiPinState[],
   nowMs: number
-): { status: DashboardStatus; alerts: { planetId: number; message: string }[] } {
-  const alerts: { planetId: number; message: string }[] = [];
+): { status: DashboardStatus; alerts: PiAlert[] } {
+  const alerts: PiAlert[] = [];
 
   if (!pins || pins.length === 0) {
     // If no PI is setup, default to Offline (Grey)
@@ -78,7 +82,7 @@ export function calculatePiStatus(
 
   for (const pin of pins) {
     if (pin.hasUnroutedMaterials) {
-      alerts.push({ planetId: pin.planetId, message: 'Unrouted Materials' });
+      alerts.push({ type: 'planet', planetId: pin.planetId, message: 'Unrouted Materials' });
       status = 'Red';
     }
 
@@ -89,7 +93,7 @@ export function calculatePiStatus(
 
     const storageEval = evaluateStorage(pin);
     if (storageEval.alert) {
-      alerts.push({ planetId: pin.planetId, message: storageEval.alert });
+      alerts.push({ type: 'planet', planetId: pin.planetId, message: storageEval.alert });
       if (storageEval.status === 'Red') status = 'Red';
       else if (storageEval.status === 'Yellow' && status === 'Green') status = 'Yellow';
     }
@@ -99,7 +103,7 @@ export function calculatePiStatus(
       hasActiveExtractor = true;
     }
     if (extractorEval.alert) {
-      alerts.push({ planetId: pin.planetId, message: extractorEval.alert });
+      alerts.push({ type: 'planet', planetId: pin.planetId, message: extractorEval.alert });
       if (extractorEval.status === 'Red') status = 'Red';
       else if (extractorEval.status === 'Yellow' && status === 'Green') status = 'Yellow';
     }
@@ -110,9 +114,7 @@ export function calculatePiStatus(
     if (status !== 'Red') {
         status = 'Red';
     }
-    // Assign dormant alert to the first planet, or unique planets that match this criteria? 
-    // The previous logic evaluated this globally across all pins. Let's just attribute it to the first planet.
-    alerts.push({ planetId: pins[0]?.planetId || 0, message: 'Dormant' });
+    alerts.push({ type: 'dormant', message: 'Dormant' });
   }
 
   return { status, alerts };

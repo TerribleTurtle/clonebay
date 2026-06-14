@@ -1,6 +1,20 @@
-import { useLogStore, LogEntry } from '../store/useLogStore';
-
 type LogLevel = 'info' | 'warn' | 'error';
+
+export interface LogEntry {
+  id: string;
+  timestamp: number;
+  level: LogLevel;
+  message: string;
+  source: 'main' | 'worker';
+  data?: unknown;
+}
+
+export type LogListener = (log: LogEntry) => void;
+const listeners: LogListener[] = [];
+
+export function addLogListener(listener: LogListener) {
+  listeners.push(listener);
+}
 
 function createLog(level: LogLevel, message: string, data?: unknown) {
   const isWorker = typeof document === 'undefined';
@@ -30,7 +44,7 @@ function createLog(level: LogLevel, message: string, data?: unknown) {
   if (isWorker) {
     postMessage({ type: 'WORKER_LOG', payload: logEntry });
   } else {
-    useLogStore.getState().addLog(logEntry);
+    listeners.forEach((l) => l(logEntry));
   }
 
   // Preserve native console logging for development

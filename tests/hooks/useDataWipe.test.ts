@@ -35,8 +35,8 @@ describe('useDataWipe', () => {
     });
 
     expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
-    expect(AuthRepository.clearAuthDictionary).toHaveBeenCalled();
-    expect(BrowserStorageService.clearAllStorage).toHaveBeenCalled();
+    expect(AuthRepository.clearAuthDictionary).toHaveBeenCalledTimes(1);
+    expect(BrowserStorageService.clearAllStorage).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith('/');
 
     window.confirm = originalConfirm;

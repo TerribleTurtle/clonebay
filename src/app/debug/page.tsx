@@ -24,18 +24,18 @@ export default function DebugPage() {
         <div className="flex items-center gap-4">
           <Link 
             href="/"
-            className="text-amber-500 hover:text-amber-400 transition-colors uppercase tracking-wider text-sm border border-amber-500/30 px-3 py-1"
+            className="text-status-yellow hover:text-status-yellow/80 transition-colors uppercase tracking-wider text-sm border border-status-yellow/30 px-3 py-1"
           >
             {'< Return'}
           </Link>
-          <h1 className="text-xl text-zinc-100 font-bold uppercase tracking-widest">
+          <h1 className="text-2xl text-eve-cryo font-display font-bold uppercase tracking-widest">
             Diagnostic Terminal
           </h1>
         </div>
         <button
           type="button"
           onClick={clearLogs}
-          className="border border-red-700 bg-red-950/30 text-red-400 px-4 py-1 hover:bg-red-900/50 transition-colors uppercase text-xs tracking-wider"
+          className="border border-status-red bg-status-red/10 text-status-red px-4 py-1 hover:bg-status-red/20 transition-colors uppercase text-xs tracking-wider"
         >
           Purge Logs
         </button>
@@ -52,8 +52,8 @@ export default function DebugPage() {
               <div 
                 key={log.id} 
                 className={`text-xs flex gap-4 ${
-                  log.level === 'error' ? 'text-red-500' :
-                  log.level === 'warn' ? 'text-amber-400' :
+                  log.level === 'error' ? 'text-status-red' :
+                  log.level === 'warn' ? 'text-status-yellow' :
                   'text-zinc-400'
                 }`}
               >
@@ -64,9 +64,9 @@ export default function DebugPage() {
                   )}
                 </span>
                 <span className={`shrink-0 w-16 uppercase font-bold ${
-                  log.level === 'error' ? 'text-red-500' :
-                  log.level === 'warn' ? 'text-amber-500' :
-                  'text-cyan-600'
+                  log.level === 'error' ? 'text-status-red' :
+                  log.level === 'warn' ? 'text-status-yellow' :
+                  'text-eve-cryo'
                 }`}>
                   [{log.source}]
                 </span>

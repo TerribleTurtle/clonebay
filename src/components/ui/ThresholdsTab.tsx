@@ -1,5 +1,7 @@
+"use client";
 import { useCharacterConfigStore } from '../../store/useCharacterConfigStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import { Input } from './Input';
 
 interface ThresholdsTabProps {
   characterId: string;
@@ -9,7 +11,7 @@ export function ThresholdsTab({ characterId }: ThresholdsTabProps) {
   const configStore = useCharacterConfigStore();
   const globalSettings = useSettingsStore();
 
-  const charConfig = configStore.configs[Number(characterId)] || {
+  const charConfig = configStore.configs[characterId] || {
     visibility: { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true },
     overrides: {}
   };
@@ -21,83 +23,85 @@ export function ThresholdsTab({ characterId }: ThresholdsTabProps) {
 
   const handleIskInheritChange = (inherit: boolean) => {
     if (inherit) {
-      configStore.clearOverride(Number(characterId), 'walletYellow');
-      configStore.clearOverride(Number(characterId), 'walletRed');
+      configStore.clearOverride(characterId, 'walletYellow');
+      configStore.clearOverride(characterId, 'walletRed');
     } else {
-      configStore.setOverride(Number(characterId), 'walletYellow', globalSettings.walletYellowThreshold);
-      configStore.setOverride(Number(characterId), 'walletRed', globalSettings.walletRedThreshold);
+      configStore.setOverride(characterId, 'walletYellow', globalSettings.walletYellowThreshold);
+      configStore.setOverride(characterId, 'walletRed', globalSettings.walletRedThreshold);
     }
   };
 
   return (
     <div className="space-y-6">
       <div className="mb-4 flex items-center justify-between border-b border-zinc-800 pb-2">
-        <h3 className="text-amber-500 uppercase tracking-widest">
+        <h3 className="text-status-yellow uppercase tracking-widest">
           Wallet ISK Thresholds
         </h3>
         <button
           onClick={() => handleIskInheritChange(true)}
-          className="text-xs uppercase text-zinc-400 underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-amber-500"
+          className="text-xs uppercase text-zinc-400 underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-status-yellow min-h-[44px] px-2 -ml-2"
         >
           Revert all to Global Default
         </button>
       </div>
 
-      <div className="space-y-4 border border-zinc-800 bg-zinc-900/30 p-4">
-        <div className="mb-4 flex items-center gap-4 text-sm">
-          <label className="flex cursor-pointer items-center gap-2">
+      <div className="space-y-4 border border-eve-border bg-eve-panel p-4">
+        <div className="mb-4 flex flex-wrap items-center gap-4 text-sm">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-2 border border-transparent p-2 transition-colors hover:border-zinc-800 hover:bg-zinc-800/50">
             <input
               type="radio"
               name="isk_inherit"
               checked={isIskInherit}
               onChange={() => handleIskInheritChange(true)}
-              className="accent-amber-500"
+              className="accent-status-yellow"
             />
-            <span className={isIskInherit ? 'text-amber-500' : 'text-zinc-500'}>
+            <span className={isIskInherit ? 'text-status-yellow' : 'text-zinc-500'}>
               Inherit Global
             </span>
           </label>
-          <label className="flex cursor-pointer items-center gap-2">
+          <label className="flex min-h-[44px] cursor-pointer items-center gap-2 border border-transparent p-2 transition-colors hover:border-zinc-800 hover:bg-zinc-800/50">
             <input
               type="radio"
               name="isk_inherit"
               checked={!isIskInherit}
               onChange={() => handleIskInheritChange(false)}
-              className="accent-amber-500"
+              className="accent-status-cyan"
             />
-            <span className={!isIskInherit ? 'text-cyan-400' : 'text-zinc-500'}>
+            <span className={!isIskInherit ? 'text-status-cyan' : 'text-zinc-500'}>
               Custom Override
             </span>
           </label>
         </div>
 
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <label className="text-sm text-yellow-500">Yellow Warning</label>
-            <input
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+            <label className="flex min-h-[44px] items-center text-sm text-status-yellow">Yellow Warning</label>
+            <Input
               type="number"
+              min="0"
               disabled={isIskInherit}
               value={displayYellow}
-              onChange={(e) => configStore.setOverride(Number(characterId), 'walletYellow', Number(e.target.value))}
-              className={`w-full sm:w-48 border bg-zinc-950 px-3 py-2 sm:py-1 text-right outline-none transition-colors ${
-                isIskInherit
-                  ? 'cursor-not-allowed border-zinc-800 text-zinc-600'
-                  : 'border-cyan-900/50 text-cyan-50 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.2)] focus:ring-1 focus:ring-cyan-400'
-              }`}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val < 0) return;
+                configStore.setOverride(characterId, 'walletYellow', val);
+              }}
+              className="w-full text-right sm:w-48"
             />
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <label className="text-sm text-red-500">Red Alert</label>
-            <input
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+            <label className="flex min-h-[44px] items-center text-sm text-status-red">Red Alert</label>
+            <Input
               type="number"
+              min="0"
               disabled={isIskInherit}
               value={displayRed}
-              onChange={(e) => configStore.setOverride(Number(characterId), 'walletRed', Number(e.target.value))}
-              className={`w-full sm:w-48 border bg-zinc-950 px-3 py-2 sm:py-1 text-right outline-none transition-colors ${
-                isIskInherit
-                  ? 'cursor-not-allowed border-zinc-800 text-zinc-600'
-                  : 'border-cyan-900/50 text-cyan-50 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.2)] focus:ring-1 focus:ring-cyan-400'
-              }`}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val < 0) return;
+                configStore.setOverride(characterId, 'walletRed', val);
+              }}
+              className="w-full text-right sm:w-48 focus:border-status-red focus:shadow-glow-red focus:ring-status-red text-status-red"
             />
           </div>
         </div>

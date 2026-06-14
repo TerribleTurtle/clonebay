@@ -11,13 +11,11 @@ export interface CacheEntry<T> {
   expires: number;
 }
 
-export async function getCachedEsiData<T>(url: string, nowMs: number): Promise<CacheEntry<T> | null> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getCachedEsiData<T>(url: string, _nowMs: number): Promise<CacheEntry<T> | null> {
   try {
     const entry = await get<CacheEntry<T>>(url);
     if (entry !== undefined) {
-      if (entry.expires <= nowMs) {
-        return null;
-      }
       return entry;
     }
     return null;

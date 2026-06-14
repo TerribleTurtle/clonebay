@@ -4,8 +4,10 @@ import { persist } from 'zustand/middleware';
 export interface SettingsState {
   walletYellowThreshold: number;
   walletRedThreshold: number;
+  isMockMode: boolean;
   setWalletYellowThreshold: (val: number) => void;
   setWalletRedThreshold: (val: number) => void;
+  setMockMode: (val: boolean) => void;
   resetToDefaults: () => void;
 
 }
@@ -13,7 +15,7 @@ export interface SettingsState {
 const DEFAULT_SETTINGS = {
   walletYellowThreshold: 500000000, // 500m
   walletRedThreshold: 100000000,    // 100m
-
+  isMockMode: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -22,6 +24,7 @@ export const useSettingsStore = create<SettingsState>()(
       ...DEFAULT_SETTINGS,
       setWalletYellowThreshold: (val) => set({ walletYellowThreshold: val }),
       setWalletRedThreshold: (val) => set({ walletRedThreshold: val }),
+      setMockMode: (val) => set({ isMockMode: val }),
 
       resetToDefaults: () => set(DEFAULT_SETTINGS),
     }),

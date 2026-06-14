@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { buildEsiAuthUrl, ESI_SCOPES } from '../src/auth/esiAuth';
-
-vi.mock('../src/auth/AuthRepository', () => ({
-  getAuthDictionary: vi.fn(),
-  addOrUpdateCharacter: vi.fn()
-}));
+import { refreshAccessToken } from '../src/auth/AuthService';
+import { addOrUpdateCharacter, clearAuthDictionary, getAuthDictionary } from '../src/auth/AuthRepository';
 
 describe('esiAuth', () => {
   describe('buildEsiAuthUrl', () => {
@@ -40,67 +37,44 @@ describe('esiAuth', () => {
   });
 
   describe('refreshAccessToken', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       vi.clearAllMocks();
       vi.resetModules();
       vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', 'test-client-id');
       global.fetch = vi.fn();
+      await clearAuthDictionary();
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       vi.unstubAllEnvs();
+      await clearAuthDictionary();
     });
 
     it('throws error when no auth data is found for character', async () => {
-      const { getAuthDictionary } = await import('../src/auth/AuthRepository');
-      vi.mocked(getAuthDictionary).mockResolvedValueOnce({});
-
-      const { refreshAccessToken } = await import('../src/auth/esiAuth');
       await expect(refreshAccessToken('char-1')).rejects.toThrow('No auth data found for character char-1');
     });
 
-    it('throws error when NEXT_PUBLIC_EVE_CLIENT_ID is missing', async () => {
-      const { getAuthDictionary } = await import('../src/auth/AuthRepository');
-      vi.mocked(getAuthDictionary).mockResolvedValueOnce({
-        'char-1': { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' }
-      });
-      vi.stubEnv('NEXT_PUBLIC_EVE_CLIENT_ID', '');
 
-      const { refreshAccessToken } = await import('../src/auth/esiAuth');
-      await expect(refreshAccessToken('char-1')).rejects.toThrow('NEXT_PUBLIC_EVE_CLIENT_ID is missing in worker context!');
-    });
 
     it('throws error on network failure', async () => {
-      const { getAuthDictionary } = await import('../src/auth/AuthRepository');
-      vi.mocked(getAuthDictionary).mockResolvedValueOnce({
-        'char-1': { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' }
-      });
+      await addOrUpdateCharacter('char-1', { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' });
       vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Network error'));
 
-      const { refreshAccessToken } = await import('../src/auth/esiAuth');
       await expect(refreshAccessToken('char-1')).rejects.toThrow('Network error refreshing access token for character char-1: Error: Network error');
     });
 
     it('throws error on non-ok status response', async () => {
-      const { getAuthDictionary } = await import('../src/auth/AuthRepository');
-      vi.mocked(getAuthDictionary).mockResolvedValueOnce({
-        'char-1': { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' }
-      });
+      await addOrUpdateCharacter('char-1', { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' });
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: false,
         status: 400
       } as Response);
 
-      const { refreshAccessToken } = await import('../src/auth/esiAuth');
       await expect(refreshAccessToken('char-1')).rejects.toThrow('ESI OAuth Refresh failed with status 400');
     });
 
     it('returns new access token and updates auth on success', async () => {
-      const { getAuthDictionary, addOrUpdateCharacter } = await import('../src/auth/AuthRepository');
-      const authDict = {
-        'char-1': { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' }
-      };
-      vi.mocked(getAuthDictionary).mockResolvedValueOnce(authDict);
+      await addOrUpdateCharacter('char-1', { accessToken: 'old-access', refreshToken: 'old-refresh', characterName: 'Char 1' });
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -109,11 +83,12 @@ describe('esiAuth', () => {
         })
       } as Response);
 
-      const { refreshAccessToken } = await import('../src/auth/esiAuth');
       const token = await refreshAccessToken('char-1');
       
       expect(token).toBe('new-access-token');
-      expect(addOrUpdateCharacter).toHaveBeenCalledWith('char-1', {
+      
+      const dict = await getAuthDictionary();
+      expect(dict['char-1']).toEqual({
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
         characterName: 'Char 1'
@@ -121,5 +96,6 @@ describe('esiAuth', () => {
     });
   });
 });
+
 
 

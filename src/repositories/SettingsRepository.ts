@@ -6,7 +6,7 @@ export const SettingsRepository = {
       return localStorage.getItem('eve_mock_mode') === 'true';
     } catch (error) {
       logger.error("Failed to read eve_mock_mode from localStorage:", error);
-      return false;
+      throw error;
     }
   },
 

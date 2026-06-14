@@ -13,19 +13,35 @@ export const EsiPlanetSchema = z.object({
 }).strict();
 export type EsiPlanet = z.infer<typeof EsiPlanetSchema>;
 
+const MAX_HEAD_ID = 9;
+
 export const EsiPlanetLayoutSchema = z.object({
   pins: z.array(
     z.object({
       pin_id: z.number().int().positive(),
       type_id: z.number().int().positive(),
       expiry_time: z.string().datetime().optional(),
-      extractor_details: z.record(z.string(), z.unknown()).optional(),
-      install_time: z.string().optional(),
-      last_cycle_start: z.string().optional(),
+      extractor_details: z.object({
+        cycle_time: z.number().optional(),
+        head_radius: z.number().optional(),
+        heads: z.array(
+          z.object({
+            head_id: z.number().int().min(0).max(MAX_HEAD_ID),
+            latitude: z.number(),
+            longitude: z.number()
+          }).strict()
+        ).optional(),
+        product_type_id: z.number().optional(),
+        qty_per_cycle: z.number().optional()
+      }).strict().optional(),
+      install_time: z.string().datetime().optional(),
+      last_cycle_start: z.string().datetime().optional(),
       latitude: z.number().optional(),
       longitude: z.number().optional(),
       schematic_id: z.number().int().optional(),
-      factory_details: z.record(z.string(), z.unknown()).optional(),
+      factory_details: z.object({
+        schematic_id: z.number()
+      }).strict().optional(),
       contents: z.array(
         z.object({
           type_id: z.number().int().positive(),
@@ -47,7 +63,7 @@ export const EsiPlanetLayoutSchema = z.object({
       source_pin_id: z.number().int().positive(),
       destination_pin_id: z.number().int().positive(),
       content_type_id: z.number().int().positive(),
-      quantity: z.number().int().min(0),
+      quantity: z.number().min(0),
       waypoints: z.array(z.number().int().positive()).optional()
     }).strict()
   ).optional()

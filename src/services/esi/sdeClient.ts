@@ -2,6 +2,9 @@ import { get, set } from 'idb-keyval';
 import { z } from 'zod';
 import { EsiSdeTypeSchema, EsiSdeSystemSchema, type EsiSdeType } from '../../schemas/esi';
 import { logger } from '../../utils/logger';
+import { HttpClient } from '../../utils/http/httpClient';
+
+const HTTP_STATUS_OK = 200;
 
 export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   const cacheKey = `sde_type_${typeId}`;
@@ -15,18 +18,21 @@ export async function fetchSdeType(typeId: number): Promise<EsiSdeType> {
   // Fetch from ESI if not cached
   let response;
   try {
-    // eslint-disable-next-line no-restricted-globals
-    response = await fetch(`https://esi.evetech.net/latest/universe/types/${typeId}/`);
+    const client = new HttpClient();
+    response = await client.request({
+      url: `https://esi.evetech.net/latest/universe/types/${typeId}/`,
+      method: 'GET',
+      context: {}
+    });
   } catch (error) {
     logger.error(`Network error fetching SDE type ${typeId}`, error);
     throw new Error(`Network error fetching SDE type ${typeId}: ${error}`);
   }
-  if (!response.ok) {
-    throw new Error(`Failed to fetch SDE type ${typeId}: ${response.statusText}`);
+  if (response.status !== HTTP_STATUS_OK) {
+    throw new Error(`Failed to fetch SDE type ${typeId}: HTTP ${response.status}`);
   }
 
-  const rawData = await response.json();
-  const result = await EsiSdeTypeSchema.parseAsync(rawData);
+  const result = await EsiSdeTypeSchema.parseAsync(response.data);
 
   // Permanently cache the result
   await set(cacheKey, result);
@@ -46,18 +52,21 @@ export async function fetchSdeSystem(systemId: number): Promise<string> {
   // Fetch from ESI if not cached
   let response;
   try {
-    // eslint-disable-next-line no-restricted-globals
-    response = await fetch(`https://esi.evetech.net/latest/universe/systems/${systemId}/`);
+    const client = new HttpClient();
+    response = await client.request({
+      url: `https://esi.evetech.net/latest/universe/systems/${systemId}/`,
+      method: 'GET',
+      context: {}
+    });
   } catch (error) {
     logger.error(`Network error fetching SDE system ${systemId}`, error);
     throw new Error(`Network error fetching SDE system ${systemId}: ${error}`);
   }
-  if (!response.ok) {
-    throw new Error(`Failed to fetch SDE system ${systemId}: ${response.statusText}`);
+  if (response.status !== HTTP_STATUS_OK) {
+    throw new Error(`Failed to fetch SDE system ${systemId}: HTTP ${response.status}`);
   }
 
-  const rawData = await response.json();
-  const data = await EsiSdeSystemSchema.parseAsync(rawData);
+  const data = await EsiSdeSystemSchema.parseAsync(response.data);
   const name = data.name;
 
   // Permanently cache the result

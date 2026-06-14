@@ -1,57 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSettingsStore } from "../../store/useSettingsStore";
 import { useDataWipe } from "../../hooks/useDataWipe";
 import { Button } from "../../components/ui/Button";
-import { configSchema } from "../../lib/schemas/configSchema";
+
+import { useSettingsForm } from "./useSettingsForm";
 
 export default function SettingsPage() {
-  const settings = useSettingsStore();
   const { handleWipeData } = useDataWipe();
-  const [mounted, setMounted] = useState(false);
-
-  const [draftSettings, setDraftSettings] = useState({
-    walletYellowThreshold: 0,
-    walletRedThreshold: 0,
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-    setDraftSettings({
-      walletYellowThreshold: settings.walletYellowThreshold,
-      walletRedThreshold: settings.walletRedThreshold,
-    });
-    setErrors({});
-  }, [settings.walletYellowThreshold, settings.walletRedThreshold]);
+  const { mounted, draftSettings, setDraftSettings, errors, handleSave, settings } = useSettingsForm();
 
   if (!mounted) {
     return null; // Prevent hydration mismatch
   }
 
-  const handleSave = () => {
-    const result = configSchema.safeParse(draftSettings);
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors({
-        walletYellowThreshold: fieldErrors["walletYellowThreshold"]?.[0] || "",
-        walletRedThreshold: fieldErrors["walletRedThreshold"]?.[0] || "",
-      });
-      return;
-    }
-
-    setErrors({});
-    settings.setWalletYellowThreshold(draftSettings.walletYellowThreshold);
-    settings.setWalletRedThreshold(draftSettings.walletRedThreshold);
-  };
-
   return (
     <div className="w-full flex-1 font-mono text-zinc-300 bg-eve-void p-4 md:p-8">
       <div className="flex flex-col mb-8 border-b border-eve-border pb-4">
-        <h1 className="text-3xl font-bold tracking-widest uppercase text-eve-cryo drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]">
+        <h1 className="text-2xl font-display font-bold tracking-widest uppercase text-eve-cryo">
           System Configuration
         </h1>
         <p className="text-zinc-500 mt-2 text-sm uppercase tracking-wider">
@@ -64,7 +29,7 @@ export default function SettingsPage() {
         <section className="space-y-4" aria-labelledby="threshold-heading">
           <h2
             id="threshold-heading"
-            className="text-xl font-bold tracking-widest uppercase text-status-yellow border-b border-zinc-800 pb-2"
+            className="text-2xl font-display font-bold tracking-widest uppercase text-status-yellow border-b border-zinc-800 pb-2"
           >
             Global Thresholds
           </h2>
@@ -73,7 +38,7 @@ export default function SettingsPage() {
             dashboard.
           </p>
 
-          <div className="flex flex-col gap-6 bg-eve-tactical border border-eve-border p-4 md:p-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+          <div className="flex flex-col gap-6 bg-eve-tactical border border-eve-border p-4 md:p-6 shadow-glow-cyan">
             <div className="flex flex-col gap-2 relative">
               <label
                 htmlFor="yellow-thresh"
@@ -97,9 +62,9 @@ export default function SettingsPage() {
                     ? "yellow-thresh-error"
                     : undefined
                 }
-                className={`bg-eve-void border rounded-none px-4 py-3 text-zinc-100 focus:outline-none focus:border-eve-cryo focus:shadow-[0_0_10px_rgba(0,255,255,0.2)] transition-all ${
+                className={`bg-eve-void border rounded-none px-4 py-3 text-zinc-100 focus:outline-none focus:border-eve-cryo focus:shadow-glow-cyan transition-all ${
                   errors["walletYellowThreshold"]
-                    ? "border-status-red focus:border-status-red focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]"
+                    ? "border-status-red focus:border-status-red focus:shadow-glow-red"
                     : "border-zinc-700 hover:border-zinc-500"
                 }`}
               />
@@ -136,9 +101,9 @@ export default function SettingsPage() {
                 aria-describedby={
                   errors["walletRedThreshold"] ? "red-thresh-error" : undefined
                 }
-                className={`bg-eve-void border rounded-none px-4 py-3 text-zinc-100 focus:outline-none focus:border-eve-cryo focus:shadow-[0_0_10px_rgba(0,255,255,0.2)] transition-all ${
+                className={`bg-eve-void border rounded-none px-4 py-3 text-zinc-100 focus:outline-none focus:border-eve-cryo focus:shadow-glow-cyan transition-all ${
                   errors["walletRedThreshold"]
-                    ? "border-status-red focus:border-status-red focus:shadow-[0_0_10px_rgba(255,0,0,0.2)]"
+                    ? "border-status-red focus:border-status-red focus:shadow-glow-red"
                     : "border-zinc-700 hover:border-zinc-500"
                 }`}
               />
@@ -180,7 +145,7 @@ export default function SettingsPage() {
         >
           <h2
             id="data-management-heading"
-            className="text-xl font-bold tracking-widest uppercase text-status-red border-b border-zinc-800 pb-2 flex items-center gap-3"
+            className="text-2xl font-display font-bold tracking-widest uppercase text-status-red border-b border-zinc-800 pb-2 flex items-center gap-3"
           >
             <span className="w-3 h-3 bg-status-red border border-status-red/50 animate-pulse" />
             Data Management
@@ -190,7 +155,7 @@ export default function SettingsPage() {
             exclusively in this browser. You can obliterate them here.
           </p>
 
-          <div className="bg-eve-tactical border border-status-red/50 p-4 md:p-6 shadow-[inset_0_0_20px_rgba(255,0,0,0.1)]">
+          <div className="bg-eve-tactical border border-status-red/50 p-4 md:p-6 shadow-glow-red">
             <Button
               onClick={() =>
                 handleWipeData(
@@ -198,7 +163,7 @@ export default function SettingsPage() {
                 )
               }
               variant="destructive"
-              className="w-full py-4 rounded-none border border-status-red hover:bg-status-red/20 focus:ring-0 uppercase tracking-[0.2em] font-bold shadow-[0_0_15px_rgba(255,0,0,0.2)] hover:shadow-[0_0_25px_rgba(255,0,0,0.4)] transition-all"
+              className="w-full py-4 rounded-none border border-status-red hover:bg-status-red/20 focus:ring-0 uppercase tracking-[0.2em] font-bold shadow-glow-red hover:shadow-glow-red transition-all"
             >
               Initiate Total Local Data Wipe
             </Button>

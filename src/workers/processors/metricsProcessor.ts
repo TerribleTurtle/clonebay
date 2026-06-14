@@ -25,9 +25,8 @@ import {
 import { NameCacheService } from "../../services/NameCacheService";
 import type { IEsiService } from "../../services/esi/IEsiService";
 
-const INFOMORPH_PSYCHOLOGY_SKILL_ID = 164;
-const ADVANCED_INFOMORPH_PSYCHOLOGY_SKILL_ID = 24063;
-const ELITE_INFOMORPH_PSYCHOLOGY_SKILL_ID = 73910;
+import { calculateTotalSp } from "../../utils/spMath";
+import { calculateMaxClones } from "../../utils/cloneMath";
 const MAX_UNREAD_MAILS_TO_FETCH = 3;
 const ATTRIBUTE_SECONDARY_DIVISOR = 2;
 const MINUTES_PER_HOUR = 60;
@@ -77,41 +76,11 @@ export async function processMetrics(context: EsiMetricsContext) {
       ? mockFleet.find((c) => c.characterId === charId)
       : null;
 
-    let totalSp = charSkillsResult?.data?.total_sp;
+    const now = Date.now();
+    const totalSp = calculateTotalSp(charSkillsResult?.data?.total_sp, skillsResult?.data ?? undefined, now);
     const unallocatedSp = charSkillsResult?.data?.unallocated_sp || 0;
-
-    let maxClones = 0;
-    if (charSkillsResult?.data?.skills) {
-      const infomorphLevel = charSkillsResult.data.skills.find(s => s.skill_id === INFOMORPH_PSYCHOLOGY_SKILL_ID)?.active_skill_level || 0;
-      const advInfomorphLevel = charSkillsResult.data.skills.find(s => s.skill_id === ADVANCED_INFOMORPH_PSYCHOLOGY_SKILL_ID)?.active_skill_level || 0;
-      const eliteInfomorphLevel = charSkillsResult.data.skills.find(s => s.skill_id === ELITE_INFOMORPH_PSYCHOLOGY_SKILL_ID)?.active_skill_level || 0;
-      const calculatedMax = infomorphLevel + advInfomorphLevel + eliteInfomorphLevel;
-      const currentClones = clonesResult?.data?.jump_clones?.length || 0;
-      maxClones = Math.max(calculatedMax, currentClones);
-    }
-
-    if (totalSp !== undefined && skillsResult?.data) {
-      const now = Date.now();
-      const activeSkill = skillsResult.data.find((s) => {
-        if (!s.start_date || !s.finish_date) return false;
-        const start = new Date(s.start_date).getTime();
-        const finish = new Date(s.finish_date).getTime();
-        return now >= start && now <= finish;
-      });
-
-      if (activeSkill && activeSkill.start_date && activeSkill.finish_date) {
-        const start = new Date(activeSkill.start_date).getTime();
-        const finish = new Date(activeSkill.finish_date).getTime();
-        const durationMs = finish - start;
-        const elapsedMs = now - start;
-        if (durationMs > 0 && elapsedMs > 0) {
-          const spToTrain =
-            activeSkill.level_end_sp - activeSkill.training_start_sp;
-          const spPerMs = spToTrain / durationMs;
-          totalSp += Math.floor(elapsedMs * spPerMs);
-        }
-      }
-    }
+    const currentClonesCount = clonesResult?.data?.jump_clones?.length || 0;
+    const maxClones = calculateMaxClones(charSkillsResult?.data?.skills, currentClonesCount);
 
     const isk = walletResult?.data;
     const locationId = locationResult?.data?.solar_system_id;
@@ -131,7 +100,7 @@ export async function processMetrics(context: EsiMetricsContext) {
     }
     
     if (stationId) {
-      const nameCache = new NameCacheService(esiService);
+      const nameCache = new NameCacheService(esiService.universe);
       const resolved = await nameCache.resolveIdsToNames([stationId]).catch((err) => {
         logger.error(`Failed to resolve station id ${stationId}`, err);
         throw err;
@@ -152,13 +121,12 @@ export async function processMetrics(context: EsiMetricsContext) {
       ? { count: marketOrdersResult.data.length }
       : undefined;
 
-    const now = Date.now();
     const walletStatus = calculateWalletStatus(isk);
     const locationStatus = calculateLocationStatus(stationId, structureId);
     const mailStatus = calculateMailStatus(mail?.total_unread_count);
     const cloneStatus = calculateCloneStatus(clones?.last_clone_jump_date, now);
 
-    const nameCache = new NameCacheService(esiService);
+    const nameCache = new NameCacheService(esiService.universe);
     const clonesContext = await buildClonesContext(clones || { jump_clones: [] }, nameCache);
     const mailContext = await buildMailContext(charId, esiService, accessToken, nameCache);
     const spContext = await buildSpContext(charId, totalSp, unallocatedSp, esiService, accessToken);

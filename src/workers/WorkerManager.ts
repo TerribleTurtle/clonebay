@@ -3,7 +3,7 @@ import { logger } from '../utils/logger';
 type WorkerMessageHandler = (event: MessageEvent) => void;
 
 export class WorkerManager {
-  private static instance: WorkerManager;
+  private static instance: WorkerManager | undefined;
   private worker: Worker | null = null;
   private messageHandlers: Set<WorkerMessageHandler> = new Set();
   
@@ -37,6 +37,16 @@ export class WorkerManager {
       WorkerManager.instance.workerFactory = factory;
     }
     return WorkerManager.instance;
+  }
+
+  /**
+   * Resets the singleton instance. Intended for testing purposes only.
+   */
+  public static resetForTests() {
+    if (WorkerManager.instance) {
+      WorkerManager.instance.stop();
+      WorkerManager.instance = undefined;
+    }
   }
 
   /**

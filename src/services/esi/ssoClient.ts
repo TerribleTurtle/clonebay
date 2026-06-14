@@ -1,6 +1,8 @@
 import { EveSsoTokenResponseSchema, EveSsoJwtPayloadSchema } from "@/schemas/auth";
 import { logger } from "../../utils/logger";
+import { HttpClient } from "../../utils/http/httpClient";
 
+const HTTP_STATUS_OK = 200;
 const EXPECTED_JWT_PARTS = 3;
 const HEX_RADIX = 16;
 const SLICE_LAST_TWO = -2;
@@ -22,8 +24,9 @@ export async function exchangeCodeForToken(
 ): Promise<TokenExchangeResult> {
   let response;
   try {
-    // eslint-disable-next-line no-restricted-globals
-    response = await fetch("https://login.eveonline.com/v2/oauth/token", {
+    const client = new HttpClient();
+    response = await client.request({
+      url: "https://login.eveonline.com/v2/oauth/token",
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
@@ -35,19 +38,18 @@ export async function exchangeCodeForToken(
         code_verifier: codeVerifier,
         redirect_uri: redirectUri,
       }),
+      context: {}
     });
   } catch (error) {
     logger.error("Network error exchanging code for token", error);
     throw new Error(`Network error exchanging code for token: ${error}`);
   }
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to fetch token: ${errorText}`);
+  if (response.status !== HTTP_STATUS_OK) {
+    throw new Error(`Failed to fetch token: HTTP ${response.status}`);
   }
 
-  const tokenDataUnparsed = await response.json();
-  const tokenData = await EveSsoTokenResponseSchema.parseAsync(tokenDataUnparsed);
+  const tokenData = await EveSsoTokenResponseSchema.parseAsync(response.data);
   
   // Decode JWT to extract character identity
   const tokenParts = tokenData.access_token.split(".");

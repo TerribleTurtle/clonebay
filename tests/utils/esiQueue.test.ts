@@ -1,10 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { esiQueueInterceptor, resetQueueForTests } from '../../src/utils/esiQueue';
 import { HttpRequest, HttpResponse } from '../../src/utils/http/httpClient';
 
 describe('esiQueueInterceptor', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     resetQueueForTests();
+  });
+
+  afterEach(() => {
+    resetQueueForTests();
+    vi.useRealTimers();
+    vi.clearAllTimers();
   });
 
   const dummyReq = {} as HttpRequest;
@@ -23,8 +30,9 @@ describe('esiQueueInterceptor', () => {
       promises.push(esiQueueInterceptor(dummyReq, nextMock));
     }
     
-    await new Promise(r => setTimeout(r, 0));
+    await vi.advanceTimersByTimeAsync(0);
     expect(active).toBe(5);
+    await vi.advanceTimersByTimeAsync(50);
     await Promise.all(promises);
   });
 
@@ -42,7 +50,7 @@ describe('esiQueueInterceptor', () => {
       esiQueueInterceptor(dummyReq, nextMock);
     }
     
-    await new Promise(r => setTimeout(r, 0));
+    await vi.advanceTimersByTimeAsync(0);
     expect(active).toBe(5);
 
     let sixthResolved = false;
@@ -50,7 +58,7 @@ describe('esiQueueInterceptor', () => {
       sixthResolved = true;
     }).catch(() => {});
 
-    await new Promise(r => setTimeout(r, 0));
+    await vi.advanceTimersByTimeAsync(0);
     expect(active).toBe(5); // Still 5 active, 6th is queued
     expect(sixthResolved).toBe(false);
 
@@ -58,7 +66,7 @@ describe('esiQueueInterceptor', () => {
     const resolver = nextResolvers[0];
     if (resolver) resolver();
     
-    await new Promise(r => setTimeout(r, 5));
+    await vi.advanceTimersByTimeAsync(5);
     expect(active).toBe(6); // Total times nextMock was called
   });
 });

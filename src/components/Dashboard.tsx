@@ -4,36 +4,29 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
 
-import { useCharacterStore } from '../store/useCharacterStore';
-import { logger } from '../utils/logger';
+import { useBoundStore } from '../store/useBoundStore';
 import { CharacterCard } from './CharacterCard';
 import { useEsiWorkerManager } from '../hooks/useEsiWorkerManager';
-import { SettingsRepository } from '../repositories/SettingsRepository';
+import { useSettingsStore } from '../store/useSettingsStore';
 import { CharacterService } from '../services/CharacterService';
 import { Button } from './ui/Button';
 
 export const Dashboard: React.FC = () => {
-  const characterIds = useCharacterStore(useShallow((state) => Object.keys(state.characters)));
+  const characterIds = useBoundStore(useShallow((state) => Object.keys(state.characters)));
   const [mounted, setMounted] = useState<boolean>(false);
-  const [isMockMode, setIsMockMode] = useState<boolean>(false);
+  const isMockMode = useSettingsStore((state) => state.isMockMode);
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const mockMode = SettingsRepository.getMockMode();
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsMockMode(mockMode);
-      setMounted(true);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(`[Dashboard] Critical Failure: LocalStorage read failed during mock mode initialization. Details: ${errorMessage}`, error);
-      throw error; // Fail loudly
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
   }, []);
 
   useEsiWorkerManager();
 
   const toggleMockMode = () => {
+    const newMockMode = !isMockMode;
+    useSettingsStore.getState().setMockMode(newMockMode);
     CharacterService.toggleMockMode(isMockMode);
   };
 

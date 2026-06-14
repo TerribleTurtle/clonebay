@@ -1,11 +1,11 @@
 import { get, set } from 'idb-keyval';
 import { logger } from '../utils/logger';
-import { IEsiService } from './esi/IEsiService';
+import { IUniverseEsiService } from './esi/IEsiService';
 
 const CACHE_KEY = 'eve_name_cache';
 
 export class NameCacheService {
-  constructor(private esiService: IEsiService) {}
+  constructor(private esiService: IUniverseEsiService) {}
 
   /**
    * Resolves a list of EVE IDs to their names.
@@ -61,7 +61,7 @@ export class NameCacheService {
       let cacheUpdated = false;
 
       try {
-        const response = await this.esiService.universe.resolveNames(missingIds);
+        const response = await this.esiService.resolveNames(missingIds);
 
         if (response && response.data) {
           for (const resolvedName of response.data) {

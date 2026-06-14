@@ -1,5 +1,5 @@
 import * as AuthRepository from '../auth/AuthRepository';
-import { useCharacterStore } from '../store/useCharacterStore';
+import { useBoundStore } from '../store/useBoundStore';
 import { SettingsRepository } from '../repositories/SettingsRepository';
 import { logger } from '../utils/logger';
 
@@ -7,7 +7,7 @@ export class CharacterService {
   static async removeAndReload(id: string): Promise<void> {
     try {
       await AuthRepository.removeCharacter(id);
-      useCharacterStore.getState().deleteCharacterState(id);
+      useBoundStore.getState().deleteCharacterState(id);
       window.location.reload();
     } catch (error) {
       logger.error(`Failed to remove character ${id}:`, error);
@@ -19,7 +19,7 @@ export class CharacterService {
     try {
       const newMockMode = !currentMode;
       SettingsRepository.setMockMode(newMockMode);
-      useCharacterStore.getState().clearAll();
+      useBoundStore.getState().clearAll();
       window.location.reload();
     } catch (error) {
       logger.error("Failed to toggle mock mode:", error);

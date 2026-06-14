@@ -2,38 +2,9 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addOrUpdateCharacter, getPkceState, getCodeVerifier, clearPkceData } from "@/auth/AuthRepository";
-
-import { exchangeCodeForToken } from "@/services/esi/ssoClient";
 import { logger } from "@/utils/logger";
 
-class SsoError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'SsoError';
-  }
-}
-
-class CsrfError extends SsoError {
-  constructor(message: string = "Invalid state parameter (CSRF mismatch).") {
-    super(message);
-    this.name = 'CsrfError';
-  }
-}
-
-class ConfigurationError extends SsoError {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ConfigurationError';
-  }
-}
-
-class SessionDataError extends SsoError {
-  constructor(message: string = "Missing callback parameters or session data.") {
-    super(message);
-    this.name = 'SessionDataError';
-  }
-}
+import { AuthService } from "@/services/AuthService";
 
 function CallbackLogic() {
   const router = useRouter();
@@ -41,53 +12,15 @@ function CallbackLogic() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function handleCallback() {
-      try {
-        const code = searchParams.get("code");
-        const state = searchParams.get("state");
-        const savedState = getPkceState();
-        const codeVerifier = getCodeVerifier();
+    async function processCallback() {
+      const code = searchParams.get("code");
+      const state = searchParams.get("state");
 
-        if (!code || !state || !savedState || !codeVerifier) {
-          throw new SessionDataError();
-        }
-
-        if (state !== savedState) {
-          throw new CsrfError();
-        }
-
-        const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'];
-        if (!clientId) {
-          throw new ConfigurationError("Missing NEXT_PUBLIC_EVE_CLIENT_ID");
-        }
-
-        // @ts-expect-error Next.js will statically replace process.env.NEXT_PUBLIC_EVE_CALLBACK_URL
-        // eslint-disable-next-line no-restricted-properties
-        const redirectUri = process.env.NEXT_PUBLIC_EVE_CALLBACK_URL || `${window.location.origin}/auth/callback`;
-
-        const { accessToken, refreshToken, characterId, characterName } = await exchangeCodeForToken(
-          code,
-          codeVerifier,
-          clientId,
-          redirectUri
-        );
-
-
-        // Store in IndexedDB dictionary
-        await addOrUpdateCharacter(characterId, {
-          accessToken,
-          refreshToken,
-          characterName,
-        });
-
-        router.push("/");
-      } finally {
-        // Clean up session storage regardless of success or failure
-        clearPkceData();
-      }
+      await AuthService.handleCallback(code, state);
+      router.push("/");
     }
 
-    handleCallback().catch((err) => {
+    processCallback().catch((err) => {
       logger.error("SSO Callback Critical Error", err);
       setError(err instanceof Error ? err.message : "Unknown error");
     });

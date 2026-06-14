@@ -60,7 +60,7 @@ async function pollLoop(workerContext: WorkerContext) {
 
 async function pollData(esiService: IEsiService, workerContext: WorkerContext): Promise<void> {
   const isMockMode = activeMockMode;
-  const nameCache = new NameCacheService(esiService);
+  const nameCache = new NameCacheService(esiService.universe);
   const structuresCache = new Map<
     number,
     Promise<EsiResponse<EsiCorporationStructure[]> | null>

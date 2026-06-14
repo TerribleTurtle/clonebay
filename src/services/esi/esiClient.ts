@@ -4,7 +4,7 @@ import { logger } from '../../utils/logger';
 import { z } from 'zod';
 import { esiQueueInterceptor } from '../../utils/esiQueue';
 import { checkDailyDowntime, getAdjustedNow, isPaused, updateClockDrift, checkAndApplyRateLimitError, sleep } from './esiRateLimit';
-import { refreshAccessToken } from '../../auth/esiAuth';
+import { refreshAccessToken } from '../../auth/AuthService';
 
 const DEFAULT_RETRIES = 3;
 const HTTP_STATUS_OK = 200;
@@ -148,20 +148,7 @@ export const esiRetryInterceptor: HttpInterceptor = async (req, next) => {
   return attempt(maxRetries);
 };
 
-export const esiValidationInterceptor: HttpInterceptor = async (req, next) => {
-  const response = await next(req);
-  
-  if (response.status === HTTP_STATUS_OK && response.data && req.context.schema) {
-    try {
-      response.data = await req.context.schema.parseAsync(response.data);
-    } catch (e) {
-      logger.error(`Failed to parse ESI response for ${req.url}:`, e);
-      throw e;
-    }
-  }
-  
-  return response;
-};
+
 
 export const esiClient = new HttpClient()
   .use(esiDowntimeInterceptor)
@@ -170,8 +157,7 @@ export const esiClient = new HttpClient()
   .use(esiQueueInterceptor)
   .use(esiRateLimitInterceptor)
   .use(esiAuthInterceptor)
-  .use(esiRetryInterceptor)
-  .use(esiValidationInterceptor);
+  .use(esiRetryInterceptor);
 
 export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number = DEFAULT_RETRIES): Promise<EsiResponse<T>> {
   try {
@@ -182,7 +168,6 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
       context: {
         characterId: options.characterId,
         accessToken: options.accessToken,
-        schema: options.schema,
         retries
       }
     };
@@ -190,8 +175,19 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
     if (res.status === HTTP_STATUS_NOT_MODIFIED) {
       throw new Error('ESI request failed with status 304: Not Modified');
     }
+    
+    let parsedData = res.data;
+    if (res.status === HTTP_STATUS_OK && parsedData !== null) {
+      try {
+        parsedData = await options.schema.parseAsync(parsedData);
+      } catch (e) {
+        logger.error(`Failed to parse ESI response for ${options.url}:`, e);
+        throw e;
+      }
+    }
+
     return {
-      data: res.data,
+      data: parsedData,
       status: res.esiStatus,
       cached: res.cached
     };

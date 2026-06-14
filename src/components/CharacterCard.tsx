@@ -1,10 +1,12 @@
+"use client";
 
 import { useShallow } from 'zustand/react/shallow';
-import { useCharacterStore } from '../store/useCharacterStore';
+import { useBoundStore } from '../store/useBoundStore';
 import { CharacterPortrait } from './ui/CharacterPortrait';
 import { CharacterMetrics } from './ui/CharacterMetrics';
 import { CharacterStatusBoard } from './ui/CharacterStatusBoard';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { SkeletonText } from './ui/SkeletonText';
 import { useState } from 'react';
 import { useCharacterConfigStore } from '../store/useCharacterConfigStore';
 import { CharacterSettingsDialog } from './ui/CharacterSettingsDialog';
@@ -17,7 +19,7 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
-  const status = useCharacterStore(useShallow((state) => state.characters[characterId]));
+  const status = useBoundStore(useShallow((state) => state.characters[characterId]));
   const charConfig = useCharacterConfigStore((state) => state.configs[Number(characterId)]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
@@ -63,7 +65,7 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
         <button 
           type="button"
           onClick={() => setIsSettingsOpen(true)}
-          className="text-zinc-600 hover:text-amber-500 active:text-amber-500 font-mono text-xs sm:text-xs text-sm cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center leading-none transition-colors"
+          className="text-zinc-600 hover:text-amber-500 active:text-amber-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-cyan font-mono text-xs sm:text-xs text-sm cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center leading-none transition-colors"
           title="Settings"
         >
           [⚙]
@@ -71,7 +73,7 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
         <button 
           type="button"
           onClick={handleRemove}
-          className="text-zinc-600 hover:text-status-red active:text-status-red font-mono text-xs sm:text-xs text-sm cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center leading-none transition-colors"
+          className="text-zinc-600 hover:text-status-red active:text-status-red focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-red font-mono text-xs sm:text-xs text-sm cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center leading-none transition-colors"
           title="Remove Character"
         >
           [X]
@@ -108,10 +110,10 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
 
           <div className="flex flex-col gap-1 text-xs font-mono tabular-nums" role="status" aria-live="polite">
             <span className="text-zinc-400 flex items-center gap-1">
-              ISK: <span className="text-status-yellow font-bold tabular-nums" aria-label={`ISK: ${isk}`}>{isk}</span>
+              ISK: <span className="text-status-yellow font-bold tabular-nums" aria-label={`ISK: ${isk}`}>{isk === '---' ? <SkeletonText width="w-16" /> : isk}</span>
             </span>
             <span className="text-zinc-400 flex items-center gap-1">
-              Total SP: <span className="text-status-green font-bold tabular-nums" aria-label={`Total SP: ${totalSp}`}>{totalSp}</span>
+              Total SP: <span className="text-status-green font-bold tabular-nums" aria-label={`Total SP: ${totalSp}`}>{totalSp === '---' ? <SkeletonText width="w-16" /> : totalSp}</span>
             </span>
           </div>
         </div>
@@ -119,7 +121,10 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
 
       {/* Main Content Scaffold */}
       <div className="flex-1 flex flex-col mt-3 min-w-0">
-        <CharacterMetrics data={metrics} />
+        <CharacterMetrics data={{
+          ...metrics,
+          fatigueTimer: metrics.fatigueTimer === '00:00:00' ? <SkeletonText width="w-16" /> : metrics.fatigueTimer
+        }} />
       </div>
 
       <div className="mt-0">

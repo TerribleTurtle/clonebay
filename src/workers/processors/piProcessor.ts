@@ -48,7 +48,14 @@ export async function processPi(
         return esiService.industry.getPlanetLayout(charId, accessToken, p.planet_id);
       });
       
-      const layouts = await Promise.all(layoutPromises);
+      const layoutsSettled = await Promise.allSettled(layoutPromises);
+      const successfulLayouts = layoutsSettled.filter(r => r.status === 'fulfilled');
+      
+      if (planetsResult.data.length > 0 && successfulLayouts.length === 0) {
+        throw new Error('All PI layout requests failed to fetch.');
+      }
+      
+      const layouts = layoutsSettled.map(r => r.status === 'fulfilled' ? r.value : null);
 
       const allPins: PiPinState[] = [];
       for (let i = 0; i < layouts.length; i++) {
@@ -98,13 +105,16 @@ export async function processPi(
       
       const piContext: { alerts: string[] } = { alerts: [] };
       if (alerts && alerts.length > 0) {
-        const planetIds = Array.from(new Set(alerts.map(a => a.planetId)));
+        const planetIds = Array.from(new Set(alerts.map(a => a.type === 'planet' ? a.planetId : undefined).filter((id): id is number => id !== undefined)));
         
         const systemIds = planetIds.map(pid => planetsResult.data?.find(p => p.planet_id === pid)?.solar_system_id).filter((id): id is number => id !== undefined);
         const idsToResolve = Array.from(new Set([...planetIds, ...systemIds]));
         const resolvedNames = await nameCache.resolveIdsToNames(idsToResolve);
         
         piContext.alerts = alerts.map(a => {
+          if (a.type === 'dormant') {
+            return a.message;
+          }
           const planetInfo = planetsResult.data?.find(p => p.planet_id === a.planetId);
           const planetName = resolvedNames[a.planetId] || `Planet ${a.planetId}`;
           const systemName = planetInfo && resolvedNames[planetInfo.solar_system_id] ? resolvedNames[planetInfo.solar_system_id] : 'Unknown System';

@@ -3,6 +3,7 @@ import { Inter, Rajdhani, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { GlobalHeader } from "../components/GlobalHeader";
+import { Toaster } from "../components/ui/Toaster";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -96,7 +97,7 @@ export default function RootLayout({
         <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col">
           {children}
         </main>
-
+        <Toaster />
       </body>
     </html>
   );

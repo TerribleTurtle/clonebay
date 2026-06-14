@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { getAuthDictionary, addOrUpdateCharacter } from './AuthRepository';
 import { logger } from '../utils/logger';
+import { ENV } from '../config/env';
 
 export const EsiTokenRefreshResponseSchema = z.object({
   access_token: z.string(),
@@ -9,69 +9,37 @@ export const EsiTokenRefreshResponseSchema = z.object({
   refresh_token: z.string().optional(),
 }).passthrough();
 
-const refreshPromises: Record<string, Promise<string>> = {};
-
-export async function refreshAccessToken(characterId: string): Promise<string> {
-  const authDict = await getAuthDictionary();
-  const auth = authDict[characterId];
-  if (!auth) {
-    throw new Error(`No auth data found for character ${characterId}`);
-  }
-
-  if (!refreshPromises[characterId]) {
-    const refreshTask = (async () => {
-      // @ts-expect-error - Next.js static exports require dot notation but TS strict config complains without it
-      const clientId = process.env.NEXT_PUBLIC_EVE_CLIENT_ID || '';
-      if (!clientId) {
-        throw new Error("NEXT_PUBLIC_EVE_CLIENT_ID is missing in worker context!");
-      }
-      let refreshResponse;
-      try {
-        // eslint-disable-next-line no-restricted-globals
-        refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            grant_type: 'refresh_token',
-            refresh_token: auth.refreshToken,
-            client_id: clientId,
-          }),
-        });
-      } catch (error) {
-        logger.error(`Network error refreshing access token for character ${characterId}`, error);
-        throw new Error(`Network error refreshing access token for character ${characterId}: ${error}`);
-      }
-      if (refreshResponse.ok) {
-        const rawData = await refreshResponse.json();
-        const refreshData = await EsiTokenRefreshResponseSchema.parseAsync(rawData);
-        
-        auth.accessToken = refreshData.access_token;
-        if (refreshData.refresh_token) {
-          auth.refreshToken = refreshData.refresh_token;
-        }
-        await addOrUpdateCharacter(characterId, auth);
-        return auth.accessToken;
-      } else {
-        throw new Error(`ESI OAuth Refresh failed with status ${refreshResponse.status}`);
-      }
-    })();
-
-    const REFRESH_TIMEOUT_MS = 15000;
-    const timeoutTask = new Promise<string>((_, reject) => {
-      setTimeout(() => reject(new Error('Refresh token request timed out')), REFRESH_TIMEOUT_MS);
+export async function fetchNewToken(characterId: string, currentRefreshToken: string): Promise<{ accessToken: string, refreshToken?: string }> {
+  const clientId = ENV.NEXT_PUBLIC_EVE_CLIENT_ID;
+  let refreshResponse;
+  try {
+    // eslint-disable-next-line no-restricted-globals
+    refreshResponse = await fetch('https://login.eveonline.com/v2/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: currentRefreshToken,
+        client_id: clientId,
+      }),
     });
-
-    const currentPromise = Promise.race([refreshTask, timeoutTask]).finally(() => {
-      if (refreshPromises[characterId] === currentPromise) {
-        delete refreshPromises[characterId];
-      }
-    });
-
-    refreshPromises[characterId] = currentPromise;
+  } catch (error) {
+    logger.error(`Network error refreshing access token for character ${characterId}`, error);
+    throw new Error(`Network error refreshing access token for character ${characterId}: ${error}`);
   }
-
-  return refreshPromises[characterId];
+  if (refreshResponse.ok) {
+    const rawData = await refreshResponse.json();
+    const refreshData = await EsiTokenRefreshResponseSchema.parseAsync(rawData);
+    
+    return {
+      accessToken: refreshData.access_token,
+      ...(refreshData.refresh_token !== undefined ? { refreshToken: refreshData.refresh_token } : {})
+    };
+  } else {
+    throw new Error(`ESI OAuth Refresh failed with status ${refreshResponse.status}`);
+  }
 }
+
 
 export const ESI_SCOPES = [
   "esi-skills.read_skillqueue.v1",

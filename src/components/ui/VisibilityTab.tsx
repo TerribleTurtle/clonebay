@@ -1,3 +1,4 @@
+"use client";
 import { useCharacterConfigStore, CharacterVisibility } from '../../store/useCharacterConfigStore';
 
 interface VisibilityTabProps {
@@ -7,18 +8,18 @@ interface VisibilityTabProps {
 export function VisibilityTab({ characterId }: VisibilityTabProps) {
   const configStore = useCharacterConfigStore();
   
-  const charConfig = configStore.configs[Number(characterId)] || {
+  const charConfig = configStore.configs[characterId] || {
     visibility: { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true },
     overrides: {}
   };
 
   const handleVisibilityToggle = (key: keyof CharacterVisibility) => {
-    configStore.setVisibility(Number(characterId), key, !charConfig.visibility[key]);
+    configStore.setVisibility(characterId, key, !charConfig.visibility[key]);
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="mb-4 border-b border-zinc-800 pb-2 text-amber-500 uppercase tracking-widest">
+      <h3 className="mb-4 border-b border-zinc-800 pb-2 text-status-yellow uppercase tracking-widest">
         Module Visibility
       </h3>
       <p className="mb-6 text-sm text-zinc-500">
@@ -35,7 +36,7 @@ export function VisibilityTab({ characterId }: VisibilityTabProps) {
         ].map(({ key, label }) => (
           <label
             key={key}
-            className="flex cursor-pointer items-center gap-3 border border-transparent p-2 transition-colors hover:border-zinc-800 hover:bg-zinc-800/50"
+            className="flex min-h-[44px] cursor-pointer items-center gap-3 border border-transparent p-2 transition-colors hover:border-zinc-800 hover:bg-zinc-800/50"
           >
             <div className="relative flex items-center">
               <input
@@ -44,9 +45,9 @@ export function VisibilityTab({ characterId }: VisibilityTabProps) {
                 onChange={() => handleVisibilityToggle(key)}
                 className="peer sr-only"
               />
-              <div className="flex h-5 w-5 items-center justify-center border border-zinc-600 bg-zinc-950 transition-colors peer-checked:border-amber-500 peer-checked:bg-amber-500/20">
+              <div className="flex h-5 w-5 items-center justify-center border border-zinc-600 bg-zinc-950 transition-colors peer-checked:border-status-yellow peer-checked:bg-status-yellow/20">
                 {charConfig.visibility[key] && (
-                  <div className="h-2.5 w-2.5 bg-amber-500" />
+                  <div className="h-2.5 w-2.5 bg-status-yellow" />
                 )}
               </div>
             </div>

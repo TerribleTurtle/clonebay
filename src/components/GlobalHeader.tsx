@@ -11,7 +11,7 @@ export const GlobalHeader: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         {/* Left Side: Logo / Brand */}
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/" className="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 p-2 min-h-[44px] min-w-[44px]" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="w-4 h-4 bg-status-cyan shadow-[0_0_10px_rgba(34,211,238,0.6)] rotate-45 group-hover:rotate-90 group-hover:bg-amber-400 group-hover:shadow-[0_0_15px_rgba(251,191,36,0.6)] transition-all duration-300"></div>
             <h1 className="font-mono font-bold tracking-[0.2em] text-zinc-100 uppercase text-lg flex items-center group-hover:text-amber-400 transition-colors">
               CLONE<span className="text-status-cyan group-hover:text-amber-400 transition-colors">_</span>BAY
