@@ -38,7 +38,9 @@ describe('ssoClient', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
-      json: async () => mockResponse
+      status: 200,
+      json: async () => mockResponse,
+      text: async () => JSON.stringify(mockResponse)
     } as unknown as Response);
 
     const result = await exchangeCodeForToken(mockCode, mockCodeVerifier, mockClientId, mockRedirectUri);
@@ -71,7 +73,9 @@ describe('ssoClient', () => {
 
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
-      json: async () => mockResponse
+      status: 200,
+      json: async () => mockResponse,
+      text: async () => JSON.stringify(mockResponse)
     } as unknown as Response);
 
     await expect(exchangeCodeForToken(mockCode, mockCodeVerifier, mockClientId, mockRedirectUri))

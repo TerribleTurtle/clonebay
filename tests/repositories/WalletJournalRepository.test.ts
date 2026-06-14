@@ -44,20 +44,22 @@ describe('WalletJournalRepository', () => {
     expect(dict).toEqual({ char1: [] });
   });
 
-  it('filters out non-actionable ref_types and old entries', async () => {
+  it('saves character wallet journal entries', async () => {
     await idb.del('eve_wallet_journal');
     
     const mockEntries = [
-      { id: 1, ref_type: 'bounty_prizes', date: '2025-01-01T10:00:00Z' }, // Keep
-      { id: 2, ref_type: 'unknown_type', date: '2025-01-01T10:00:00Z' }, // Filter out (non-actionable)
-      { id: 3, ref_type: 'market_transaction', date: '2024-10-01T10:00:00Z' } // Filter out (older than 45 days)
+      { id: 1, ref_type: 'bounty_prizes', date: '2025-01-01T10:00:00Z' },
+      { id: 2, ref_type: 'unknown_type', date: '2025-01-01T10:00:00Z' },
+      { id: 3, ref_type: 'market_transaction', date: '2024-10-01T10:00:00Z' }
     ];
 
     await saveCharacterWalletJournal('char1', mockEntries as unknown as EsiWalletJournalEntry[]);
     const dict = await idb.get('eve_wallet_journal');
     
-    expect(dict?.char1.length).toBe(1);
+    expect(dict?.char1.length).toBe(3);
     expect(dict?.char1[0].id).toBe(1);
+    expect(dict?.char1[1].id).toBe(2);
+    expect(dict?.char1[2].id).toBe(3);
   });
 
   it('gets character wallet journal', async () => {

@@ -51,7 +51,7 @@ describe('sdeClient', () => {
       })
     );
 
-    await expect(fetchSdeType(2544)).rejects.toThrow('Failed to fetch SDE type 2544: Internal Server Error');
+    await expect(fetchSdeType(2544)).rejects.toThrow('Failed to fetch SDE type 2544: HTTP 500');
   });
 });
 

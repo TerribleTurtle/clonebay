@@ -28,11 +28,11 @@ describe('SettingsRepository', () => {
     expect(localStorage.getItem('eve_mock_mode')).toBe('true');
   });
 
-  it('handles localStorage errors gracefully in getMockMode', () => {
+  it('fails loudly on localStorage errors in getMockMode', () => {
     const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('Denied');
     });
-    expect(SettingsRepository.getMockMode()).toBe(false);
+    expect(() => SettingsRepository.getMockMode()).toThrow('Denied');
     expect(logger.error).toHaveBeenCalled();
     spy.mockRestore();
   });
