@@ -123,7 +123,7 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
       <div className="flex-1 flex flex-col mt-3 min-w-0">
         <CharacterMetrics data={{
           ...metrics,
-          fatigueTimer: metrics.fatigueTimer === '00:00:00' ? <SkeletonText width="w-16" /> : metrics.fatigueTimer
+          fatigueTimer: metrics.fatigueTimer === '---' ? <SkeletonText width="w-16" /> : metrics.fatigueTimer
         }} />
       </div>
 
