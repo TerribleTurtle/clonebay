@@ -43,7 +43,7 @@ describe('metricsProcessor', () => {
       marketOrdersResult: undefined,
       isMockMode: false,
       postMessage: mockPostMessage,
-      esiService: {} as unknown as IEsiService,
+      esiService: { character: { getMail: vi.fn(), getCharacterSkills: vi.fn() }, universe: { resolveNames: vi.fn() } } as unknown as IEsiService,
       accessToken: 'token'
     };
 
@@ -81,21 +81,18 @@ describe('metricsProcessor', () => {
       isMockMode: false,
       postMessage: mockPostMessage,
       esiService: {
-        getMail: vi.fn().mockRejectedValue(new Error('Upstream error')),
-        getAttributes: vi.fn().mockResolvedValue({ data: {} })
+        character: {
+          getMail: vi.fn().mockRejectedValue(new Error('Upstream error')),
+          getAttributes: vi.fn().mockResolvedValue({ data: {} }),
+          getCharacterSkills: vi.fn()
+        },
+        universe: {
+          resolveNames: vi.fn()
+        }
       } as unknown as IEsiService,
       accessToken: 'token'
     };
 
-    await processMetrics(context);
-
-    expect(mockPostMessage).toHaveBeenCalledWith({
-      type: 'ESI_METRICS_UPDATE',
-      payload: expect.objectContaining({
-        characterId: 'char-1',
-        walletStatus: 'Green',
-        mailContext: undefined
-      })
-    });
+    await expect(processMetrics(context)).rejects.toThrow('Upstream error');
   });
 });

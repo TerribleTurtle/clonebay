@@ -20,7 +20,8 @@ export async function refreshAccessToken(characterId: string): Promise<string> {
 
   if (!refreshPromises[characterId]) {
     const refreshTask = (async () => {
-      const clientId = process.env['NEXT_PUBLIC_EVE_CLIENT_ID'] || '';
+      // @ts-expect-error - Next.js static exports require dot notation but TS strict config complains without it
+      const clientId = process.env.NEXT_PUBLIC_EVE_CLIENT_ID || '';
       if (!clientId) {
         throw new Error("NEXT_PUBLIC_EVE_CLIENT_ID is missing in worker context!");
       }

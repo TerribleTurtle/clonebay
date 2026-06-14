@@ -95,6 +95,7 @@ export async function processSkills(
           `Error generating hover context for skills processor for ${charId}`,
           e,
         );
+        throw e;
       }
 
       postMessage({
@@ -142,5 +143,6 @@ export async function processSkills(
         data: null,
       },
     });
+    throw error;
   }
 }

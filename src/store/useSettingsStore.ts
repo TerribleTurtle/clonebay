@@ -31,10 +31,3 @@ export const useSettingsStore = create<SettingsState>()(
   )
 );
 
-
-export const clearAllStorage = () => {
-  if (typeof window !== "undefined") {
-    localStorage.clear();
-    sessionStorage.clear();
-  }
-};

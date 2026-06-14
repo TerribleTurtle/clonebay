@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
 import type { EsiClones, EsiFatigue, EsiTransaction, EsiShip, EsiLocation, EsiMailLabels, EsiContract, EsiMarketOrder } from '../schemas/esi';
 import type { EsiCorporationStructure } from '../schemas/esi/corporation';
 
@@ -56,6 +55,31 @@ export interface CharacterStatus {
   ordersContext?: { topOrders: string[] };
   mailContext?: { unreadSubjects: string[] };
   warContext?: { alerts: string[] };
+}
+
+export function serializeCharacterState(state: CharacterStoreState): Partial<CharacterStoreState> {
+  return {
+    ...state,
+    characters: Object.fromEntries(
+      Object.entries(state.characters).map(([id, char]) => {
+        const { transactions, mail, contracts, marketOrders, ...rest } = char;
+        const serializedChar: CharacterStatus = { ...rest };
+        if (transactions) {
+          serializedChar.transactions = { count: Array.isArray(transactions) ? transactions.length : transactions.count };
+        }
+        if (mail) {
+          serializedChar.mail = { total_unread_count: mail.total_unread_count, labels: [] };
+        }
+        if (contracts) {
+          serializedChar.contracts = { count: Array.isArray(contracts) ? contracts.length : contracts.count };
+        }
+        if (marketOrders) {
+          serializedChar.marketOrders = { count: Array.isArray(marketOrders) ? marketOrders.length : marketOrders.count };
+        }
+        return [id, serializedChar];
+      })
+    ),
+  };
 }
 
 /**
@@ -163,24 +187,7 @@ export const useCharacterStore = create<CharacterStoreState>()(
     }),
     {
       name: 'clonebay-storage',
-      partialize: (state) => ({
-        ...state,
-        characters: Object.fromEntries(
-          Object.entries(state.characters).map(([id, char]) => {
-            const { transactions, mail, contracts, marketOrders, ...rest } = char;
-            return [
-              id,
-              {
-                ...rest,
-                transactions: transactions ? { count: Array.isArray(transactions) ? transactions.length : transactions.count } : undefined,
-                mail: mail ? { total_unread_count: mail.total_unread_count } : undefined,
-                contracts: contracts ? { count: Array.isArray(contracts) ? contracts.length : contracts.count } : undefined,
-                marketOrders: marketOrders ? { count: Array.isArray(marketOrders) ? marketOrders.length : marketOrders.count } : undefined,
-              }
-            ];
-          })
-        ),
-      }),
+      partialize: serializeCharacterState,
     }
   )
 );

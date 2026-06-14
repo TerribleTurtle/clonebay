@@ -31,6 +31,31 @@ export function useCharacterPresenter(status: CharacterStatus | undefined, chara
   const activeOrders = status.marketOrders ? (Array.isArray(status.marketOrders) ? status.marketOrders.length : status.marketOrders.count) : 0;
   const unreadMail = status.mail?.total_unread_count !== undefined ? status.mail.total_unread_count : 0;
 
+  let clonesContextGroups = undefined;
+  if (status.clonesContext) {
+    const grouped: Record<string, typeof status.clonesContext[0] & { count: number }> = {};
+    status.clonesContext.forEach(clone => {
+      const key = clone.locationName;
+      if (!grouped[key]) grouped[key] = { ...clone, count: 0 };
+      grouped[key].count++;
+    });
+    clonesContextGroups = Object.values(grouped);
+  }
+
+  const metrics = {
+    clonesCount,
+    maxClones,
+    clonesContext: clonesContextGroups,
+    fatigueTimer,
+    fatigueContext: status.fatigue?.jump_fatigue_expire_date ? { jumpFatigueExpireDate: status.fatigue.jump_fatigue_expire_date } : undefined,
+    activeShip,
+    shipContext: status.ship ? { shipName: status.ship.ship_name, typeName: status.ship.ship_type_id.toString() } : undefined,
+    activeOrders,
+    ordersContext: status.ordersContext ? status.ordersContext.topOrders.map(o => ({ typeName: o })) : undefined,
+    unreadMail,
+    mailContext: status.mailContext ? status.mailContext.unreadSubjects.map(s => ({ subject: s })) : undefined,
+  };
+
   const statuses = {
     skill: mapStatus(status.skills),
     pi: mapStatus(status.pi),
@@ -47,28 +72,14 @@ export function useCharacterPresenter(status: CharacterStatus | undefined, chara
     war: status.warContext?.alerts
   };
 
-  const metricsContexts = {
-    clonesContext: status.clonesContext,
-    fatigueContext: status.fatigue?.jump_fatigue_expire_date ? { jumpFatigueExpireDate: status.fatigue.jump_fatigue_expire_date } : undefined,
-    shipContext: status.ship ? { shipName: status.ship.ship_name, typeName: status.ship.ship_type_id.toString() } : undefined,
-    ordersContext: status.ordersContext ? status.ordersContext.topOrders.map(o => ({ typeName: o })) : undefined,
-    mailContext: status.mailContext ? status.mailContext.unreadSubjects.map(s => ({ subject: s })) : undefined,
-  };
-
   return {
     displayName,
     locationText,
     isk,
     totalSp,
-    clonesCount,
-    maxClones,
-    fatigueTimer,
-    activeShip,
-    activeOrders,
-    unreadMail,
+    metrics,
     statuses,
     alerts,
-    metricsContexts,
     stationName: status.stationName,
     structureId: status.structureId,
   };

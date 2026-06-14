@@ -12,15 +12,14 @@ describe('structureProcessor', () => {
   beforeEach(() => {
     mockPostMessage = vi.fn();
     mockEsiService = {
-      getCharacterRoles: vi.fn(),
-      getPublicCharacterInfo: vi.fn(),
-      getCorporationStructures: vi.fn()
+      character: { getCharacterRoles: vi.fn(), getPublicCharacterInfo: vi.fn() },
+      corporation: { getCorporationStructures: vi.fn() }
     };
     mockCache = new Map();
   });
 
   it('should post Green status and empty data when character has no roles', async () => {
-    mockEsiService.getCharacterRoles.mockResolvedValue({
+    mockEsiService.character.getCharacterRoles.mockResolvedValue({
       data: { roles_at_hq: [], roles_at_base: [], roles_at_other: [] }
     });
 
@@ -33,9 +32,9 @@ describe('structureProcessor', () => {
   });
 
   it('should intercept errors cleanly and post Red status', async () => {
-    mockEsiService.getCharacterRoles.mockRejectedValue(new Error('ESI Error'));
+    mockEsiService.character.getCharacterRoles.mockRejectedValue(new Error('ESI Error'));
 
-    await processStructures('char-1', mockEsiService, 'token', mockCache, mockPostMessage);
+    await expect(processStructures('char-1', mockEsiService, 'token', mockCache, mockPostMessage)).rejects.toThrow();
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
@@ -44,10 +43,10 @@ describe('structureProcessor', () => {
   });
 
   it('should use cache for corporation structures to avoid 429 limits', async () => {
-    mockEsiService.getCharacterRoles.mockResolvedValue({
+    mockEsiService.character.getCharacterRoles.mockResolvedValue({
       data: { roles_at_hq: ['Station_Manager'], roles_at_base: [], roles_at_other: [] }
     });
-    mockEsiService.getPublicCharacterInfo.mockResolvedValue({
+    mockEsiService.character.getPublicCharacterInfo.mockResolvedValue({
       data: { corporation_id: 12345 }
     });
 
@@ -58,7 +57,7 @@ describe('structureProcessor', () => {
     await processStructures('char-1', mockEsiService, 'token', mockCache, mockPostMessage);
 
     // It shouldn't have called getCorporationStructures since cache is hit
-    expect(mockEsiService.getCorporationStructures).not.toHaveBeenCalled();
+    expect(mockEsiService.corporation.getCorporationStructures).not.toHaveBeenCalled();
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

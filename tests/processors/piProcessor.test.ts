@@ -18,7 +18,7 @@ describe('piProcessor', () => {
     vi.useFakeTimers();
 
     mockEsiService = {
-      getPlanetLayout: vi.fn()
+      industry: { getPlanetLayout: vi.fn() }
     };
     mockNameCache = { resolveIdsToNames: vi.fn().mockResolvedValue({}) };
     
@@ -55,7 +55,7 @@ describe('piProcessor', () => {
       ] as EsiPlanetLayout['pins']
     };
 
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
+    mockEsiService.industry.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
     await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
@@ -82,7 +82,7 @@ describe('piProcessor', () => {
         baseLayout.pins![1]
       ] as EsiPlanetLayout['pins']
     };
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
+    mockEsiService.industry.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
     await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
@@ -109,7 +109,7 @@ describe('piProcessor', () => {
         baseLayout.pins![1]
       ] as EsiPlanetLayout['pins']
     };
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
+    mockEsiService.industry.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
     await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
@@ -138,7 +138,7 @@ describe('piProcessor', () => {
         }
       ] as EsiPlanetLayout['pins']
     };
-    mockEsiService.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
+    mockEsiService.industry.getPlanetLayout.mockResolvedValue({ status: 'Green', cached: false, data: validLayout });
 
     await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
 
@@ -164,9 +164,9 @@ describe('piProcessor', () => {
     const mockPlanets = [EsiPlanetSchema.parse(mockPlanetsRaw[0])];
     
     // Explicitly reject to hit the catch block
-    mockEsiService.getPlanetLayout.mockRejectedValue(new Error('Test error'));
+    mockEsiService.industry.getPlanetLayout.mockRejectedValue(new Error('Test error'));
 
-    await processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage);
+    await expect(processPi('char-1', { status: 'Green', cached: false, data: mockPlanets }, mockEsiService, 'token', mockNameCache, mockPostMessage)).rejects.toThrow();
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

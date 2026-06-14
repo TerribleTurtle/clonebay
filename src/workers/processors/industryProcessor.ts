@@ -69,5 +69,6 @@ export async function processIndustry(
   } catch (error) {
     logger.error(`ESI Worker: Error calculating industry status for ${charId}`, error);
     postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'industry', status: 'Red', data: null } });
+    throw error;
   }
 }

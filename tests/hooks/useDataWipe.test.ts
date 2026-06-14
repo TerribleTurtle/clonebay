@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useDataWipe } from '../../src/hooks/useDataWipe';
 import * as AuthRepository from '../../src/auth/AuthRepository';
-import { clearAllStorage } from '../../src/store/useSettingsStore';
+import { BrowserStorageService } from '../../src/services/BrowserStorageService';
 
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -13,8 +13,10 @@ vi.mock('../../src/auth/AuthRepository', () => ({
   clearAuthDictionary: vi.fn()
 }));
 
-vi.mock('../../src/store/useSettingsStore', () => ({
-  clearAllStorage: vi.fn()
+vi.mock('../../src/services/BrowserStorageService', () => ({
+  BrowserStorageService: {
+    clearAllStorage: vi.fn()
+  }
 }));
 
 describe('useDataWipe', () => {
@@ -34,7 +36,7 @@ describe('useDataWipe', () => {
 
     expect(window.confirm).toHaveBeenCalledWith('Are you sure?');
     expect(AuthRepository.clearAuthDictionary).toHaveBeenCalled();
-    expect(clearAllStorage).toHaveBeenCalled();
+    expect(BrowserStorageService.clearAllStorage).toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalledWith('/');
 
     window.confirm = originalConfirm;

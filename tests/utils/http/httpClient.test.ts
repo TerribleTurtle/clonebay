@@ -46,7 +46,7 @@ describe('HttpClient', () => {
     expect(res.esiStatus).toBe('Green');
   });
 
-  it('should fallback to text when JSON fails', async () => {
+  it('should throw an error when JSON fails', async () => {
     const client = new HttpClient();
     global.fetch = vi.fn().mockResolvedValue({
       status: 200,
@@ -55,8 +55,7 @@ describe('HttpClient', () => {
       text: () => Promise.resolve('not-json')
     });
 
-    const res = await client.request({ url: '/test', context: {} });
-    expect(res.data).toBe('not-json');
+    await expect(client.request({ url: '/test', context: {} })).rejects.toThrow();
   });
 
   it('should handle no content', async () => {

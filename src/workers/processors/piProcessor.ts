@@ -45,7 +45,7 @@ export async function processPi(
   if (planetsResult && planetsResult.data) {
     try {
       const layoutPromises = planetsResult.data.map(p => {
-        return esiService.getPlanetLayout(charId, accessToken, p.planet_id);
+        return esiService.industry.getPlanetLayout(charId, accessToken, p.planet_id);
       });
       
       const layouts = await Promise.all(layoutPromises);
@@ -157,6 +157,7 @@ export async function processPi(
         type: 'ESI_DATA_UPDATE',
         payload: { characterId: charId, dataType: 'pi', status: 'Red', data: null }
       });
+      throw error;
     }
   } else if (planetsResult?.status === 'Offline') {
     postMessage({

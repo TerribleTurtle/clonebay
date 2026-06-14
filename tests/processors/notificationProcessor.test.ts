@@ -13,8 +13,10 @@ describe('notificationProcessor', () => {
     vi.setSystemTime(new Date('2026-06-13T10:00:00Z'));
     mockPostMessage = vi.fn();
     mockEsiService = {
-      getWar: vi.fn(),
-      resolveNames: vi.fn().mockResolvedValue({ data: [] })
+      universe: {
+        getWar: vi.fn(),
+        resolveNames: vi.fn().mockResolvedValue({ data: [] })
+      }
     };
   });
 
@@ -61,7 +63,7 @@ describe('notificationProcessor', () => {
       open_for_allies: false
     };
 
-    mockEsiService.getWar.mockResolvedValue({ data: mockWar });
+    mockEsiService.universe.getWar.mockResolvedValue({ data: mockWar });
 
     await processNotifications('char-1', notifications, mockEsiService, mockPostMessage);
     
@@ -98,7 +100,7 @@ describe('notificationProcessor', () => {
       open_for_allies: false
     };
 
-    mockEsiService.getWar.mockResolvedValue({ data: mockWar });
+    mockEsiService.universe.getWar.mockResolvedValue({ data: mockWar });
 
     await processNotifications('char-1', notifications, mockEsiService, mockPostMessage);
     
@@ -125,22 +127,8 @@ describe('notificationProcessor', () => {
       }
     ];
 
-    mockEsiService.getWar.mockRejectedValue(new Error('Network error'));
+    mockEsiService.universe.getWar.mockRejectedValue(new Error('Network error'));
 
-    // Should not throw, should handle gracefully and post Offline since war couldn't be confirmed active
-    await processNotifications('char-1', notifications, mockEsiService, mockPostMessage);
-    
-    expect(mockPostMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'ESI_DATA_UPDATE',
-        payload: expect.objectContaining({
-          status: 'Offline',
-          data: expect.objectContaining({
-            warStatus: 'Offline',
-            warContext: { alerts: ['Failed to fetch details for war ID 44'] }
-          })
-        })
-      })
-    );
+    await expect(processNotifications('char-1', notifications, mockEsiService, mockPostMessage)).rejects.toThrow('Network error');
   });
 });

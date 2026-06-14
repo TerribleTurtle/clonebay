@@ -135,7 +135,7 @@ describe('industryProcessor', () => {
     const mockJobs: EsiIndustryJob[] = [{ ...baseJob }];
     const validJobs = z.array(EsiIndustryJobSchema).parse(mockJobs);
 
-    await processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockNameCache, mockPostMessage);
+    await expect(processIndustry('char-1', { status: 'Green', cached: false, data: validJobs }, { status: 'Green', cached: false, data: charSkills }, mockNameCache, mockPostMessage)).rejects.toThrow('Test error');
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

@@ -31,7 +31,7 @@ describe('LiveEsiService', () => {
       cached: false
     });
 
-    const response = await service.getSkillQueue('123', 'token');
+    const response = await service.skills.getSkillQueue('123', 'token');
     expect(response?.data).toEqual(mockData);
     expect(esiClientModule.fetchEsi).toHaveBeenCalledTimes(1);
   });
@@ -42,7 +42,7 @@ describe('LiveEsiService', () => {
     
     vi.mocked(esiClientModule.fetchEsi).mockRejectedValueOnce(zodError);
 
-    await expect(service.getSkillQueue('123', 'token')).rejects.toThrow(z.ZodError);
+    await expect(service.skills.getSkillQueue('123', 'token')).rejects.toThrow(z.ZodError);
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('ESI Worker: Contract Validation Error fetching skills'),
       zodError
@@ -55,7 +55,7 @@ describe('LiveEsiService', () => {
     
     vi.mocked(esiClientModule.fetchEsi).mockRejectedValueOnce(typeError);
 
-    await expect(service.getSkillQueue('123', 'token')).rejects.toThrow(TypeError);
+    await expect(service.skills.getSkillQueue('123', 'token')).rejects.toThrow(TypeError);
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('ESI Worker: Network Error fetching skills'),
       'Failed to fetch'
@@ -68,7 +68,7 @@ describe('LiveEsiService', () => {
     
     vi.mocked(esiClientModule.fetchEsi).mockRejectedValueOnce(genericError);
 
-    await expect(service.getSkillQueue('123', 'token')).rejects.toThrow('Generic failure');
+    await expect(service.skills.getSkillQueue('123', 'token')).rejects.toThrow('Generic failure');
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('ESI Worker: Error fetching skills'),
       genericError

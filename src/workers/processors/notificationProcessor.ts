@@ -46,7 +46,7 @@ export async function processNotifications(
     // Fetch details for each war
     for (const warId of Array.from(warIds)) {
       try {
-        const warResponse = await esiService.getWar(warId);
+        const warResponse = await esiService.universe.getWar(warId);
         if (warResponse && warResponse.data) {
           const war = warResponse.data;
           
@@ -85,6 +85,7 @@ export async function processNotifications(
         logger.error(`ESI Worker: Error fetching war details for warId ${warId}`, error);
         warStatus = 'Offline';
         alerts.push(`Failed to fetch details for war ID ${warId}`);
+        throw error;
       }
     }
 
@@ -92,7 +93,7 @@ export async function processNotifications(
     const entityNames: Record<number, string> = {};
     if (entityIdsToResolve.size > 0) {
       try {
-        const resolveResponse = await esiService.resolveNames(Array.from(entityIdsToResolve));
+        const resolveResponse = await esiService.universe.resolveNames(Array.from(entityIdsToResolve));
         if (resolveResponse && resolveResponse.data) {
           for (const item of resolveResponse.data) {
             entityNames[item.id] = item.name;
@@ -100,6 +101,7 @@ export async function processNotifications(
         }
       } catch (error) {
         logger.error(`ESI Worker: Error resolving names for wars`, error);
+        throw error;
       }
     }
 

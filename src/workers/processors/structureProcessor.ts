@@ -13,7 +13,7 @@ export async function processStructures(
   postMessage: (msg: unknown) => void
 ) {
   try {
-    const rolesRes = await esiService.getCharacterRoles(charId, accessToken);
+    const rolesRes = await esiService.character.getCharacterRoles(charId, accessToken);
     if (!rolesRes || !rolesRes.data) {
       postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'structures', status: 'Offline', data: [] } });
       return;
@@ -30,7 +30,7 @@ export async function processStructures(
       return;
     }
 
-    const publicInfoRes = await esiService.getPublicCharacterInfo(charId);
+    const publicInfoRes = await esiService.character.getPublicCharacterInfo(charId);
     if (!publicInfoRes || !publicInfoRes.data || !publicInfoRes.data.corporation_id) {
       postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'structures', status: 'Offline', data: [] } });
       return;
@@ -39,7 +39,7 @@ export async function processStructures(
     const corpId = publicInfoRes.data.corporation_id;
 
     if (!structuresCache.has(corpId)) {
-      structuresCache.set(corpId, esiService.getCorporationStructures(corpId, accessToken));
+      structuresCache.set(corpId, esiService.universe.getCorporationStructures(corpId, accessToken));
     }
 
     const structuresRes = await structuresCache.get(corpId);
@@ -61,5 +61,6 @@ export async function processStructures(
   } catch (err) {
     logger.error(`ESI Worker: Error processing structures for ${charId}`, err);
     postMessage({ type: 'ESI_DATA_UPDATE', payload: { characterId: charId, dataType: 'structures', status: 'Red', data: null } });
+    throw err;
   }
 }

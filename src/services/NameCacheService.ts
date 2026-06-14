@@ -61,7 +61,7 @@ export class NameCacheService {
       let cacheUpdated = false;
 
       try {
-        const response = await this.esiService.resolveNames(missingIds);
+        const response = await this.esiService.universe.resolveNames(missingIds);
 
         if (response && response.data) {
           for (const resolvedName of response.data) {

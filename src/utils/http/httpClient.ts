@@ -106,13 +106,7 @@ export class HttpClient {
       if (fetchResponse.status !== HTTP_STATUS_NO_CONTENT && fetchResponse.status !== HTTP_STATUS_NOT_MODIFIED) {
         const text = await fetchResponse.text();
         if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (error) {
-            console.error('Failed to parse JSON response:', error);
-            // @ts-expect-error fallback if JSON parse fails
-            data = text;
-          }
+          data = JSON.parse(text);
         }
       }
 

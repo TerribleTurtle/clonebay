@@ -10,6 +10,46 @@ export interface PiPinState {
   hasUnroutedMaterials: boolean;
 }
 
+export function evaluateStorage(pin: PiPinState): { status: DashboardStatus; alert?: string } {
+  if (!pin.isStorage || pin.storageCapacity === undefined || pin.storageUsed === undefined) {
+    return { status: 'Green' };
+  }
+
+  if (pin.storageCapacity === 0 && pin.storageUsed > 0) {
+    return { status: 'Red', alert: 'Storage Over Capacity' };
+  } else if (pin.storageCapacity > 0) {
+    const fillRatio = pin.storageUsed / pin.storageCapacity;
+    if (fillRatio >= 1.0) {
+      return { status: 'Red', alert: 'Storage Full' };
+    } else if (fillRatio > YELLOW_THRESHOLD_PI_PERCENT) {
+      return { status: 'Yellow', alert: 'Storage Almost Full' };
+    }
+  }
+  return { status: 'Green' };
+}
+
+export function evaluateExtractor(pin: PiPinState, nowMs: number): { status: DashboardStatus; alert?: string; isActive: boolean } {
+  if (!pin.isExtractor) {
+    return { status: 'Green', isActive: false };
+  }
+
+  if (!pin.extractorExpiryTime) {
+    return { status: 'Red', alert: 'Extractor Stopped', isActive: false };
+  }
+
+  const expiry = Date.parse(pin.extractorExpiryTime);
+  if (expiry <= nowMs) {
+    return { status: 'Red', alert: 'Extraction Program Finished', isActive: false };
+  }
+
+  const remainingMs = expiry - nowMs;
+  if (remainingMs < YELLOW_THRESHOLD_HOURS * MS_IN_HOUR) {
+    return { status: 'Yellow', alert: 'Extraction Program Ending Soon', isActive: true };
+  }
+
+  return { status: 'Green', isActive: true };
+}
+
 /**
  * Calculates the status of a character's Planetary Interaction (PI).
  * - RED: Extractors stopped, OR Storage 100% full, OR unrouted materials detected.
@@ -45,39 +85,23 @@ export function calculatePiStatus(
     if (pin.isStorage && pin.storageCapacity !== undefined && pin.storageUsed !== undefined) {
       hasStorage = true;
       totalStorageUsed += pin.storageUsed;
-      if (pin.storageCapacity === 0 && pin.storageUsed > 0) {
-        alerts.push({ planetId: pin.planetId, message: 'Storage Over Capacity' });
-        status = 'Red';
-      } else if (pin.storageCapacity > 0) {
-        const fillRatio = pin.storageUsed / pin.storageCapacity;
-        if (fillRatio >= 1.0) {
-          alerts.push({ planetId: pin.planetId, message: 'Storage Full' });
-          status = 'Red';
-        } else if (fillRatio > YELLOW_THRESHOLD_PI_PERCENT) {
-          alerts.push({ planetId: pin.planetId, message: 'Storage Almost Full' });
-          if (status === 'Green') status = 'Yellow';
-        }
-      }
     }
 
-    if (pin.isExtractor) {
-      if (!pin.extractorExpiryTime) {
-        alerts.push({ planetId: pin.planetId, message: 'Extractor Stopped' });
-        status = 'Red';
-      } else {
-        const expiry = Date.parse(pin.extractorExpiryTime);
-        if (expiry <= nowMs) {
-          alerts.push({ planetId: pin.planetId, message: 'Extraction Program Finished' });
-          status = 'Red';
-        } else {
-          hasActiveExtractor = true;
-          const remainingMs = expiry - nowMs;
-          if (remainingMs < YELLOW_THRESHOLD_HOURS * MS_IN_HOUR) {
-            alerts.push({ planetId: pin.planetId, message: 'Extraction Program Ending Soon' });
-            if (status === 'Green') status = 'Yellow';
-          }
-        }
-      }
+    const storageEval = evaluateStorage(pin);
+    if (storageEval.alert) {
+      alerts.push({ planetId: pin.planetId, message: storageEval.alert });
+      if (storageEval.status === 'Red') status = 'Red';
+      else if (storageEval.status === 'Yellow' && status === 'Green') status = 'Yellow';
+    }
+
+    const extractorEval = evaluateExtractor(pin, nowMs);
+    if (extractorEval.isActive) {
+      hasActiveExtractor = true;
+    }
+    if (extractorEval.alert) {
+      alerts.push({ planetId: pin.planetId, message: extractorEval.alert });
+      if (extractorEval.status === 'Red') status = 'Red';
+      else if (extractorEval.status === 'Yellow' && status === 'Green') status = 'Yellow';
     }
   }
 

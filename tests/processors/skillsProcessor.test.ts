@@ -127,7 +127,7 @@ describe('skillsProcessor', () => {
       get: () => { throw new Error('Test error'); }
     });
 
-    await processSkills('char-1', badSkillsResult as unknown as EsiResponse<EsiSkillQueue[]>, mockNameCache, mockPostMessage);
+    await expect(processSkills('char-1', badSkillsResult as unknown as EsiResponse<EsiSkillQueue[]>, mockNameCache, mockPostMessage)).rejects.toThrow();
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',

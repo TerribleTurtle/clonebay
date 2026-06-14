@@ -1,6 +1,6 @@
 import { useRouter } from 'next/navigation';
 import { clearAuthDictionary } from '../auth/AuthRepository';
-import { clearAllStorage } from '../store/useSettingsStore';
+import { BrowserStorageService } from '../services/BrowserStorageService';
 import { logger } from '../utils/logger';
 
 export function useDataWipe() {
@@ -10,7 +10,7 @@ export function useDataWipe() {
     if (window.confirm(confirmMessage)) {
       try {
         await clearAuthDictionary();
-        clearAllStorage();
+        BrowserStorageService.clearAllStorage();
         router.push("/");
       } catch (err) {
         logger.error("Failed to wipe local data", err);

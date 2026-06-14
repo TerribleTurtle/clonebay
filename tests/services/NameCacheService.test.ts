@@ -23,7 +23,7 @@ describe('NameCacheService', () => {
 
   beforeEach(() => {
     mockEsiService = {
-      resolveNames: vi.fn(),
+      universe: { resolveNames: vi.fn() },
     } as unknown as IEsiService;
 
     service = new NameCacheService(mockEsiService);
@@ -36,7 +36,7 @@ describe('NameCacheService', () => {
 
   it('should test error logging when ESI resolveNames returns null', async () => {
     // Return a null response simulating failure
-    vi.mocked(mockEsiService.resolveNames).mockResolvedValue(null);
+    vi.mocked(mockEsiService.universe.resolveNames).mockResolvedValue(null);
 
     const result = await service.resolveIdsToNames([123, 456]);
     
@@ -46,7 +46,7 @@ describe('NameCacheService', () => {
   });
 
   it('should successfully resolve and cache new ids', async () => {
-    vi.mocked(mockEsiService.resolveNames).mockResolvedValue({
+    vi.mocked(mockEsiService.universe.resolveNames).mockResolvedValue({
       status: 'Green',
       cached: false,
       data: [{ id: 123, name: 'Test Name 123', category: 'character' }]

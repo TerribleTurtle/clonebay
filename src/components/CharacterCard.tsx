@@ -49,15 +49,9 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
     locationText,
     isk,
     totalSp,
-    clonesCount,
-    maxClones,
-    fatigueTimer,
-    activeShip,
-    activeOrders,
-    unreadMail,
     statuses,
     alerts,
-    metricsContexts,
+    metrics,
     stationName,
     structureId
   } = presenter;
@@ -125,19 +119,7 @@ export function CharacterCard({ characterId, onRemove }: CharacterCardProps) {
 
       {/* Main Content Scaffold */}
       <div className="flex-1 flex flex-col mt-3 min-w-0">
-        <CharacterMetrics 
-          clonesCount={clonesCount}
-          maxClones={maxClones}
-          clonesContext={metricsContexts.clonesContext}
-          fatigueTimer={fatigueTimer}
-          fatigueContext={metricsContexts.fatigueContext}
-          activeShip={activeShip}
-          shipContext={metricsContexts.shipContext}
-          activeOrders={activeOrders}
-          ordersContext={metricsContexts.ordersContext}
-          unreadMail={unreadMail}
-          mailContext={metricsContexts.mailContext}
-        />
+        <CharacterMetrics data={metrics} />
       </div>
 
       <div className="mt-0">

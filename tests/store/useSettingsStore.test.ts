@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useSettingsStore, clearAllStorage } from '../../src/store/useSettingsStore';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { useSettingsStore } from '../../src/store/useSettingsStore';
 
 describe('useSettingsStore', () => {
   beforeEach(() => {
@@ -21,9 +21,5 @@ describe('useSettingsStore', () => {
     expect(state.walletRedThreshold).toBe(100);
   });
 
-  it('clearAllStorage clears local and session storage', () => {
-    const localSpy = vi.spyOn(Storage.prototype, 'clear');
-    clearAllStorage();
-    expect(localSpy).toHaveBeenCalledTimes(2); // once for local, once for session
-  });
+
 });

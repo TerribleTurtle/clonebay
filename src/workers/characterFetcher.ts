@@ -28,19 +28,19 @@ export async function fetchCharacterData(
     }
     const accessToken = tokenInfo?.accessToken || "mock_token";
 
-    const skillsPromise = esiService.getSkillQueue(charId, accessToken);
-    const charSkillsPromise = esiService.getCharacterSkills(charId, accessToken);
-    const industryPromise = esiService.getIndustryJobs(charId, accessToken);
-    const planetsPromise = esiService.getPlanets(charId, accessToken);
-    const walletPromise = esiService.getWallet(charId, accessToken);
-    const locationPromise = esiService.getLocation(charId, accessToken);
-    const shipPromise = esiService.getShip(charId, accessToken);
-    const clonesPromise = esiService.getClones(charId, accessToken);
-    const fatiguePromise = esiService.getFatigue(charId, accessToken);
-    const transactionsPromise = esiService.getTransactions(charId, accessToken);
-    const mailLabelsPromise = esiService.getMailLabels(charId, accessToken);
-    const contractsPromise = esiService.getContracts(charId, accessToken);
-    const marketOrdersPromise = esiService.getMarketOrders(charId, accessToken);
+    const skillsPromise = esiService.skills.getSkillQueue(charId, accessToken);
+    const charSkillsPromise = esiService.skills.getCharacterSkills(charId, accessToken);
+    const industryPromise = esiService.industry.getIndustryJobs(charId, accessToken);
+    const planetsPromise = esiService.industry.getPlanets(charId, accessToken);
+    const walletPromise = esiService.wallet.getWallet(charId, accessToken);
+    const locationPromise = esiService.character.getLocation(charId, accessToken);
+    const shipPromise = esiService.character.getShip(charId, accessToken);
+    const clonesPromise = esiService.character.getClones(charId, accessToken);
+    const fatiguePromise = esiService.character.getFatigue(charId, accessToken);
+    const transactionsPromise = esiService.wallet.getTransactions(charId, accessToken);
+    const mailLabelsPromise = esiService.character.getMailLabels(charId, accessToken);
+    const contractsPromise = esiService.character.getContracts(charId, accessToken);
+    const marketOrdersPromise = esiService.wallet.getMarketOrders(charId, accessToken);
 
     const getVal = <T>(result: PromiseSettledResult<T>) => result.status === 'fulfilled' ? result.value : null;
 
@@ -104,6 +104,7 @@ export async function fetchCharacterData(
             cloneStatus: "Red",
           },
         });
+        throw err;
       });
 
     const skillsProcessing = skillsPromise
@@ -121,6 +122,7 @@ export async function fetchCharacterData(
           type: "ESI_DATA_UPDATE",
           payload: { characterId: charId, dataType: "skills", status: "Red", data: null },
         });
+        throw err;
       });
 
     const industryProcessing = Promise.allSettled([
@@ -142,6 +144,7 @@ export async function fetchCharacterData(
           type: "ESI_DATA_UPDATE",
           payload: { characterId: charId, dataType: "industry", status: "Red", data: null },
         });
+        throw err;
       });
 
     const piProcessing = planetsPromise
@@ -161,10 +164,10 @@ export async function fetchCharacterData(
           type: "ESI_DATA_UPDATE",
           payload: { characterId: charId, dataType: "pi", status: "Red", data: null },
         });
+        throw err;
       });
 
-    const notificationsProcessing = esiService
-      .getCharacterNotifications(charId, accessToken)
+    const notificationsProcessing = esiService.character.getCharacterNotifications(charId, accessToken)
       .then(async (notificationsResponse) => {
         if (notificationsResponse && notificationsResponse.data) {
           await saveCharacterNotifications(charId, notificationsResponse.data);
@@ -178,10 +181,10 @@ export async function fetchCharacterData(
       })
       .catch((err) => {
         logger.error(`ESI Worker: Error fetching/saving notifications for ${charId}`, err);
+        throw err;
       });
 
-    const walletJournalProcessing = esiService
-      .getWalletJournal(charId, accessToken)
+    const walletJournalProcessing = esiService.wallet.getWalletJournal(charId, accessToken)
       .then(async (journalResponse) => {
         if (journalResponse && journalResponse.data) {
           await saveCharacterWalletJournal(charId, journalResponse.data);
@@ -189,6 +192,7 @@ export async function fetchCharacterData(
       })
       .catch((err) => {
         logger.error(`ESI Worker: Error fetching/saving wallet journal for ${charId}`, err);
+        throw err;
       });
 
     const structuresProcessing = processStructures(
@@ -218,5 +222,6 @@ export async function fetchCharacterData(
     workerContext.postMessage({ type: "ESI_DATA_UPDATE", payload: { characterId: charId, dataType: "industry", status: "Red", data: null } });
     workerContext.postMessage({ type: "ESI_DATA_UPDATE", payload: { characterId: charId, dataType: "pi", status: "Red", data: null } });
     workerContext.postMessage({ type: "ESI_DATA_UPDATE", payload: { characterId: charId, dataType: "structures", status: "Red", data: null } });
+    throw err;
   }
 }

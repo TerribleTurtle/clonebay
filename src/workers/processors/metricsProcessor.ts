@@ -126,13 +126,16 @@ export async function processMetrics(context: EsiMetricsContext) {
     if (locationId) {
       locationName = await fetchSdeSystem(locationId).catch((err) => {
         logger.error(`Failed to fetch SDE system name for ${locationId}`, err);
-        return undefined;
+        throw err;
       });
     }
     
     if (stationId) {
       const nameCache = new NameCacheService(esiService);
-      const resolved = await nameCache.resolveIdsToNames([stationId]).catch(() => ({} as Record<number, string>));
+      const resolved = await nameCache.resolveIdsToNames([stationId]).catch((err) => {
+        logger.error(`Failed to resolve station id ${stationId}`, err);
+        throw err;
+      });
       stationName = resolved[stationId];
     }
 
@@ -155,107 +158,11 @@ export async function processMetrics(context: EsiMetricsContext) {
     const mailStatus = calculateMailStatus(mail?.total_unread_count);
     const cloneStatus = calculateCloneStatus(clones?.last_clone_jump_date, now);
 
-    // --- Hover Context Generation: Metrics Update ---
     const nameCache = new NameCacheService(esiService);
-    let clonesContext:
-      | { locationName: string; implants: string[] }[]
-      | undefined = undefined;
-    let mailContext: { unreadSubjects: string[] } | undefined = undefined;
-    let spContext:
-      | { current: number; unallocated: number; ratePerHour: number }
-      | undefined = undefined;
+    const clonesContext = await buildClonesContext(clones || { jump_clones: [] }, nameCache);
+    const mailContext = await buildMailContext(charId, esiService, accessToken, nameCache);
+    const spContext = await buildSpContext(charId, totalSp, unallocatedSp, esiService, accessToken);
 
-    try {
-      // 1. Clones Context
-      if (clones && clones.jump_clones) {
-        // Collect all location_ids and implant type_ids to resolve
-        const idsToResolve = new Set<number>();
-        for (const c of clones.jump_clones) {
-          if (c.location_id) idsToResolve.add(c.location_id);
-          if (c.implants) {
-            c.implants.forEach((imp) => idsToResolve.add(imp));
-          }
-        }
-
-        const resolvedNames = await nameCache.resolveIdsToNames(
-          Array.from(idsToResolve),
-        );
-
-        clonesContext = clones.jump_clones.map((c) => ({
-          locationName: c.location_id
-            ? resolvedNames[c.location_id] || c.location_id.toString()
-            : "Unknown",
-          implants: c.implants
-            ? c.implants.map((imp) => resolvedNames[imp] || imp.toString())
-            : [],
-        }));
-      }
-
-      // 2. Mail Context
-      try {
-        const mailResponse = await esiService.getMail(charId, accessToken);
-        if (mailResponse && mailResponse.data) {
-          const unreadMails = mailResponse.data
-            .filter((m) => m.is_read === false)
-            .slice(0, MAX_UNREAD_MAILS_TO_FETCH);
-          if (unreadMails.length > 0) {
-            const senderIds = unreadMails
-              .map((m) => m.from)
-              .filter((id) => id !== undefined) as number[];
-            const resolvedSenders = await nameCache.resolveIdsToNames(
-              senderIds,
-            );
-            const unreadSubjects = unreadMails.map((m) => {
-              const senderName = m.from
-                ? resolvedSenders[m.from] || m.from.toString()
-                : "Unknown";
-              return `${senderName}: ${m.subject}`;
-            });
-            mailContext = { unreadSubjects };
-          } else {
-            mailContext = { unreadSubjects: [] };
-          }
-        }
-      } catch (e) {
-        logger.warn(`Failed to fetch mail for hover context for ${charId}`, e);
-      }
-
-      // 3. SP Context
-      try {
-        if (totalSp !== undefined) {
-          const attrsResponse = await esiService.getAttributes(
-            charId,
-            accessToken,
-          );
-          if (attrsResponse && attrsResponse.data) {
-            const { intelligence, memory } = attrsResponse.data;
-            // EVE calculation approximation:
-            // ratePerHour = (primary + (secondary / 2)) * 60
-            // Assuming intelligence/memory are the attributes used for the active skill as we don't have skill attributes mapping
-            // It's a rough approximation for the Hover Context
-            const primary = intelligence || 0;
-            const secondary = memory || 0;
-            const ratePerHour = (primary + secondary / ATTRIBUTE_SECONDARY_DIVISOR) * MINUTES_PER_HOUR;
-            spContext = {
-              current: totalSp,
-              unallocated: unallocatedSp,
-              ratePerHour,
-            };
-          }
-        }
-      } catch (e) {
-        logger.warn(
-          `Failed to fetch attributes for SP rate context for ${charId}`,
-          e,
-        );
-      }
-    } catch (e) {
-      logger.error(
-        `Error generating hover contexts for metrics processor for ${charId}`,
-        e,
-      );
-    }
-    // ------------------------------------------------
 
     postMessage({
       type: "ESI_METRICS_UPDATE",
@@ -300,5 +207,87 @@ export async function processMetrics(context: EsiMetricsContext) {
         cloneStatus: "Red",
       },
     });
+    throw err;
+  }
+}
+
+async function buildClonesContext(clones: EsiClones | undefined, nameCache: NameCacheService) {
+  if (!clones?.jump_clones) return undefined;
+  try {
+    const idsToResolve = new Set<number>();
+    for (const c of clones.jump_clones) {
+      if (c.location_id) idsToResolve.add(c.location_id);
+      if (c.implants) {
+        c.implants.forEach((imp) => idsToResolve.add(imp));
+      }
+    }
+
+    const resolvedNames = await nameCache.resolveIdsToNames(Array.from(idsToResolve));
+
+    return clones.jump_clones.map((c) => ({
+      locationName: c.location_id
+        ? resolvedNames[c.location_id] || c.location_id.toString()
+        : "Unknown",
+      implants: c.implants
+        ? c.implants.map((imp) => resolvedNames[imp] || imp.toString())
+        : [],
+    }));
+  } catch (e) {
+    logger.error(`Failed to build clones context`, e);
+    throw e;
+  }
+}
+
+async function buildMailContext(charId: string, esiService: IEsiService, accessToken: string, nameCache: NameCacheService) {
+  try {
+    const mailResponse = await esiService.character.getMail(charId, accessToken);
+    if (!mailResponse?.data) return undefined;
+
+    const unreadMails = mailResponse.data
+      .filter((m) => m.is_read === false)
+      .slice(0, MAX_UNREAD_MAILS_TO_FETCH);
+      
+    if (unreadMails.length === 0) {
+      return { unreadSubjects: [] };
+    }
+
+    const senderIds = unreadMails
+      .map((m) => m.from)
+      .filter((id) => id !== undefined) as number[];
+    const resolvedSenders = await nameCache.resolveIdsToNames(senderIds);
+    
+    const unreadSubjects = unreadMails.map((m) => {
+      const senderName = m.from
+        ? resolvedSenders[m.from] || m.from.toString()
+        : "Unknown";
+      return `${senderName}: ${m.subject}`;
+    });
+    
+    return { unreadSubjects };
+  } catch (e) {
+    logger.error(`Failed to fetch mail for hover context for ${charId}`, e);
+    throw e;
+  }
+}
+
+async function buildSpContext(charId: string, totalSp: number | undefined, unallocatedSp: number, esiService: IEsiService, accessToken: string) {
+  if (totalSp === undefined) return undefined;
+  try {
+    const attrsResponse = await esiService.character.getAttributes(charId, accessToken);
+    if (!attrsResponse?.data) return undefined;
+
+    const { intelligence, memory } = attrsResponse.data;
+    const primary = intelligence || 0;
+    const secondary = memory || 0;
+    const ratePerHour = (primary + secondary / ATTRIBUTE_SECONDARY_DIVISOR) * MINUTES_PER_HOUR;
+    
+    return {
+      current: totalSp,
+      unallocated: unallocatedSp,
+      ratePerHour,
+    };
+  } catch (e) {
+    logger.error(`Failed to fetch attributes for SP rate context for ${charId}`, e);
+    throw e;
   }
 }

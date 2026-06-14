@@ -72,17 +72,25 @@ export interface CharacterStatusBoardProps {
   } | undefined;
 }
 
-export function CharacterStatusBoard({ statuses, alerts, visibility }: CharacterStatusBoardProps) {
-  const defaultVis = { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true, trackWar: true };
-  const vis = visibility || defaultVis;
-
-  const indicators = [
+export function buildIndicators(
+  vis: NonNullable<CharacterStatusBoardProps["visibility"]>,
+  statuses: CharacterStatusBoardProps["statuses"],
+  alerts: CharacterStatusBoardProps["alerts"]
+) {
+  return [
     ...(vis.trackSkills ? [{ key: "skill", label: "SKILL", status: statuses.skill, contextAlerts: alerts?.skill }] : []),
     ...(vis.trackPi ? [{ key: "pi", label: "PI", status: statuses.pi, contextAlerts: alerts?.pi }] : []),
     ...(vis.trackIndy ? [{ key: "indy", label: "INDY", status: statuses.indy, contextAlerts: alerts?.indy }] : []),
     ...(vis.trackMail ? [{ key: "mail", label: "MAIL", status: statuses.mail, contextAlerts: alerts?.mail }] : []),
     ...(vis.trackWar && statuses.war ? [{ key: "war", label: "WAR", status: statuses.war, contextAlerts: alerts?.war }] : []),
   ];
+}
+
+export function CharacterStatusBoard({ statuses, alerts, visibility }: CharacterStatusBoardProps) {
+  const defaultVis = { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true, trackWar: true };
+  const vis = visibility || defaultVis;
+
+  const indicators = buildIndicators(vis, statuses, alerts);
 
   return (
     <TooltipProvider delayDuration={200}>

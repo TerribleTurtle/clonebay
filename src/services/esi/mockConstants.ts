@@ -1,0 +1,8 @@
+export const MS_IN_HOUR = 3600000;
+export const MOCK_CORP_ID_GOONSWARM = 986665792;
+export const MOCK_WAR_ID = 1941;
+export const MOCK_NOTIFICATION_DELAY_HOURS = 1;
+export const MOCK_JOURNAL_DELAY_HOURS_1 = 1;
+export const MOCK_JOURNAL_DELAY_HOURS_2 = 2;
+export const MOCK_WAR_STARTED_DELAY_HOURS = 24;
+export const MOCK_WAR_DECLARED_DELAY_HOURS = 48;

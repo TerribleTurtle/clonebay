@@ -50,7 +50,7 @@ describe('MockEsiService', () => {
     mockFleet.push(badChar);
 
     // MockEsiService must not swallow the error but reject the Promise loudly
-    await expect(service.getSkillQueue('some_char_id')).rejects.toThrow(z.ZodError);
+    await expect(service.skills.getSkillQueue('some_char_id')).rejects.toThrow(z.ZodError);
   });
 
   it('should successfully parse valid mock data using parseAsync', async () => {
@@ -69,7 +69,7 @@ describe('MockEsiService', () => {
       }]
     });
 
-    const result = await service.getSkillQueue('some_char_id');
+    const result = await service.skills.getSkillQueue('some_char_id');
     expect(result).toBeDefined();
     expect(result!.status).toStrictEqual('Green');
     expect(result!.data).toStrictEqual([{
@@ -91,7 +91,7 @@ describe('MockEsiService', () => {
       skills: undefined as unknown as EsiSkillQueue[]
     });
 
-    const result = await service.getSkillQueue('some_char_id');
+    const result = await service.skills.getSkillQueue('some_char_id');
     expect(result).toBeNull();
   });
 });
