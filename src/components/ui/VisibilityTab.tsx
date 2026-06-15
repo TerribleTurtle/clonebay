@@ -6,15 +6,15 @@ interface VisibilityTabProps {
 }
 
 export function VisibilityTab({ characterId }: VisibilityTabProps) {
-  const configStore = useCharacterConfigStore();
-  
-  const charConfig = configStore.configs[characterId] || {
+  // Use atomic selectors to prevent unnecessary re-renders
+  const charConfig = useCharacterConfigStore(state => state.configs[characterId]) || {
     visibility: { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true },
     overrides: {}
   };
+  const setVisibility = useCharacterConfigStore(state => state.setVisibility);
 
   const handleVisibilityToggle = (key: keyof CharacterVisibility) => {
-    configStore.setVisibility(characterId, key, !charConfig.visibility[key]);
+    setVisibility(characterId, key, !charConfig.visibility[key]);
   };
 
   return (

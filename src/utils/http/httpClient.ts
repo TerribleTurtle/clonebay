@@ -13,10 +13,10 @@ export interface HttpRequest {
   };
 }
 
-export interface HttpResponse<T = unknown> {
+export interface HttpResponse {
   status: number;
   headers: Headers;
-  data: T | null;
+  data: unknown | null;
   cached: boolean;
   esiStatus: 'Green' | 'Yellow' | 'Red' | 'Offline';
 }
@@ -61,19 +61,18 @@ export class HttpClient {
   /**
    * Executes an HTTP request through the interceptor pipeline.
    * 
-   * @template T - The expected type of the response data.
    * @param req - The request configuration object.
-   * @returns A promise resolving to the HTTP response containing the typed data.
+   * @returns A promise resolving to the HTTP response containing the unknown data.
    * 
    * @example
-   * const response = await client.request<{ status: string }>({
+   * const response = await client.request({
    *   url: 'https://esi.evetech.net/latest/status/',
    *   method: 'GET',
    *   context: {}
    * });
-   * console.log(response.data?.status);
+   * // Validate response.data with Zod down the line
    */
-  async request<T = unknown>(req: HttpRequest): Promise<HttpResponse<T>> {
+  async request(req: HttpRequest): Promise<HttpResponse> {
     let index = 0;
     
     const next: HttpNext = async (currentReq: HttpRequest): Promise<HttpResponse> => {
@@ -105,11 +104,11 @@ export class HttpClient {
       // eslint-disable-next-line no-restricted-globals
       const fetchResponse = await fetch(currentReq.url, fetchOptions);
 
-      let data: T | null = null;
+      let data: unknown | null = null;
       if (fetchResponse.status !== HTTP_STATUS_NO_CONTENT && fetchResponse.status !== HTTP_STATUS_NOT_MODIFIED) {
         const text = await fetchResponse.text();
         if (text) {
-          data = JSON.parse(text) as T;
+          data = JSON.parse(text);
         }
       }
 
@@ -122,6 +121,6 @@ export class HttpClient {
       };
     };
 
-    return (await next(req)) as unknown as HttpResponse<T>;
+    return await next(req);
   }
 }

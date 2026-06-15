@@ -158,26 +158,26 @@ export async function processPi(
 
       postMessage({
         type: 'ESI_DATA_UPDATE',
-        payload: { characterId: charId, dataType: 'pi', status, data: planetsResult.data, piContext }
+        payload: { characterId: charId, dataType: 'pi', status, piContext }
       });
      
     } catch (error) {
       logger.error(`ESI Worker: Error processing PI layouts for ${charId}`, error);
       postMessage({
         type: 'ESI_DATA_UPDATE',
-        payload: { characterId: charId, dataType: 'pi', status: 'Red', data: null }
+        payload: { characterId: charId, dataType: 'pi', status: 'Red' }
       });
       throw error;
     }
   } else if (planetsResult?.status === 'Offline') {
     postMessage({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: charId, dataType: 'pi', status: 'Offline', data: null }
+      payload: { characterId: charId, dataType: 'pi', status: 'Offline' }
     });
   } else {
     postMessage({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: charId, dataType: 'pi', status: 'Red', data: null }
+      payload: { characterId: charId, dataType: 'pi', status: 'Red' }
     });
   }
 }

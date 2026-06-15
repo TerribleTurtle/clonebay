@@ -124,7 +124,7 @@ export const esiAuthInterceptor: HttpInterceptor = async (req, next) => {
 export const esiRetryInterceptor: HttpInterceptor = async (req, next) => {
   const maxRetries = req.context.retries ?? DEFAULT_RETRIES;
   
-  const attempt = async (retriesLeft: number): Promise<import('../../utils/http/httpClient').HttpResponse<unknown>> => {
+  const attempt = async (retriesLeft: number): Promise<import('../../utils/http/httpClient').HttpResponse> => {
     const response = await next(req);
     
     if (response.status === HTTP_STATUS_TOO_MANY_REQUESTS || response.status >= HTTP_STATUS_INTERNAL_SERVER_ERROR) {
@@ -171,15 +171,15 @@ export async function fetchEsi<T>(options: EsiRequestOptions<T>, retries: number
         retries
       }
     };
-    const res = await esiClient.request<T>(req);
+    const res = await esiClient.request(req);
     if (res.status === HTTP_STATUS_NOT_MODIFIED) {
       throw new Error('ESI request failed with status 304: Not Modified');
     }
     
-    let parsedData = res.data;
-    if (res.status === HTTP_STATUS_OK && parsedData !== null) {
+    let parsedData: T | null = null;
+    if (res.status === HTTP_STATUS_OK && res.data !== null) {
       try {
-        parsedData = await options.schema.parseAsync(parsedData);
+        parsedData = await options.schema.parseAsync(res.data);
       } catch (e) {
         logger.error(`Failed to parse ESI response for ${options.url}:`, e);
         throw e;

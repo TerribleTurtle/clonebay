@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+
 import { createCoreSlice, CoreSlice } from './slices/createCoreSlice';
 import { createSkillsSlice, SkillsSlice } from './slices/createSkillsSlice';
 import { createIndustrySlice, IndustrySlice } from './slices/createIndustrySlice';
@@ -9,11 +9,26 @@ export * from './slices/types';
 
 export type BoundStoreState = CoreSlice & SkillsSlice & IndustrySlice;
 
+let lastState: BoundStoreState | null = null;
+let lastSerialized: Partial<BoundStoreState> | null = null;
+let lastCharacters: Record<string, CharacterStatus> | null = null;
+let serializedCharacters: Record<string, CharacterStatus> = {};
+
 export function serializeCharacterState(state: BoundStoreState): Partial<BoundStoreState> {
-  return {
-    ...state,
-    characters: Object.fromEntries(
-      Object.entries(state.characters).map(([id, char]) => {
+  if (state === lastState && lastSerialized) return lastSerialized;
+  lastState = state;
+
+  if (state.characters === lastCharacters && lastSerialized) {
+     return lastSerialized;
+  }
+  
+  const newSerializedCharacters: Record<string, CharacterStatus> = {};
+  for (const id in state.characters) {
+    const char = state.characters[id];
+    const prevSerialized = serializedCharacters[id];
+    if (lastCharacters && char === lastCharacters[id] && prevSerialized) {
+       newSerializedCharacters[id] = prevSerialized;
+    } else if (char) {
         const { transactions, mail, contracts, marketOrders, ...rest } = char;
         const serializedChar: CharacterStatus = { ...rest };
         if (transactions) {
@@ -28,22 +43,24 @@ export function serializeCharacterState(state: BoundStoreState): Partial<BoundSt
         if (marketOrders) {
           serializedChar.marketOrders = { count: Array.isArray(marketOrders) ? marketOrders.length : marketOrders.count };
         }
-        return [id, serializedChar];
-      })
-    ),
+        newSerializedCharacters[id] = serializedChar;
+    }
+  }
+
+  lastCharacters = state.characters;
+  serializedCharacters = newSerializedCharacters;
+  
+  lastSerialized = {
+    ...state,
+    characters: newSerializedCharacters,
   };
+  return lastSerialized;
 }
 
 export const useBoundStore = create<BoundStoreState>()(
-  persist(
-    (...a) => ({
-      ...createCoreSlice(...a),
-      ...createSkillsSlice(...a),
-      ...createIndustrySlice(...a),
-    }),
-    {
-      name: 'clonebay-storage',
-      partialize: serializeCharacterState,
-    }
-  )
+  (...a) => ({
+    ...createCoreSlice(...a),
+    ...createSkillsSlice(...a),
+    ...createIndustrySlice(...a),
+  })
 );

@@ -104,7 +104,6 @@ export async function processSkills(
           characterId: charId,
           dataType: "skills",
           status,
-          data: skillsResult.data,
           skillsContext,
         },
       });
@@ -115,7 +114,6 @@ export async function processSkills(
           characterId: charId,
           dataType: "skills",
           status: "Offline",
-          data: null,
         },
       });
     } else {
@@ -125,7 +123,6 @@ export async function processSkills(
           characterId: charId,
           dataType: "skills",
           status: "Red",
-          data: null,
         },
       });
     }
@@ -140,7 +137,6 @@ export async function processSkills(
         characterId: charId,
         dataType: "skills",
         status: "Red",
-        data: null,
       },
     });
     throw error;

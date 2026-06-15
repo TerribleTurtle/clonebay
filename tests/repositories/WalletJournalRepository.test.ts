@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getWalletJournalDictionary, saveCharacterWalletJournal, getCharacterWalletJournal } from '../../src/repositories/WalletJournalRepository';
+import { saveCharacterWalletJournal, getCharacterWalletJournal } from '../../src/repositories/WalletJournalRepository';
 import { EsiWalletJournalEntry } from '../../src/schemas/esi/walletJournal';
 import { StorageError } from '../../src/auth/AuthRepository';
 import * as idb from 'idb-keyval';
@@ -38,14 +38,8 @@ describe('WalletJournalRepository', () => {
     vi.useRealTimers();
   });
 
-  it('gets dictionary', async () => {
-    await idb.set('eve_wallet_journal', { char1: [] });
-    const dict = await getWalletJournalDictionary();
-    expect(dict).toEqual({ char1: [] });
-  });
-
   it('saves character wallet journal entries', async () => {
-    await idb.del('eve_wallet_journal');
+    await idb.del('eve_wallet_journal_char1');
     
     const mockEntries = [
       { id: 1, ref_type: 'bounty_prizes', date: '2025-01-01T10:00:00Z' },
@@ -54,23 +48,24 @@ describe('WalletJournalRepository', () => {
     ];
 
     await saveCharacterWalletJournal('char1', mockEntries as unknown as EsiWalletJournalEntry[]);
-    const dict = await idb.get('eve_wallet_journal');
+    const dict = await idb.get<EsiWalletJournalEntry[]>('eve_wallet_journal_char1');
     
-    expect(dict?.char1.length).toBe(3);
-    expect(dict?.char1[0].id).toBe(1);
-    expect(dict?.char1[1].id).toBe(2);
-    expect(dict?.char1[2].id).toBe(3);
+    expect(dict).toBeDefined();
+    expect(dict?.length).toBe(3);
+    expect(dict?.[0]?.id).toBe(1);
+    expect(dict?.[1]?.id).toBe(2);
+    expect(dict?.[2]?.id).toBe(3);
   });
 
   it('gets character wallet journal', async () => {
-    await idb.set('eve_wallet_journal', { char1: [{ id: 1 }] });
+    await idb.set('eve_wallet_journal_char1', [{ id: 1 }]);
     const dict = await getCharacterWalletJournal('char1');
     expect(dict).toEqual([{ id: 1 }]);
   });
 
   it('fails loudly with StorageError on IDB read failure', async () => {
     failIdb = true;
-    await expect(getWalletJournalDictionary()).rejects.toThrow(StorageError);
+    await expect(getCharacterWalletJournal('char1')).rejects.toThrow(StorageError);
   });
 
   it('fails loudly with StorageError on IDB write failure', async () => {

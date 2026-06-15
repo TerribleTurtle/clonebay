@@ -41,7 +41,7 @@ describe('skillsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'skills', status: 'Green', data: validQueue, skillsContext: expect.any(Object) }
+      payload: { characterId: 'char-1', dataType: 'skills', status: 'Green', skillsContext: expect.any(Object) }
     });
   });
 
@@ -63,7 +63,7 @@ describe('skillsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'skills', status: 'Yellow', data: validQueue, skillsContext: expect.any(Object) }
+      payload: { characterId: 'char-1', dataType: 'skills', status: 'Yellow', skillsContext: expect.any(Object) }
     });
   });
 
@@ -85,7 +85,7 @@ describe('skillsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'skills', status: 'Red', data: validQueue, skillsContext: expect.any(Object) }
+      payload: { characterId: 'char-1', dataType: 'skills', status: 'Red', skillsContext: expect.any(Object) }
     });
   });
 
@@ -107,7 +107,7 @@ describe('skillsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'skills', status: 'Red', data: validQueue, skillsContext: expect.any(Object) }
+      payload: { characterId: 'char-1', dataType: 'skills', status: 'Red', skillsContext: expect.any(Object) }
     });
   });
 
@@ -116,7 +116,7 @@ describe('skillsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'skills', status: 'Offline', data: null }
+      payload: { characterId: 'char-1', dataType: 'skills', status: 'Offline' }
     });
   });
 
@@ -131,7 +131,7 @@ describe('skillsProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: { characterId: 'char-1', dataType: 'skills', status: 'Red', data: null }
+      payload: { characterId: 'char-1', dataType: 'skills', status: 'Red' }
     });
   });
 });

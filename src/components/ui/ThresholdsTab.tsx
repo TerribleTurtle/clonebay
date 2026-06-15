@@ -8,26 +8,29 @@ interface ThresholdsTabProps {
 }
 
 export function ThresholdsTab({ characterId }: ThresholdsTabProps) {
-  const configStore = useCharacterConfigStore();
-  const globalSettings = useSettingsStore();
-
-  const charConfig = configStore.configs[characterId] || {
+  // Use atomic selectors to prevent unnecessary re-renders
+  const charConfig = useCharacterConfigStore(state => state.configs[characterId]) || {
     visibility: { trackSkills: true, trackPi: true, trackIndy: true, trackMail: true },
     overrides: {}
   };
+  const setOverride = useCharacterConfigStore(state => state.setOverride);
+  const clearOverride = useCharacterConfigStore(state => state.clearOverride);
+
+  const globalWalletYellow = useSettingsStore(state => state.walletYellowThreshold);
+  const globalWalletRed = useSettingsStore(state => state.walletRedThreshold);
 
   const isIskInherit = charConfig.overrides.walletYellow === undefined;
   
-  const displayYellow = isIskInherit ? globalSettings.walletYellowThreshold : charConfig.overrides.walletYellow;
-  const displayRed = isIskInherit ? globalSettings.walletRedThreshold : charConfig.overrides.walletRed;
+  const displayYellow = isIskInherit ? globalWalletYellow : charConfig.overrides.walletYellow;
+  const displayRed = isIskInherit ? globalWalletRed : charConfig.overrides.walletRed;
 
   const handleIskInheritChange = (inherit: boolean) => {
     if (inherit) {
-      configStore.clearOverride(characterId, 'walletYellow');
-      configStore.clearOverride(characterId, 'walletRed');
+      clearOverride(characterId, 'walletYellow');
+      clearOverride(characterId, 'walletRed');
     } else {
-      configStore.setOverride(characterId, 'walletYellow', globalSettings.walletYellowThreshold);
-      configStore.setOverride(characterId, 'walletRed', globalSettings.walletRedThreshold);
+      setOverride(characterId, 'walletYellow', globalWalletYellow);
+      setOverride(characterId, 'walletRed', globalWalletRed);
     }
   };
 
@@ -84,7 +87,7 @@ export function ThresholdsTab({ characterId }: ThresholdsTabProps) {
               onChange={(e) => {
                 const val = Number(e.target.value);
                 if (val < 0) return;
-                configStore.setOverride(characterId, 'walletYellow', val);
+                setOverride(characterId, 'walletYellow', val);
               }}
               className="w-full text-right sm:w-48"
             />
@@ -99,7 +102,7 @@ export function ThresholdsTab({ characterId }: ThresholdsTabProps) {
               onChange={(e) => {
                 const val = Number(e.target.value);
                 if (val < 0) return;
-                configStore.setOverride(characterId, 'walletRed', val);
+                setOverride(characterId, 'walletRed', val);
               }}
               className="w-full text-right sm:w-48 focus:border-status-red focus:shadow-glow-red focus:ring-status-red text-status-red"
             />

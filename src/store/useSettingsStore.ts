@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+
 
 export interface SettingsState {
   walletYellowThreshold: number;
@@ -19,18 +19,13 @@ const DEFAULT_SETTINGS = {
 };
 
 export const useSettingsStore = create<SettingsState>()(
-  persist(
-    (set) => ({
-      ...DEFAULT_SETTINGS,
-      setWalletYellowThreshold: (val) => set({ walletYellowThreshold: val }),
-      setWalletRedThreshold: (val) => set({ walletRedThreshold: val }),
-      setMockMode: (val) => set({ isMockMode: val }),
+  (set) => ({
+    ...DEFAULT_SETTINGS,
+    setWalletYellowThreshold: (val) => set({ walletYellowThreshold: val }),
+    setWalletRedThreshold: (val) => set({ walletRedThreshold: val }),
+    setMockMode: (val) => set({ isMockMode: val }),
 
-      resetToDefaults: () => set(DEFAULT_SETTINGS),
-    }),
-    {
-      name: 'clonebay-settings',
-    }
-  )
+    resetToDefaults: () => set(DEFAULT_SETTINGS),
+  })
 );
 

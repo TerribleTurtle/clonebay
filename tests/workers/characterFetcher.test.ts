@@ -51,14 +51,12 @@ describe('characterFetcher', () => {
       )
     ).resolves.toBeUndefined();
 
-    // We should see a specific error message payload for the failing module before it rejected
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'ESI_DATA_UPDATE',
+        type: 'ESI_METRICS_UPDATE',
         payload: expect.objectContaining({
           characterId: 'char-123',
-          dataType: 'skills',
-          status: 'Red'
+          skills: 'Red',
         })
       })
     );

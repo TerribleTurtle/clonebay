@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { CharacterStatus, StatusLight } from '../store/slices/types';
 
 export type PresenterStatus = 'green' | 'yellow' | 'red' | 'offline';
@@ -13,6 +14,28 @@ export function mapStatus(s: StatusLight): PresenterStatus {
 }
 
 export function useCharacterPresenter(status: CharacterStatus | undefined, characterId: string) {
+  const clonesContext = status?.clonesContext;
+  const clonesContextGroups = useMemo(() => {
+    if (!clonesContext) return undefined;
+    const grouped: Record<string, typeof clonesContext[0] & { count: number }> = {};
+    clonesContext.forEach(clone => {
+      const key = clone.locationName;
+      if (!grouped[key]) grouped[key] = { ...clone, count: 0 };
+      grouped[key].count++;
+    });
+    return Object.values(grouped);
+  }, [clonesContext]);
+
+  const ordersContextRaw = status?.ordersContext;
+  const ordersContext = useMemo(() => {
+    return ordersContextRaw ? ordersContextRaw.topOrders.map(o => ({ typeName: o })) : undefined;
+  }, [ordersContextRaw]);
+
+  const mailContextRaw = status?.mailContext;
+  const mailContext = useMemo(() => {
+    return mailContextRaw ? mailContextRaw.unreadSubjects.map(s => ({ subject: s })) : undefined;
+  }, [mailContextRaw]);
+
   if (!status) {
     return null;
   }
@@ -32,16 +55,7 @@ export function useCharacterPresenter(status: CharacterStatus | undefined, chara
   const activeOrders = status.marketOrders ? (Array.isArray(status.marketOrders) ? status.marketOrders.length : status.marketOrders.count) : 0;
   const unreadMail = status.mail?.total_unread_count !== undefined ? status.mail.total_unread_count : 0;
 
-  let clonesContextGroups = undefined;
-  if (status.clonesContext) {
-    const grouped: Record<string, typeof status.clonesContext[0] & { count: number }> = {};
-    status.clonesContext.forEach(clone => {
-      const key = clone.locationName;
-      if (!grouped[key]) grouped[key] = { ...clone, count: 0 };
-      grouped[key].count++;
-    });
-    clonesContextGroups = Object.values(grouped);
-  }
+
 
   const metrics = {
     clonesCount,
@@ -52,9 +66,9 @@ export function useCharacterPresenter(status: CharacterStatus | undefined, chara
     activeShip,
     shipContext: status.ship ? { shipName: status.ship.ship_name, typeName: status.ship.ship_type_id.toString() } : undefined,
     activeOrders,
-    ordersContext: status.ordersContext ? status.ordersContext.topOrders.map(o => ({ typeName: o })) : undefined,
+    ordersContext,
     unreadMail,
-    mailContext: status.mailContext ? status.mailContext.unreadSubjects.map(s => ({ subject: s })) : undefined,
+    mailContext,
   };
 
   const statuses = {

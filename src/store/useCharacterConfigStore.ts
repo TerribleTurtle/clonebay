@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { safeLocalStorage } from '../utils/storageAdapter';
+
 
 export interface CharacterVisibility {
   trackSkills: boolean;
@@ -41,61 +40,55 @@ const getDefaultConfig = (): CharacterConfig => ({
 
 
 export const useCharacterConfigStore = create<CharacterConfigState>()(
-  persist(
-    (set) => ({
-      configs: {},
-      setOverride: (charId, key, value) =>
-        set((state) => {
-          const charConfig = state.configs[charId] || getDefaultConfig();
-          return {
-            configs: {
-              ...state.configs,
-              [charId]: {
-                ...charConfig,
-                overrides: {
-                  ...charConfig.overrides,
-                  [key]: value,
-                },
+  (set) => ({
+    configs: {},
+    setOverride: (charId, key, value) =>
+      set((state) => {
+        const charConfig = state.configs[charId] || getDefaultConfig();
+        return {
+          configs: {
+            ...state.configs,
+            [charId]: {
+              ...charConfig,
+              overrides: {
+                ...charConfig.overrides,
+                [key]: value,
               },
             },
-          };
-        }),
-      clearOverride: (charId, key) =>
-        set((state) => {
-          if (!state.configs[charId]) return state;
-          const charConfig = state.configs[charId];
-          const newOverrides = { ...charConfig.overrides };
-          delete newOverrides[key];
-          return {
-            configs: {
-              ...state.configs,
-              [charId]: {
-                ...charConfig,
-                overrides: newOverrides,
+          },
+        };
+      }),
+    clearOverride: (charId, key) =>
+      set((state) => {
+        if (!state.configs[charId]) return state;
+        const charConfig = state.configs[charId];
+        const newOverrides = { ...charConfig.overrides };
+        delete newOverrides[key];
+        return {
+          configs: {
+            ...state.configs,
+            [charId]: {
+              ...charConfig,
+              overrides: newOverrides,
+            },
+          },
+        };
+      }),
+    setVisibility: (charId, key, value) =>
+      set((state) => {
+        const charConfig = state.configs[charId] || getDefaultConfig();
+        return {
+          configs: {
+            ...state.configs,
+            [charId]: {
+              ...charConfig,
+              visibility: {
+                ...charConfig.visibility,
+                [key]: value,
               },
             },
-          };
-        }),
-      setVisibility: (charId, key, value) =>
-        set((state) => {
-          const charConfig = state.configs[charId] || getDefaultConfig();
-          return {
-            configs: {
-              ...state.configs,
-              [charId]: {
-                ...charConfig,
-                visibility: {
-                  ...charConfig.visibility,
-                  [key]: value,
-                },
-              },
-            },
-          };
-        }),
-    }),
-    {
-      name: 'eve-character-config-storage',
-      storage: createJSONStorage(() => safeLocalStorage),
-    }
-  )
+          },
+        };
+      }),
+  })
 );

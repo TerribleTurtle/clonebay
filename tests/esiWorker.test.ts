@@ -62,10 +62,10 @@ describe('esiWorker', () => {
     await vi.waitFor(() => {
       expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'ESI_DATA_UPDATE',
+        type: 'ESI_METRICS_UPDATE',
         payload: expect.objectContaining({
           characterId: '2112345678',
-          dataType: 'skills'
+          skills: expect.any(String)
         })
       })
     );
@@ -111,11 +111,10 @@ describe('esiWorker', () => {
     await vi.waitFor(() => {
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'ESI_DATA_UPDATE',
+        type: 'ESI_METRICS_UPDATE',
         payload: expect.objectContaining({
           characterId: '2112345678',
-          dataType: 'industry',
-          status: 'Red'
+          industry: 'Red'
         })
       })
     );
@@ -154,10 +153,10 @@ describe('esiWorker', () => {
     await vi.waitFor(() => {
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'ESI_DATA_UPDATE',
+        type: 'ESI_METRICS_UPDATE',
         payload: expect.objectContaining({
           characterId: '2112345678',
-          dataType: 'pi'
+          pi: expect.any(String)
         })
       })
     );

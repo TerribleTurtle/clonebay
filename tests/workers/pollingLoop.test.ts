@@ -63,14 +63,13 @@ describe('pollingLoop', () => {
     await vi.advanceTimersByTimeAsync(100);
 
     // During downtime, the interceptor returns 503 Offline without making the actual HTTP call.
-    // We expect the processors to post 'Offline' status for the modules.
+    // We expect the processors to post 'Offline' status for the modules
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'ESI_DATA_UPDATE',
+        type: 'ESI_METRICS_UPDATE',
         payload: expect.objectContaining({
           characterId: '12345',
-          dataType: 'skills',
-          status: 'Offline'
+          skills: 'Offline',
         })
       })
     );

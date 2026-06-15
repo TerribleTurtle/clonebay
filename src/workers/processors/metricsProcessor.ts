@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax, max-lines */
+ 
 import { fetchSdeSystem } from "../../services/esi/sdeClient";
 import { logger } from "../../utils/logger";
 import { mockFleet } from "../../utils/mockFleet";
@@ -27,9 +27,9 @@ import type { IEsiService } from "../../services/esi/IEsiService";
 
 import { calculateTotalSp } from "../../utils/spMath";
 import { calculateMaxClones } from "../../utils/cloneMath";
-const MAX_UNREAD_MAILS_TO_FETCH = 3;
-const ATTRIBUTE_SECONDARY_DIVISOR = 2;
-const MINUTES_PER_HOUR = 60;
+import { buildClonesContext } from "../../utils/metrics/buildClonesContext";
+import { buildMailContext } from "../../utils/metrics/buildMailContext";
+import { buildSpContext } from "../../utils/metrics/buildSpContext";
 
 export interface EsiMetricsContext {
   charId: string;
@@ -176,86 +176,5 @@ export async function processMetrics(context: EsiMetricsContext) {
       },
     });
     throw err;
-  }
-}
-
-async function buildClonesContext(clones: EsiClones | undefined, nameCache: NameCacheService) {
-  if (!clones?.jump_clones) return undefined;
-  try {
-    const idsToResolve = new Set<number>();
-    for (const c of clones.jump_clones) {
-      if (c.location_id) idsToResolve.add(c.location_id);
-      if (c.implants) {
-        c.implants.forEach((imp) => idsToResolve.add(imp));
-      }
-    }
-
-    const resolvedNames = await nameCache.resolveIdsToNames(Array.from(idsToResolve));
-
-    return clones.jump_clones.map((c) => ({
-      locationName: c.location_id
-        ? resolvedNames[c.location_id] || c.location_id.toString()
-        : "Unknown",
-      implants: c.implants
-        ? c.implants.map((imp) => resolvedNames[imp] || imp.toString())
-        : [],
-    }));
-  } catch (e) {
-    logger.error(`Failed to build clones context`, e);
-    throw e;
-  }
-}
-
-async function buildMailContext(charId: string, esiService: IEsiService, accessToken: string, nameCache: NameCacheService) {
-  try {
-    const mailResponse = await esiService.character.getMail(charId, accessToken);
-    if (!mailResponse?.data) return undefined;
-
-    const unreadMails = mailResponse.data
-      .filter((m) => m.is_read === false)
-      .slice(0, MAX_UNREAD_MAILS_TO_FETCH);
-      
-    if (unreadMails.length === 0) {
-      return { unreadSubjects: [] };
-    }
-
-    const senderIds = unreadMails
-      .map((m) => m.from)
-      .filter((id) => id !== undefined) as number[];
-    const resolvedSenders = await nameCache.resolveIdsToNames(senderIds);
-    
-    const unreadSubjects = unreadMails.map((m) => {
-      const senderName = m.from
-        ? resolvedSenders[m.from] || m.from.toString()
-        : "Unknown";
-      return `${senderName}: ${m.subject}`;
-    });
-    
-    return { unreadSubjects };
-  } catch (e) {
-    logger.error(`Failed to fetch mail for hover context for ${charId}`, e);
-    throw e;
-  }
-}
-
-async function buildSpContext(charId: string, totalSp: number | undefined, unallocatedSp: number, esiService: IEsiService, accessToken: string) {
-  if (totalSp === undefined) return undefined;
-  try {
-    const attrsResponse = await esiService.character.getAttributes(charId, accessToken);
-    if (!attrsResponse?.data) return undefined;
-
-    const { intelligence, memory } = attrsResponse.data;
-    const primary = intelligence || 0;
-    const secondary = memory || 0;
-    const ratePerHour = (primary + secondary / ATTRIBUTE_SECONDARY_DIVISOR) * MINUTES_PER_HOUR;
-    
-    return {
-      current: totalSp,
-      unallocated: unallocatedSp,
-      ratePerHour,
-    };
-  } catch (e) {
-    logger.error(`Failed to fetch attributes for SP rate context for ${charId}`, e);
-    throw e;
   }
 }

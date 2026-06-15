@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { GlobalHeader } from "../components/GlobalHeader";
 import { Toaster } from "../components/ui/Toaster";
+import { StateInit } from "../components/StateInit";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -98,6 +99,7 @@ export default function RootLayout({
           {children}
         </main>
         <Toaster />
+        <StateInit />
       </body>
     </html>
   );

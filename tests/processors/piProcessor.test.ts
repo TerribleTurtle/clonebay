@@ -61,7 +61,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Green', data: mockPlanets })
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Green' })
     });
   });
 
@@ -88,7 +88,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Yellow', data: mockPlanets })
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Yellow' })
     });
   });
 
@@ -115,7 +115,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red', data: mockPlanets })
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red' })
     });
   });
 
@@ -144,7 +144,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red', data: mockPlanets })
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red' })
     });
   });
 
@@ -153,7 +153,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Offline', data: null })
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Offline' })
     });
   });
 
@@ -170,7 +170,7 @@ describe('piProcessor', () => {
 
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'ESI_DATA_UPDATE',
-      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red', data: null })
+      payload: expect.objectContaining({ characterId: 'char-1', dataType: 'pi', status: 'Red' })
     });
   });
 });
