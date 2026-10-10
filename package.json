@@ -36,7 +36,6 @@
     "@vitejs/plugin-react": "6.0.2",
     "@vitest/coverage-v8": "4.1.8",
     "dependency-cruiser": "17.4.3",
-    "dotenv": "17.4.2",
     "eslint": "9",
     "eslint-config-next": "16.2.7",
     "eslint-plugin-boundaries": "6.0.2",
@@ -46,17 +45,11 @@
     "fake-indexeddb": "^6.2.5",
     "husky": "9.1.7",
     "jsdom": "29.1.1",
-    "lint-staged": "17.0.7",
     "msw": "2.14.6",
     "postcss": "8.4.38",
     "serve": "14.2.4",
     "tailwindcss": "4",
     "typescript": "5",
     "vitest": "4.1.8"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
-    ]
   }
 }

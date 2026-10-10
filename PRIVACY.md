@@ -52,9 +52,6 @@ Clone Bay limits network connections via strict Content Security Policy (CSP) he
 | `images.evetech.net` | Official EVE character portraits & item icons | Public asset IDs |
 | Cloudflare Pages | Hosting static web assets | Standard static asset requests (HTML/JS/CSS) |
 
-> [!NOTE]
-> The repository includes a Cloudflare Pages Function at `functions/api/resolve.ts` for potential edge name resolution, but the web application in `src/` does not call this endpoint. The web app makes zero requests to project-run APIs.
-
 ## 4. Third-Party Hosting and Authentication Providers
 
 - **Hosting Provider**: Static assets are hosted on Cloudflare Pages. Please review the [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/) for details on edge network access logs.
