@@ -43,8 +43,8 @@ export default function TrustPage() {
                 Browser Only
               </strong>
               <span className="text-zinc-400 text-xs">
-                Your Access and Refresh tokens are encrypted and stored
-                exclusively in IndexedDB.
+                Your Access and Refresh tokens are stored exclusively in
+                this browser&apos;s IndexedDB, isolated to this site&apos;s origin.
               </span>
             </li>
             <li className="bg-eve-void border border-eve-border/50 p-4">

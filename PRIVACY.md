@@ -30,8 +30,8 @@ All persistent application data is stored locally within your browser using stan
 ### LocalStorage
 
 - **`clonebay-storage`**: Persists client UI state.
-- **`clonebay-settings`**: Persists user preferences (e.g., refresh intervals and alert thresholds).
-- **`eve-character-config-storage`**: Persists character ordering, custom groupings, and visibility preferences.
+- **`clonebay-settings`**: Persists user preferences (wallet alert thresholds and the mock-mode flag).
+- **`eve-character-config-storage`**: Persists per-character visibility settings and alert threshold overrides.
 - **`eve-log-store`**: Stores local client diagnostic logs for in-browser debugging.
 - **`eve_mock_mode`**: Flag toggling local mock fixtures during offline development.
 
@@ -39,7 +39,7 @@ All persistent application data is stored locally within your browser using stan
 
 - **`oauth_state`**: A cryptographically random string generated for Cross-Site Request Forgery (CSRF) protection during EVE SSO login.
 - **`code_verifier`**: The PKCE code verifier generated on your client for token exchange.
-- Both values are ephemeral and purged immediately when the authentication callback completes or fails.
+- Both values are short-lived: they are cleared when the login callback finishes (success or failure), and sessionStorage is discarded when the browser tab is closed.
 
 ## 3. Network Requests & Third-Party Services
 

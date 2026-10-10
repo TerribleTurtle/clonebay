@@ -94,3 +94,8 @@ scratch/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# ==========================================
+# Keys & Certificates
+# ==========================================
+*.pem
