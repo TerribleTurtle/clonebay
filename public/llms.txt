@@ -1,13 +1,13 @@
 # Clone Bay
-> Eliminate alt-tab fatigue with this zero-backend EVE Online dashboard.
+> An unofficial, browser-only EVE Online dashboard for checking several characters at once.
 
 ## Overview
-Clone Bay is an open-source, purely client-side SPA (Single Page Application) built with Next.js (App Router, static export), React, Tailwind CSS, and Zustand. It serves as a unified command center for multiboxers in the game EVE Online.
+Clone Bay is an open-source, purely client-side SPA (Single Page Application) built with Next.js (App Router, static export), React, Tailwind CSS, and Zustand. I use it to keep an eye on several EVE Online characters from one page.
 
-## Architecture & Security (Zero-Backend)
-Clone Bay uses a strict Zero-Trust, Zero-Backend architecture. 
-- It uses the EVE SSO PKCE OAuth flow, meaning no `client_secret` is ever required.
-- Access and Refresh tokens are stored strictly within the browser's IndexedDB (`idb-keyval`) using Web Crypto API encryption.
+## Architecture & Security (No Backend)
+Clone Bay has no backend.
+- It uses the EVE SSO PKCE OAuth flow, so no `client_secret` is required.
+- Access and refresh tokens are stored in the browser's IndexedDB (`idb-keyval`) as plain JSON, without application-level encryption. A hash-based Content Security Policy, sent as an HTTP header, is the main defence against injected scripts reading them.
 - No central database or API exists. All data fetches to the EVE Swagger Interface (ESI) occur directly from the user's browser via Web Workers to prevent UI thread blocking.
 
 ## Tech Stack

@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD013 -->
 # Clone Bay
 
-A modern, high-performance web dashboard built with Next.js and Tailwind CSS designed to eliminate "alt-tab chore fatigue" for EVE Online multiboxers.
+A web dashboard I built with Next.js and Tailwind CSS so I can check on several EVE Online characters without alt-tabbing between clients.
 
 > [!NOTE]
 > **Unofficial Fan Project Callout**: Clone Bay is an unofficial, community-created open-source fan project. It is not affiliated with, endorsed by, or sponsored by CCP Games. All EVE Online assets and intellectual property belong to CCP hf. See the [Legal Notice](#legal--ccp-games-notice) below.
@@ -14,24 +14,24 @@ Managing multiple EVE Online accounts requires constant alt-tabbing or cycling c
 
 ## The Solution
 
-Clone Bay provides a unified "Single Pane of Glass" read-only overview that aggregates the passive and asynchronous states of your entire character roster in real time without needing active in-game logins.
+Clone Bay shows a read-only overview of all your characters on one page: skill queues, industry jobs, PI extractors and other timers. It reads this from ESI, so you don't need to be logged in to the game.
 
 ### Core Features
 
-- **Multi-Character EVE SSO**: Authenticate all your characters seamlessly using OAuth 2.0 PKCE. No client secrets are stored or needed.
-- **Traffic Light Health Dashboard**: Instant Green, Yellow, and Red status indicators summarizing queue emergencies, job completions, and alerts across your entire fleet.
-- **Unified Timer Aggregation**:
-  - **Skill Queues**: Real-time training progress, completion timers, and empty queue warnings.
+- **Multi-Character EVE SSO**: Log in each character with OAuth 2.0 PKCE. No client secret is stored or needed.
+- **Traffic Light Dashboard**: Green, Yellow, and Red status per character for skill queues, jobs, and alerts.
+- **Timers**:
+  - **Skill Queues**: Training progress, completion times, and empty queue warnings.
   - **Planetary Interaction (PI)**: Extractor cycle tracking and program expiration alerts.
   - **Industry Jobs**: Manufacturing, research, and invention job states and completion countdowns.
-  - **Fleet Overview**: Jump fatigue timers, active clone locations, current ship/station locations, wallet balances, character notifications, and structure status.
-- **Zero-Backend Privacy Architecture**: Runs entirely as a static Single Page Application (SPA) in your browser.
+  - **Character Overview**: Jump fatigue, clone locations, current ship and location, wallet balance, notifications, and structure status.
+- **No Backend**: Runs as a static Single Page Application (SPA) in your browser.
 
 ---
 
 ## Privacy Model & Architecture
 
-Clone Bay operates on a strict zero-backend philosophy:
+Clone Bay has no backend:
 
 - **No Project Backend or Database**: Clone Bay has no central servers, no user accounts, and no database.
 - **Direct-to-CCP Requests**: All authentication and game data queries are made directly from your browser to CCP Games' official endpoints:
@@ -44,7 +44,8 @@ Clone Bay operates on a strict zero-backend philosophy:
   - **Name & SDE Cache (IndexedDB)**: Entity names (`eve_name_cache`) and Static Data Export definitions (`sde_type_*`, `sde_system_*`).
   - **Local UI Preferences (localStorage)**: User settings (`clonebay-settings`), dashboard state (`clonebay-storage`), character config (`eve-character-config-storage`), and diagnostics (`eve-log-store`).
   - **Ephemeral PKCE Parameters (sessionStorage)**: `oauth_state` and `code_verifier` are purged immediately upon login completion or failure.
-- **Emergency Wipe Button**: A complete terminal wipe button is available in the UI (`/trust` and `/settings`) that permanently purges all IndexedDB data, localStorage keys, and session state.
+- **Content Security Policy**: Because tokens are readable by any script running on the page, the CSP is the main defence against injected scripts. It is sent as an HTTP header (no `'unsafe-eval'`, no `'unsafe-inline'` for scripts). `npm run build` runs `scripts/csp-hashes.mjs`, which hashes each inline Next.js bootstrap script and writes per-route CSP rules into `out/_headers`.
+- **Wipe Button**: A wipe button in the UI (`/trust` and `/settings`) clears stored tokens, localStorage, and session state.
 - **Zero Telemetry**: No Google Analytics, Sentry, or tracking scripts are included. No tracking cookies are used.
 
 For full details, review our [Privacy Policy](PRIVACY.md) and [Security Policy](SECURITY.md).

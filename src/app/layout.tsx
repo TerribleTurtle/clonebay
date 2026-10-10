@@ -28,13 +28,13 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Clone Bay | Unofficial Multibox Command Center",
-  description: "Eliminate alt-tab fatigue. An unofficial, zero-backend, secure, and open-source fan dashboard for monitoring EVE Online skill queues, industry jobs, and planetary interaction across your entire fleet.",
+  description: "An unofficial, open-source EVE Online dashboard I built to check skill queues, industry jobs, and planetary interaction across several characters in one place. It runs entirely in your browser with no backend.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Clone Bay | Unofficial Multibox Command Center",
-    description: "Eliminate alt-tab fatigue with this unofficial zero-backend EVE Online dashboard.",
+    description: "An unofficial, browser-only EVE Online dashboard for keeping an eye on several characters at once.",
     url: SITE_URL,
     siteName: "Clone Bay",
     locale: "en_US",
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Clone Bay | Unofficial Multibox Command Center",
-    description: "Eliminate alt-tab fatigue with this unofficial zero-backend EVE Online dashboard.",
+    description: "An unofficial, browser-only EVE Online dashboard for keeping an eye on several characters at once.",
     images: ["/og-image.png"],
   },
 };
@@ -60,7 +60,6 @@ export const viewport: Viewport = {
   themeColor: "#09090b",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -74,10 +73,7 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; connect-src 'self' https://esi.evetech.net https://login.eveonline.com; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://images.evetech.net data: blob:;"
-        />
+        {/* CSP is sent as an HTTP header from out/_headers (see scripts/csp-hashes.mjs). */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

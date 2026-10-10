@@ -1,5 +1,10 @@
+# Static security headers for Cloudflare Pages.
+#
+# The Content-Security-Policy is NOT set here. scripts/csp-hashes.mjs runs after
+# `next build` (npm postbuild), hashes every inline <script> in out/**/*.html, and
+# appends per-route CSP rules to out/_headers.
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; connect-src 'self' https://esi.evetech.net https://login.eveonline.com; img-src 'self' https://images.evetech.net data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:;
+  Referrer-Policy: no-referrer
+  Permissions-Policy: accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()

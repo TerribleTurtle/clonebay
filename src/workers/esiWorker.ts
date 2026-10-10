@@ -1,3 +1,4 @@
+import "../lib/zodCspConfig";
 import { logger } from "../utils/logger";
 import { handleWorkerMessage } from "./pollingLoop";
 
