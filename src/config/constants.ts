@@ -1,7 +1,6 @@
 export const SITE_URL = 'https://clonebay.terribleturtles.dev';
 export const LEGACY_HOSTNAME = 'clonebay.app';
 
-// TODO: Repository is not yet created. Update URL when initialized.
 export const REPO_URL = 'https://github.com/TerribleTurtle/clonebay';
 
 export const UNOFFICIAL_NOTICE =
