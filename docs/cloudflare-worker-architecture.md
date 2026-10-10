@@ -20,7 +20,7 @@ We will use Cloudflare's "Deploy to Workers" integration to allow 1-click provis
 
 ### Step 1: The Deploy & Variables (2 minutes)
 1. **The Button:** The user clicks the deployment badge in Clone Bay:
-   `[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/YOURUSERNAME/clonebay-worker-template)`
+   `[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/TerribleTurtle/clonebay-worker-template)`
 2. **Cloudflare Handoff:** They log into Cloudflare and click **Authorize GitHub**. Cloudflare automatically forks the template repository into their personal GitHub account and deploys the worker.
 3. **The Variables:** They navigate to their new Cloudflare Dashboard -> `Settings` -> `Variables` and paste their `ESI_REFRESH_TOKEN` and `DISCORD_WEBHOOK_URL`. *(The worker is now fully functional).*
 
@@ -63,7 +63,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git remote add upstream https://github.com/YOURUSERNAME/clonebay-worker-template.git
+          git remote add upstream https://github.com/TerribleTurtle/clonebay-worker-template.git
           git fetch upstream
           git merge upstream/main --no-edit --allow-unrelated-histories
           git push origin main

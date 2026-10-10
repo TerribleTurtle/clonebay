@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability Reporting
+    url: https://github.com/TerribleTurtle/clonebay/security/advisories/new
+    about: Please report security vulnerabilities privately via GitHub Security Advisories rather than public issues.
+  - name: CCP Games ESI & Server Status
+    url: https://developers.eveonline.com
+    about: If an issue stems from official CCP ESI outages or CCP SSO services, check CCP's developer portal.
