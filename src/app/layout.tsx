@@ -3,6 +3,7 @@ import { Inter, Rajdhani, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { GlobalHeader } from "../components/GlobalHeader";
+import { Footer } from "../components/Footer";
 import { Toaster } from "../components/ui/Toaster";
 import { StateInit } from "../components/StateInit";
 
@@ -24,14 +25,14 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://clonebay.app"),
-  title: "Clone Bay | Unified Multibox Command Center",
-  description: "Eliminate alt-tab fatigue. A zero-backend, secure, and open-source dashboard for monitoring EVE Online skill queues, industry jobs, and planetary interaction across your entire fleet.",
+  title: "Clone Bay | Unofficial Multibox Command Center",
+  description: "Eliminate alt-tab fatigue. An unofficial, zero-backend, secure, and open-source fan dashboard for monitoring EVE Online skill queues, industry jobs, and planetary interaction across your entire fleet.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Clone Bay | Unified Multibox Command Center",
-    description: "Eliminate alt-tab fatigue with this zero-backend EVE Online dashboard.",
+    title: "Clone Bay | Unofficial Multibox Command Center",
+    description: "Eliminate alt-tab fatigue with this unofficial zero-backend EVE Online dashboard.",
     url: "https://clonebay.app",
     siteName: "Clone Bay",
     locale: "en_US",
@@ -47,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Clone Bay | Unified Multibox Command Center",
-    description: "Eliminate alt-tab fatigue with this zero-backend EVE Online dashboard.",
+    title: "Clone Bay | Unofficial Multibox Command Center",
+    description: "Eliminate alt-tab fatigue with this unofficial zero-backend EVE Online dashboard.",
     images: ["/og-image.png"],
   },
 };
@@ -82,7 +83,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "Clone Bay",
-              "description": "Unified Multibox Command Center for EVE Online.",
+              "description": "Unofficial Unified Multibox Command Center for EVE Online.",
               "applicationCategory": "GameUtility",
               "operatingSystem": "All",
               "url": "https://clonebay.app"
@@ -98,6 +99,7 @@ export default function RootLayout({
         <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col">
           {children}
         </main>
+        <Footer />
         <Toaster />
         <StateInit />
       </body>

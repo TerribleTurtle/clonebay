@@ -1,6 +1,7 @@
 "use client";
 
 import { useDataWipe } from "../../hooks/useDataWipe";
+import { CCP_LEGAL_NOTICE } from "../../config/constants";
 
 export default function TrustPage() {
   const { handleWipeData } = useDataWipe();
@@ -141,12 +142,8 @@ export default function TrustPage() {
               </p>
             </div>
             <div className="bg-eve-void border border-eve-border/50 p-4 border-l-4 border-l-zinc-700">
-              <p className="text-[10px] text-zinc-500 italic uppercase">
-                EVE Online and the EVE logo are the registered trademarks of CCP
-                hf. CCP hf. has granted permission to Clone Bay to use EVE
-                Online and all associated logos for promotional and information
-                purposes but does not endorse, and is not affiliated with, Clone
-                Bay.
+              <p className="text-[10px] text-zinc-500 italic uppercase leading-relaxed">
+                {CCP_LEGAL_NOTICE}
               </p>
             </div>
           </div>
