@@ -1,0 +1,3 @@
+# Known false positive: tests/fixtures/mockOauth.json synthetic test credential (Mock Character, expired 2024)
+b6762fdd3f7a0ae57abcf0a8cbd89557d4ad9c3b:tests/fixtures/mockOauth.json:generic-api-key:5
+tests/fixtures/mockOauth.json:generic-api-key:5
