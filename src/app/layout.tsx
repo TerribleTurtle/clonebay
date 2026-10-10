@@ -6,6 +6,8 @@ import { GlobalHeader } from "../components/GlobalHeader";
 import { Footer } from "../components/Footer";
 import { Toaster } from "../components/ui/Toaster";
 import { StateInit } from "../components/StateInit";
+import { LegacyDomainNotice } from "../components/LegacyDomainNotice";
+import { SITE_URL } from "../config/constants";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://clonebay.app"),
+  metadataBase: new URL(SITE_URL),
   title: "Clone Bay | Unofficial Multibox Command Center",
   description: "Eliminate alt-tab fatigue. An unofficial, zero-backend, secure, and open-source fan dashboard for monitoring EVE Online skill queues, industry jobs, and planetary interaction across your entire fleet.",
   alternates: {
@@ -33,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Clone Bay | Unofficial Multibox Command Center",
     description: "Eliminate alt-tab fatigue with this unofficial zero-backend EVE Online dashboard.",
-    url: "https://clonebay.app",
+    url: SITE_URL,
     siteName: "Clone Bay",
     locale: "en_US",
     type: "website",
@@ -86,7 +88,7 @@ export default function RootLayout({
               "description": "Unofficial Unified Multibox Command Center for EVE Online.",
               "applicationCategory": "GameUtility",
               "operatingSystem": "All",
-              "url": "https://clonebay.app"
+              "url": SITE_URL
             })
           }}
         />
@@ -97,7 +99,9 @@ export default function RootLayout({
         </a>
         <GlobalHeader />
         <main id="main-content" className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 flex flex-col">
-          {children}
+          <LegacyDomainNotice>
+            {children}
+          </LegacyDomainNotice>
         </main>
         <Footer />
         <Toaster />

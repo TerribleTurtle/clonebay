@@ -1,7 +1,9 @@
 "use client";
 
 import { useDataWipe } from "../../hooks/useDataWipe";
-import { CCP_LEGAL_NOTICE } from "../../config/constants";
+import { CCP_LEGAL_NOTICE, SITE_URL } from "../../config/constants";
+
+const siteHost = new URL(SITE_URL).hostname;
 
 export default function TrustPage() {
   const { handleWipeData } = useDataWipe();
@@ -76,7 +78,7 @@ export default function TrustPage() {
               </strong>
               <p className="mt-2 text-xs">
                 Open Developer Tools (F12) &gt; Network. The only traffic
-                hitting our domain (`clonebay.app`) are static files. All game
+                hitting our domain (`{siteHost}`) are static files. All game
                 data is fetched directly from official CCP servers:
               </p>
               <div className="bg-eve-void p-4 border border-eve-border mt-3 text-[11px] text-zinc-500 font-mono">
