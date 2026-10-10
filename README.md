@@ -156,7 +156,7 @@ Clone Bay is built as a static Single Page Application (`output: 'export'`):
    npm run deploy:prod
    ```
 
-   *(Note: Production domain migration is currently pending.)*
+   The production deployment is live at [https://clonebay.terribleturtles.dev](https://clonebay.terribleturtles.dev). During the transition period, the legacy `clonebay.app` domain displays a migration notice prompting users to migrate and clean up old browser data before the legacy domain is retired.
 
 ---
 
